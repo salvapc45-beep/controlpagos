@@ -17,15 +17,13 @@
 <body>
 <div class="card">
     <h2>Portal de Pagos</h2>
-    <label>Cédula del Representante</label>
-    <input type="text" id="ciBus" placeholder="Ej: 12345678">
+    <label>Nombre y Apellido del Estudiante</label>
+    <input type="text" id="nomBus" placeholder="Escriba el nombre tal cual se registró">
     <button id="btnBus">CONSULTAR DEUDA</button>
     
     <div id="info"></div>
 
     <div id="formRep" style="display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-        <label>Estudiante</label>
-        <input type="text" id="est" readonly style="background: #f1f3f4;">
         <label>Grado</label>
         <input type="text" id="grado" readonly style="background: #f1f3f4;">
         <label>Representante</label>
@@ -46,33 +44,32 @@
     let idD = null; let monD = 0;
 
     document.getElementById("btnBus").addEventListener("click", async () => {
-        const q = query(collection(db, "deudas"), where("cedulaRep", "==", ciBus.value.trim()));
+        // Ahora buscamos por nombreEst en lugar de cédula
+        const q = query(collection(db, "deudas"), where("nombreEst", "==", nomBus.value.trim()));
         const s = await getDocs(q);
         if (!s.empty) {
             s.forEach(d => {
                 const i = d.data(); idD = d.id; monD = parseFloat(i.montoDeuda);
                 document.getElementById("info").style.display = "block";
-                document.getElementById("info").innerHTML = `<b>Deuda Pendiente: $${i.montoDeuda}</b><br><small>Estudiante: ${i.nombreEst}</small>`;
-                document.getElementById("est").value = i.nombreEst;
+                document.getElementById("info").innerHTML = `<b>Deuda Pendiente: $${i.montoDeuda}</b><br><small>Representante: ${i.nombreRep}</small>`;
                 document.getElementById("grado").value = i.gradoEst;
                 document.getElementById("rep").value = i.nombreRep;
                 document.getElementById("formRep").style.display = "block";
             });
-        } else { alert("No se encontró deuda para esta cédula."); }
+        } else { alert("No se encontró deuda para este estudiante. Verifique que el nombre esté bien escrito."); }
     });
 
     document.getElementById("btnEnv").addEventListener("click", async () => {
         const pg = parseFloat(pago.value);
         const referencia = document.getElementById("ref").value;
         
-        // VALIDACIÓN: No permite campos vacíos
         if(!referencia || isNaN(pg) || pg <= 0) {
-            alert("Error: Debe ingresar la Referencia y el Monto pagado.");
+            alert("Error: Ingrese Referencia y Monto.");
             return;
         }
 
         await addDoc(collection(db, "pagos_reportados"), { 
-            nombreEst: est.value, 
+            nombreEst: nomBus.value.trim(), 
             nombreRep: rep.value, 
             gradoEst: grado.value, 
             referencia: referencia, 
@@ -86,7 +83,7 @@
         } else { 
             const n = monD - pg; 
             await updateDoc(doc(db, "deudas", idD), { montoDeuda: n.toFixed(2).toString() }); 
-            alert("Abono registrado. Su deuda pendiente ahora es de: $" + n.toFixed(2)); 
+            alert("Abono registrado. Nueva deuda: $" + n.toFixed(2)); 
         }
         location.reload();
     });
