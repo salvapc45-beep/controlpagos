@@ -14,7 +14,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; font-size: 14px; }
         th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
         th { background: #333; color: white; }
-        .btn-del { background: #e74c3c; padding: 5px 10px; font-size: 12px; }
+        .btn-del { background: #e74c3c; padding: 5px 10px; font-size: 12px; color: white; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -23,9 +23,8 @@
         
         <h2>1. Registrar Nueva Deuda</h2>
         <div class="form-admin">
-            <input type="text" id="ci" placeholder="Cédula Representante">
-            <input type="text" id="nomR" placeholder="Nombre Representante">
-            <input type="text" id="nomE" placeholder="Nombre Estudiante">
+            <input type="text" id="nomE" placeholder="Nombre y Apellido del Estudiante">
+            <input type="text" id="nomR" placeholder="Nombre del Representante">
             <input type="text" id="gra" placeholder="Grado">
             <input type="number" id="mon" placeholder="Monto Deuda $">
             <button id="btnReg">REGISTRAR DEUDA</button>
@@ -33,7 +32,7 @@
 
         <h2>2. Lista de Deudores Actuales</h2>
         <table>
-            <thead><tr><th>Cédula</th><th>Representante</th><th>Estudiante</th><th>Grado</th><th>Deuda</th><th>Acción</th></tr></thead>
+            <thead><tr><th>Estudiante</th><th>Representante</th><th>Grado</th><th>Deuda</th><th>Acción</th></tr></thead>
             <tbody id="tablaDeudores"></tbody>
         </table>
 
@@ -51,14 +50,14 @@
     const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
     document.getElementById("btnReg").addEventListener("click", async () => {
-        if(!ci.value || !nomR.value || !nomE.value || !gra.value || !mon.value) return alert("Error: Debe llenar TODOS los campos para registrar.");
-        await addDoc(collection(db, "deudas"), { cedulaRep: ci.value, nombreRep: nomR.value, nombreEst: nomE.value, gradoEst: gra.value, montoDeuda: mon.value });
+        if(!nomE.value || !nomR.value || !gra.value || !mon.value) return alert("Error: Debe llenar todos los campos.");
+        await addDoc(collection(db, "deudas"), { nombreEst: nomE.value.trim(), nombreRep: nomR.value, gradoEst: gra.value, montoDeuda: mon.value });
         alert("¡Deuda registrada!"); location.reload();
     });
 
     onSnapshot(collection(db, "deudas"), (s) => {
         const t = document.getElementById("tablaDeudores"); t.innerHTML = "";
-        s.forEach(d => { const i = d.data(); t.innerHTML += `<tr><td>${i.cedulaRep}</td><td>${i.nombreRep}</td><td>${i.nombreEst}</td><td>${i.gradoEst}</td><td>$${i.montoDeuda}</td><td><button class="btn-del" onclick="window.borrarD('${d.id}')">Eliminar</button></td></tr>`; });
+        s.forEach(d => { const i = d.data(); t.innerHTML += `<tr><td>${i.nombreEst}</td><td>${i.nombreRep}</td><td>${i.gradoEst}</td><td>$${i.montoDeuda}</td><td><button class="btn-del" onclick="window.borrarD('${d.id}')">Eliminar</button></td></tr>`; });
     });
 
     onSnapshot(collection(db, "pagos_reportados"), (s) => {
@@ -67,7 +66,7 @@
     });
 
     window.borrarD = async (id) => { if(confirm("¿Eliminar esta deuda?")) await deleteDoc(doc(db, "deudas", id)); };
-    window.borrarP = async (id) => { if(confirm("¿Marcar pago como verificado y quitar de la lista?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
+    window.borrarP = async (id) => { if(confirm("¿Marcar pago como verificado?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
 </script>
 </body>
 </html>
