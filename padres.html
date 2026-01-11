@@ -3,80 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Pagos - Estudiantes</title>
+    <title>Portal de Pagos - Reporte</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f1f3f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); width: 100%; max-width: 450px; box-sizing: border-box; }
-        h2 { color: #1a73e8; text-align: center; margin-bottom: 25px; }
-        .group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #5f6368; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        button:hover { background-color: #1557b0; }
-        #infoDeuda { background: #e8f0fe; padding: 15px; border-radius: 4px; margin-bottom: 15px; display: none; color: #1967d2; border: 1px solid #d2e3fc; line-height: 1.5; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #eef2f3; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        #info { background: #fff3e0; padding: 15px; border-radius: 8px; border: 1px solid #ffe0b2; margin-bottom: 15px; display: none; color: #e65100; }
     </style>
 </head>
 <body>
 <div class="card">
     <h2>Portal de Pagos</h2>
-    <div class="group"><label>Cédula del Representante</label><input type="text" id="cedulaBusqueda" placeholder="Ej: 12345678"></div>
-    <button id="btnBuscar">CONSULTAR DEUDA</button>
-    <div id="infoDeuda"></div>
-    <div id="formularioReporte" style="display: none; margin-top: 20px;">
-        <div class="group"><label>Estudiante</label><input type="text" id="displayEstudiante" readonly style="background: #f9f9f9;"></div>
-        <div class="group"><label>Referencia Bancaria</label><input type="text" id="referencia"></div>
-        <div class="group"><label>Monto a Pagar ($)</label><input type="number" id="montoPagado"></div>
-        <button id="btnEnviar" style="background-color: #1e8e3e;">REPORTAR PAGO</button>
+    <label>Cédula del Representante</label>
+    <input type="text" id="ciBus" placeholder="Ej: 12345678">
+    <button id="btnBus">CONSULTAR DEUDA</button>
+    
+    <div id="info"></div>
+
+    <div id="formRep" style="display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+        <label>Estudiante</label>
+        <input type="text" id="est" readonly style="background: #f1f3f4;">
+        <label>Grado</label>
+        <input type="text" id="grado" readonly style="background: #f1f3f4;">
+        <label>Representante</label>
+        <input type="text" id="rep" readonly style="background: #f1f3f4;">
+        <label>Referencia Bancaria</label>
+        <input type="text" id="ref" placeholder="Número de transferencia">
+        <label>Monto a Reportar ($)</label>
+        <input type="number" id="pago" placeholder="Monto pagado">
+        <button id="btnEnv" style="background: #1e8e3e;">ENVIAR REPORTE</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const firebaseConfig = { apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8", authDomain: "reportedepagos-d8485.firebaseapp.com", projectId: "reportedepagos-d8485", storageBucket: "reportedepagos-d8485.appspot.com", messagingSenderId: "335664812002", appId: "1:335664812002:web:609ecb3008145281af3bb8" };
+    const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+    let idD = null; let monD = 0;
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
-        authDomain: "reportedepagos-d8485.firebaseapp.com",
-        projectId: "reportedepagos-d8485",
-        storageBucket: "reportedepagos-d8485.appspot.com",
-        messagingSenderId: "335664812002",
-        appId: "1:335664812002:web:609ecb3008145281af3bb8"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    let idDeudaActual = null; let montoDeudaActual = 0;
-
-    document.getElementById("btnBuscar").addEventListener("click", async () => {
-        const ci = document.getElementById("cedulaBusqueda").value.trim();
-        const q = query(collection(db, "deudas"), where("cedulaRep", "==", ci));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-            snap.forEach((documento) => {
-                const data = documento.data(); idDeudaActual = documento.id; montoDeudaActual = parseFloat(data.montoDeuda);
-                document.getElementById("infoDeuda").style.display = "block";
-                document.getElementById("infoDeuda").innerHTML = `<strong>Representante: ${data.nombreRep}</strong><br>Saldo actual: <strong>$${data.montoDeuda}</strong>`;
-                document.getElementById("displayEstudiante").value = data.nombreEst;
-                document.getElementById("formularioReporte").style.display = "block";
+    document.getElementById("btnBus").addEventListener("click", async () => {
+        const q = query(collection(db, "deudas"), where("cedulaRep", "==", ciBus.value.trim()));
+        const s = await getDocs(q);
+        if (!s.empty) {
+            s.forEach(d => {
+                const i = d.data(); idD = d.id; monD = parseFloat(i.montoDeuda);
+                document.getElementById("info").style.display = "block";
+                document.getElementById("info").innerHTML = `<b>Deuda Pendiente: $${i.montoDeuda}</b><br><small>Estudiante: ${i.nombreEst}</small>`;
+                document.getElementById("est").value = i.nombreEst;
+                document.getElementById("grado").value = i.gradoEst;
+                document.getElementById("rep").value = i.nombreRep;
+                document.getElementById("formRep").style.display = "block";
             });
-        } else { alert("No se encontró deuda."); }
+        } else { alert("No se encontró deuda para esta cédula."); }
     });
 
-    document.getElementById("btnEnviar").addEventListener("click", async () => {
-        const pago = parseFloat(document.getElementById("montoPagado").value);
-        await addDoc(collection(db, "pagos_reportados"), {
-            cedulaRep: document.getElementById("cedulaBusqueda").value,
-            nombreEst: document.getElementById("displayEstudiante").value,
-            referencia: document.getElementById("referencia").value,
-            monto: pago, fecha: new Date()
+    document.getElementById("btnEnv").addEventListener("click", async () => {
+        const pg = parseFloat(pago.value);
+        const referencia = document.getElementById("ref").value;
+        
+        // VALIDACIÓN: No permite campos vacíos
+        if(!referencia || isNaN(pg) || pg <= 0) {
+            alert("Error: Debe ingresar la Referencia y el Monto pagado.");
+            return;
+        }
+
+        await addDoc(collection(db, "pagos_reportados"), { 
+            nombreEst: est.value, 
+            nombreRep: rep.value, 
+            gradoEst: grado.value, 
+            referencia: referencia, 
+            monto: pg, 
+            fecha: new Date() 
         });
-        if (pago >= montoDeudaActual) {
-            await deleteDoc(doc(db, "deudas", idDeudaActual));
-            alert("¡Deuda cancelada!");
-        } else {
-            const nuevoSaldo = montoDeudaActual - pago;
-            await updateDoc(doc(db, "deudas", idDeudaActual), { montoDeuda: nuevoSaldo.toFixed(2).toString() });
-            alert("Abono registrado. Nuevo saldo: $" + nuevoSaldo.toFixed(2));
+
+        if (pg >= monD) { 
+            await deleteDoc(doc(db, "deudas", idD)); 
+            alert("¡Reporte enviado! Deuda saldada."); 
+        } else { 
+            const n = monD - pg; 
+            await updateDoc(doc(db, "deudas", idD), { montoDeuda: n.toFixed(2).toString() }); 
+            alert("Abono registrado. Su deuda pendiente ahora es de: $" + n.toFixed(2)); 
         }
         location.reload();
     });
