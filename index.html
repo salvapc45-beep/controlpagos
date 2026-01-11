@@ -2,34 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrativo - Registro</title>
+    <title>ADMINISTRACIÓN - REGISTRO DE PAGOS</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
-        .box { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; margin: 0; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h1 { color: #d32f2f; text-align: center; border-bottom: 3px solid #d32f2f; padding-bottom: 10px; }
-        .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
-        input, button { padding: 12px; border: 1px solid #ccc; border-radius: 6px; }
+        .form-admin { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        input, button { padding: 12px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
         button { background: #d32f2f; color: white; font-weight: bold; cursor: pointer; border: none; }
-        button:hover { background: #b71c1c; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #333; color: white; }
-        .btn-del { background: #757575; font-size: 11px; padding: 5px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>ADMINISTRACIÓN - REGISTRO DE DEUDAS</h1>
-        <div class="form">
-            <input type="text" id="ci" placeholder="Cédula Representante">
-            <input type="text" id="nomR" placeholder="Nombre Representante">
-            <input type="text" id="nomE" placeholder="Nombre Estudiante">
-            <input type="text" id="gra" placeholder="Grado">
-            <input type="number" id="mon" placeholder="Monto Deuda $">
-            <button id="btnReg">REGISTRAR DEUDA NUEVA</button>
+    <div class="container">
+        <h1>PANEL ADMINISTRADOR</h1>
+        <h3>Registrar Nueva Deuda</h3>
+        <div class="form-admin">
+            <input type="text" id="ci" placeholder="Cédula">
+            <input type="text" id="nomR" placeholder="Representante">
+            <input type="text" id="nomE" placeholder="Estudiante">
+            <input type="number" id="mon" placeholder="Monto $">
+            <button id="btnReg">REGISTRAR</button>
         </div>
-        <h3>Pagos Reportados por Padres (Por verificar):</h3>
+        <h3>Pagos Reportados por Padres</h3>
         <table>
             <thead><tr><th>Estudiante</th><th>Referencia</th><th>Monto</th><th>Acción</th></tr></thead>
             <tbody id="tabla"></tbody>
@@ -42,8 +39,7 @@
     const app = initializeApp(firebaseConfig); const db = getFirestore(app);
     
     document.getElementById("btnReg").addEventListener("click", async () => {
-        if(!ci.value || !mon.value) return alert("Cédula y Monto obligatorios");
-        await addDoc(collection(db, "deudas"), { cedulaRep: ci.value, nombreRep: nomR.value, nombreEst: nomE.value, gradoEst: gra.value, montoDeuda: mon.value });
+        await addDoc(collection(db, "deudas"), { cedulaRep: ci.value, nombreRep: nomR.value, nombreEst: nomE.value, montoDeuda: mon.value });
         alert("¡Deuda Registrada!"); location.reload();
     });
 
@@ -51,11 +47,10 @@
         const t = document.getElementById("tabla"); t.innerHTML = "";
         s.forEach(d => {
             const i = d.data();
-            t.innerHTML += `<tr><td>${i.nombreEst}</td><td>${i.referencia}</td><td>$${i.monto}</td><td><button class="btn-del" onclick="window.borrar('${d.id}')">X</button></td></tr>`;
+            t.innerHTML += `<tr><td>${i.nombreEst}</td><td>${i.referencia}</td><td>$${i.monto}</td><td><button onclick="window.borrar('${d.id}')">Eliminar</button></td></tr>`;
         });
     });
-    window.borrar = async (id) => { if(confirm("¿Eliminar reporte?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
+    window.borrar = async (id) => { if(confirm("¿Borrar?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
 </script>
 </body>
 </html>
-
