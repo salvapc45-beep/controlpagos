@@ -2,43 +2,44 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Pagos</title>
+    <title>Panel de Control - Administración</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f1f3f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        h2 { text-align: center; color: #3c4043; }
-        .group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #5f6368; font-size: 14px; font-weight: bold; }
-        input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #infoDeuda { background: #e8f0fe; padding: 15px; border-radius: 4px; margin: 15px 0; display: none; color: #1967d2; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
+        .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn-add { background: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #3498db; color: white; }
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>ADMINISTRACIÓN DE PAGOS</h1>
+        
+        <h3>Registrar Nuevo Deudor</h3>
+        <div class="inputs">
+            <input type="text" id="ci" placeholder="Cédula Representante">
+            <input type="text" id="nomR" placeholder="Nombre Representante">
+            <input type="text" id="nomE" placeholder="Nombre Estudiante">
+            <input type="text" id="gra" placeholder="Grado/Sección">
+            <input type="number" id="mon" placeholder="Monto Deuda ($)">
+            <button class="btn-add" id="reg">REGISTRAR</button>
+        </div>
 
-<div class="card">
-    <h2>Reportar Pago</h2>
-    <div class="group">
-        <label>Cédula del Representante</label>
-        <input type="text" id="cedBusqueda">
+        <h3>Pagos por Validar</h3>
+        <table>
+            <thead><tr><th>Estudiante</th><th>Referencia</th><th>Monto</th><th>Acción</th></tr></thead>
+            <tbody id="tabla"></tbody>
+        </table>
     </div>
-    <button id="btnBuscar">BUSCAR DEUDA</button>
-
-    <div id="infoDeuda"></div>
-
-    <div id="formEnvio" style="display: none;">
-        <div class="group"><label>Estudiante</label><input type="text" id="resEst" readonly></div>
-        <div class="group"><label>Grado</label><input type="text" id="resGrado" readonly></div>
-        <div class="group"><label>Referencia</label><input type="text" id="ref"></div>
-        <div class="group"><label>Monto a Reportar ($)</label><input type="number" id="mon"></div>
-        <button id="btnEnviar" style="background: #1e8e3e;">ENVIAR REPORTE</button>
-    </div>
-</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
@@ -52,39 +53,28 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let idD = null; let montoD = 0; let nomR = "";
-
-    document.getElementById("btnBuscar").addEventListener("click", async () => {
-        const ci = document.getElementById("cedBusqueda").value.trim();
-        const q = query(collection(db, "deudas"), where("cedulaRep", "==", ci));
-        const snap = await getDocs(q);
-
-        if (!snap.empty) {
-            snap.forEach(d => {
-                const i = d.data(); idD = d.id; montoD = parseFloat(i.montoDeuda); nomR = i.nombreRep;
-                document.getElementById("infoDeuda").style.display = "block";
-                document.getElementById("infoDeuda").innerHTML = `<b>Representante:</b> ${i.nombreRep}<br><b>Deuda:</b> $${i.montoDeuda}`;
-                document.getElementById("resEst").value = i.nombreEst;
-                document.getElementById("resGrado").value = i.gradoEst;
-                document.getElementById("formEnvio").style.display = "block";
-            });
-        } else { alert("Sin deudas pendientes"); }
-    });
-
-    document.getElementById("btnEnviar").addEventListener("click", async () => {
-        const monP = parseFloat(document.getElementById("mon").value);
-        const ref = document.getElementById("ref").value;
-        const est = document.getElementById("resEst").value;
-
-        await addDoc(collection(db, "pagos_reportados"), {
-            cedulaRep: document.getElementById("cedBusqueda").value,
-            nombreRep: nomR, nombreEst: est, referencia: ref, monto: monP, fecha: new Date()
+    document.getElementById("reg").addEventListener("click", async () => {
+        await addDoc(collection(db, "deudas"), {
+            cedulaRep: document.getElementById("ci").value,
+            nombreRep: document.getElementById("nomR").value,
+            nombreEst: document.getElementById("nomE").value,
+            gradoEst: document.getElementById("gra").value,
+            montoDeuda: document.getElementById("mon").value
         });
-
-        if (monP >= montoD) { await deleteDoc(doc(db, "deudas", idD)); alert("Deuda saldada y reportada"); }
-        else { alert("Abono reportado"); }
+        alert("Deuda registrada");
         location.reload();
     });
+
+    onSnapshot(collection(db, "pagos_reportados"), (snap) => {
+        const t = document.getElementById("tabla");
+        t.innerHTML = "";
+        snap.forEach(d => {
+            const i = d.data();
+            t.innerHTML += `<tr><td>${i.estudiante}</td><td>${i.referencia}</td><td>$${i.monto}</td><td><button class="btn-del" onclick="window.borrar('${d.id}')">Eliminar</button></td></tr>`;
+        });
+    });
+
+    window.borrar = async (id) => { if(confirm("¿Borrar reporte?")) await deleteDoc(doc(db, "pagos_reportados", id)); }
 </script>
 </body>
 </html>
