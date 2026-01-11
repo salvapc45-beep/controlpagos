@@ -3,83 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Pagos - Estudiantes</title>
+    <title>PANEL DE CONTROL - ADMINISTRADOR</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f1f3f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); width: 100%; max-width: 450px; box-sizing: border-box; }
-        h2 { color: #1a73e8; text-align: center; margin-bottom: 25px; }
-        .group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #5f6368; font-size: 14px; }
-        input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        button:hover { background-color: #1557b0; }
-        #infoDeuda { background: #e8f0fe; padding: 15px; border-radius: 4px; margin-bottom: 15px; display: none; color: #1967d2; border: 1px solid #d2e3fc; line-height: 1.5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #1a73e8; text-align: center; border-bottom: 4px solid #1a73e8; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; border-left: 5px solid #27ae60; padding-left: 10px; }
+        .admin-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ddd; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        button { padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #219150; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #1a73e8; color: white; }
+        .btn-delete { background-color: #e74c3c; padding: 8px 12px; font-size: 12px; }
+        .btn-delete:hover { background-color: #c0392b; }
     </style>
 </head>
 <body>
-<div class="card">
-    <h2>Portal de Pagos</h2>
-    <div class="group"><label>Cédula del Representante</label><input type="text" id="cedulaBusqueda" placeholder="Ej: 12345678"></div>
-    <button id="btnBuscar">CONSULTAR DEUDA</button>
-    <div id="infoDeuda"></div>
-    <div id="formularioReporte" style="display: none; margin-top: 20px;">
-        <div class="group"><label>Estudiante</label><input type="text" id="displayEstudiante" readonly style="background: #f9f9f9;"></div>
-        <div class="group"><label>Referencia Bancaria</label><input type="text" id="referencia"></div>
-        <div class="group"><label>Monto a Pagar ($)</label><input type="number" id="montoPagado"></div>
-        <button id="btnEnviar" style="background-color: #1e8e3e;">REPORTAR PAGO</button>
+    <div class="container">
+        <h1>SISTEMA DE CONTROL ADMINISTRATIVO</h1>
+        
+        <h2>1. Registrar Nuevo Deudor</h2>
+        <div class="admin-section">
+            <input type="text" id="repCedula" placeholder="Cédula Representante">
+            <input type="text" id="repNombre" placeholder="Nombre Representante">
+            <input type="text" id="estNombre" placeholder="Nombre Estudiante">
+            <input type="text" id="estGrado" placeholder="Grado/Año">
+            <input type="number" id="montoDeuda" placeholder="Deuda Inicial ($)">
+            <button id="btnCrearDeuda">REGISTRAR DEUDA</button>
+        </div>
+
+        <h2>2. Pagos por Verificar (Reportados por Padres)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Referencia</th>
+                    <th>Monto Pagado</th>
+                    <th>Fecha de Reporte</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tablaPagos">
+                </tbody>
+        </table>
     </div>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
-        authDomain: "reportedepagos-d8485.firebaseapp.com",
-        projectId: "reportedepagos-d8485",
-        storageBucket: "reportedepagos-d8485.appspot.com",
-        messagingSenderId: "335664812002",
-        appId: "1:335664812002:web:609ecb3008145281af3bb8"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
+            authDomain: "reportedepagos-d8485.firebaseapp.com",
+            projectId: "reportedepagos-d8485",
+            storageBucket: "reportedepagos-d8485.appspot.com",
+            messagingSenderId: "335664812002",
+            appId: "1:335664812002:web:609ecb3008145281af3bb8"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    let idDeudaActual = null; let montoDeudaActual = 0;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    document.getElementById("btnBuscar").addEventListener("click", async () => {
-        const ci = document.getElementById("cedulaBusqueda").value.trim();
-        const q = query(collection(db, "deudas"), where("cedulaRep", "==", ci));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-            snap.forEach((documento) => {
-                const data = documento.data(); idDeudaActual = documento.id; montoDeudaActual = parseFloat(data.montoDeuda);
-                document.getElementById("infoDeuda").style.display = "block";
-                document.getElementById("infoDeuda").innerHTML = `<strong>Representante: ${data.nombreRep}</strong><br>Saldo actual: <strong>$${data.montoDeuda}</strong>`;
-                document.getElementById("displayEstudiante").value = data.nombreEst;
-                document.getElementById("formularioReporte").style.display = "block";
-            });
-        } else { alert("No se encontró deuda."); }
-    });
+        // FUNCIÓN PARA QUE TÚ REGISTRES DEUDAS
+        document.getElementById("btnCrearDeuda").addEventListener("click", async () => {
+            const ced = document.getElementById("repCedula").value.trim();
+            const nomR = document.getElementById("repNombre").value.trim();
+            const nomE = document.getElementById("estNombre").value.trim();
+            const gra = document.getElementById("estGrado").value.trim();
+            const mon = document.getElementById("montoDeuda").value.trim();
 
-    document.getElementById("btnEnviar").addEventListener("click", async () => {
-        const pago = parseFloat(document.getElementById("montoPagado").value);
-        await addDoc(collection(db, "pagos_reportados"), {
-            cedulaRep: document.getElementById("cedulaBusqueda").value,
-            nombreEst: document.getElementById("displayEstudiante").value,
-            referencia: document.getElementById("referencia").value,
-            monto: pago, fecha: new Date()
+            if(ced && nomR && nomE && mon) {
+                await addDoc(collection(db, "deudas"), {
+                    cedulaRep: ced,
+                    nombreRep: nomR,
+                    nombreEst: nomE,
+                    gradoEst: gra,
+                    montoDeuda: mon
+                });
+                alert("¡Deuda registrada correctamente!");
+                location.reload();
+            } else {
+                alert("Por favor rellena los campos principales.");
+            }
         });
-        if (pago >= montoDeudaActual) {
-            await deleteDoc(doc(db, "deudas", idDeudaActual));
-            alert("¡Deuda cancelada!");
-        } else {
-            const nuevoSaldo = montoDeudaActual - pago;
-            await updateDoc(doc(db, "deudas", idDeudaActual), { montoDeuda: nuevoSaldo.toFixed(2).toString() });
-            alert("Abono registrado. Nuevo saldo: $" + nuevoSaldo.toFixed(2));
-        }
-        location.reload();
-    });
-</script>
+
+        // VER LOS PAGOS QUE REPORTAN LOS PADRES EN TIEMPO REAL
+        onSnapshot(collection(db, "pagos_reportados"), (snap) => {
+            const tabla = document.getElementById("tablaPagos");
+            tabla.innerHTML = "";
+            snap.forEach(documento => {
+                const pago = documento.data();
+                const fecha = pago.fecha ? new Date(pago.fecha.seconds * 1000).toLocaleDateString() : "N/A";
+                tabla.innerHTML += `
+                    <tr>
+                        <td>${pago.nombreEst}</td>
+                        <td>${pago.referencia}</td>
+                        <td>$${pago.monto}</td>
+                        <td>${fecha}</td>
+                        <td><button class="btn-delete" onclick="window.eliminarReporte('${documento.id}')">Eliminar</button></td>
+                    </tr>
+                `;
+            });
+        });
+
+        window.eliminarReporte = async (id) => {
+            if(confirm("¿Deseas eliminar este reporte de la lista?")) {
+                await deleteDoc(doc(db, "pagos_reportados", id));
+            }
+        };
+    </script>
 </body>
 </html>
+
