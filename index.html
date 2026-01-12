@@ -2,46 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administrativo - SDJ Cobros</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Administración - SDJ Cobros</title>
     <style>
-        /* Mantenemos exactamente tu estilo original */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; font-weight: 300; }
-        .form-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; transition: border-color 0.3s; }
-        input:focus { border-color: #3498db; outline: none; }
-        button { padding: 12px 20px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s; }
-        button:hover { background-color: #2980b9; }
-        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 40px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #3498db; color: white; text-transform: uppercase; font-size: 14px; }
-        .btn-delete { background-color: #e74c3c; padding: 8px 12px; font-size: 12px; }
-        .btn-delete:hover { background-color: #c0392b; }
+        :root { --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --dark: #2c3e50; --light: #ecf0f1; }
+        body { background-color: #f5f7fa; color: var(--dark); font-family: sans-serif; padding: 10px; }
+        header { background: linear-gradient(135deg, var(--primary), #2980b9); color: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; background: var(--primary); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th { background: var(--light); padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .btn-del { background: var(--danger); padding: 5px 10px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>SISTEMA ADMINISTRATIVO SDJ</h1>
+    <header><h1>PANEL ADMINISTRATIVO SDJ</h1></header>
 
-        <h2>1. Registrar Nueva Deuda</h2>
+    <div class="card">
+        <h3>Registrar Nueva Deuda</h3>
         <div class="form-group">
             <input type="text" id="nomE" placeholder="Nombre Estudiante">
             <input type="text" id="nomR" placeholder="Nombre Representante">
             <input type="text" id="gra" placeholder="Grado">
             <input type="number" id="mon" placeholder="Monto Deuda $">
-            <button id="btnReg">REGISTRAR</button>
+            <button id="btnReg">REGISTRAR EN NUBE</button>
         </div>
+    </div>
 
-        <h2>2. Lista de Deudores</h2>
+    <div class="card">
+        <h3>Lista de Deudores</h3>
         <table>
-            <thead><tr><th>Estudiante</th><th>Representante</th><th>Grado</th><th>Deuda</th><th>Acción</th></tr></thead>
+            <thead><tr><th>Estudiante</th><th>Deuda</th><th>Acción</th></tr></thead>
             <tbody id="tablaDeudores"></tbody>
         </table>
+    </div>
 
-        <h2>3. Pagos Reportados por Padres</h2>
+    <div class="card">
+        <h3>Pagos por Validar</h3>
         <table>
             <thead><tr><th>Estudiante</th><th>Referencia</th><th>Monto</th><th>Acción</th></tr></thead>
             <tbody id="tablaPagos"></tbody>
@@ -64,58 +64,38 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Registro de deuda
         document.getElementById("btnReg").addEventListener("click", async () => {
             const nomE = document.getElementById("nomE").value.trim();
-            const nomR = document.getElementById("nomR").value.trim();
-            const gra = document.getElementById("gra").value.trim();
             const mon = document.getElementById("mon").value.trim();
-
-            if(!nomE || !mon) return alert("Por favor, ingrese al menos el nombre del estudiante y el monto.");
-
+            if(!nomE || !mon) return alert("Faltan datos");
             await addDoc(collection(db, "deudas"), {
                 nombreEst: nomE,
-                nombreRep: nomR,
-                gradoEst: gra,
+                nombreRep: document.getElementById("nomR").value,
+                gradoEst: document.getElementById("gra").value,
                 montoDeuda: mon
             });
-            alert("Deuda registrada con éxito");
+            alert("Registrado en Firebase");
             document.querySelectorAll("input").forEach(i => i.value = "");
         });
 
-        // Escuchar Deudores en tiempo real
         onSnapshot(collection(db, "deudas"), (snap) => {
-            const tbody = document.getElementById("tablaDeudores");
-            tbody.innerHTML = "";
+            const t = document.getElementById("tablaDeudores"); t.innerHTML = "";
             snap.forEach(d => {
                 const i = d.data();
-                tbody.innerHTML += `<tr>
-                    <td>${i.nombreEst}</td>
-                    <td>${i.nombreRep}</td>
-                    <td>${i.gradoEst}</td>
-                    <td>$${i.montoDeuda}</td>
-                    <td><button class="btn-delete" onclick="window.eliminarDeuda('${d.id}')">Eliminar</button></td>
-                </tr>`;
+                t.innerHTML += `<tr><td>${i.nombreEst}</td><td>$${i.montoDeuda}</td><td><button class="btn-del" onclick="window.delD('${d.id}')">X</button></td></tr>`;
             });
         });
 
-        // Escuchar Pagos en tiempo real
         onSnapshot(collection(db, "pagos_reportados"), (snap) => {
-            const tbody = document.getElementById("tablaPagos");
-            tbody.innerHTML = "";
+            const t = document.getElementById("tablaPagos"); t.innerHTML = "";
             snap.forEach(d => {
                 const i = d.data();
-                tbody.innerHTML += `<tr>
-                    <td>${i.nombreEst}</td>
-                    <td>${i.referencia}</td>
-                    <td>$${i.monto}</td>
-                    <td><button class="btn-delete" onclick="window.eliminarPago('${d.id}')">Validar</button></td>
-                </tr>`;
+                t.innerHTML += `<tr><td>${i.nombreEst}</td><td>${i.referencia}</td><td>$${i.monto}</td><td><button class="btn-del" style="background:var(--success)" onclick="window.delP('${d.id}')">OK</button></td></tr>`;
             });
         });
 
-        window.eliminarDeuda = async (id) => { if(confirm("¿Eliminar deuda?")) await deleteDoc(doc(db, "deudas", id)); };
-        window.eliminarPago = async (id) => { if(confirm("¿Validar y quitar reporte?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
+        window.delD = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "deudas", id)); };
+        window.delP = async (id) => { if(confirm("¿Validar?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
     </script>
 </body>
 </html>
