@@ -3,171 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SDJ Cobros - Panel de Control Profesional</title>
+    <title>SISTEMA SDJ - CONTROL TOTAL</title>
     <style>
         :root {
             --primary: #1e3a8a; --success: #2ecc71; --danger: #e74c3c;
-            --warning: #f39c12; --info: #3498db; --bg: #f0f4f8;
+            --warning: #f39c12; --bg: #f4f7fa; --text: #1e293b;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg); color: #333; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* Navegación Superior */
-        header { background: var(--primary); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        nav { 
-            display: flex; background: white; sticky: top; top: 0; z-index: 100;
-            justify-content: center; gap: 10px; padding: 10px; border-bottom: 2px solid #e2e8f0;
+        /* HEADER Y NAVEGACIÓN */
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; }
+        
+        nav {
+            display: flex; background: #ffffff; border-bottom: 2px solid #e2e8f0;
+            position: sticky; top: 0; z-index: 1000; overflow-x: auto;
         }
-        .nav-btn {
-            padding: 12px 20px; cursor: pointer; border-radius: 12px; border: none;
-            background: #e2e8f0; color: #475569; font-weight: bold; transition: 0.3s;
+        .nav-link {
+            flex: 1; text-align: center; padding: 15px 5px; cursor: pointer;
+            font-weight: 700; color: #64748b; font-size: 13px; transition: 0.3s;
+            border-bottom: 4px solid transparent; min-width: 100px;
         }
-        .nav-btn.active { background: var(--primary); color: white; }
+        .nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: #f8fafc; }
 
-        /* Secciones */
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-        .section { display: none; animation: slideUp 0.4s ease-out; }
-        .section.active { display: block; }
+        /* CONTENEDOR DE SECCIONES */
+        .main-content { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        h2 { color: var(--primary); margin-bottom: 20px; font-size: 1.5rem; border-left: 5px solid var(--primary); padding-left: 15px; }
-
-        /* Formulario */
-        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
-        label { font-weight: 600; font-size: 0.9rem; color: #64748b; }
-        input, select { padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; font-size: 1rem; }
+        /* TARJETAS Y FORMULARIOS */
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .form-section { display: flex; flex-direction: column; gap: 15px; }
+        .input-box { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 12px; font-weight: bold; color: var(--primary); text-transform: uppercase; }
+        input, select { padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; outline: none; }
         input:focus { border-color: var(--primary); }
 
-        /* Botones */
-        .btn-action { 
-            background: var(--primary); color: white; padding: 15px; border: none; 
-            border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px;
-        }
-        .btn-notif { background: var(--warning); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* Tablas */
-        .table-wrap { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 0.8rem; color: #94a3b8; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        /* TABLAS PROFESIONALES */
+        .table-container { overflow-x: auto; background: white; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: #f1f5f9; padding: 12px; text-align: left; font-size: 11px; color: #475569; }
+        td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
-        /* Etiquetas de Grado */
-        .tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; color: white; }
-        .tag-maternal { background: #f472b6; }
-        .tag-primaria { background: #3b82f6; }
-        .tag-bachillerato { background: #8b5cf6; }
+        /* ETIQUETAS */
+        .tag { padding: 4px 8px; border-radius: 5px; font-size: 10px; font-weight: bold; color: white; }
+        .tag-pre { background: #db2777; } .tag-pri { background: #2563eb; } .tag-bac { background: #7c3aed; }
 
-        .status-debt { color: var(--danger); font-weight: bold; }
+        /* BOTONES DE ACCIÓN */
+        .actions { display: flex; gap: 8px; }
+        .btn-notif { background: var(--warning); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; }
 
-        /* Toast de confirmación */
-        #toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 15px 25px; border-radius: 10px; display: none; z-index: 1000; }
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 2000; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>SDJ COBROS - SISTEMA INTEGRAL</h1>
-</header>
+<header>CONTROL ADMINISTRATIVO SDJ</header>
 
 <nav>
-    <button class="nav-btn active" onclick="openTab(event, 'registro')">➕ REGISTRO</button>
-    <button class="nav-btn" onclick="openTab(event, 'deudores')">📋 LISTA POR GRADOS</button>
-    <button class="nav-btn" onclick="openTab(event, 'pagos')">✅ VALIDAR PAGOS</button>
+    <div class="nav-link active" onclick="switchTab('registro')">1. REGISTRO</div>
+    <div class="nav-link" onclick="switchTab('deudores')">2. DEUDORES</div>
+    <div class="nav-link" onclick="switchTab('verificar')">3. VERIFICAR PAGOS</div>
 </nav>
 
-<div class="container">
+<div class="main-content">
     
-    <section id="registro" class="section active">
+    <section id="registro" class="tab-content active">
         <div class="card">
-            <h2>Registrar Nuevo Estudiante</h2>
-            <div class="grid-form">
-                <div class="input-group">
+            <h3 style="margin-bottom:20px; color:var(--primary)">Registrar Nuevo Estudiante</h3>
+            <div class="form-section">
+                <div class="input-box">
                     <label>Nombre y Apellido del Estudiante</label>
-                    <input type="text" id="nomE" placeholder="Ej: Carlos Rodriguez">
+                    <input type="text" id="nomE" placeholder="Nombre completo">
                 </div>
-                <div class="input-group">
-                    <label>Nombre del Representante</label>
-                    <input type="text" id="nomR" placeholder="Ej: Maria Rodriguez">
+                <div class="input-box">
+                    <label>Representante y Correo</label>
+                    <input type="text" id="nomR" placeholder="Nombre del Representante" style="margin-bottom:8px">
+                    <input type="email" id="mailR" placeholder="correo@ejemplo.com">
                 </div>
-                <div class="input-group">
-                    <label>Correo Electrónico (Para Notificar)</label>
-                    <input type="email" id="mailR" placeholder="ejemplo@correo.com">
-                </div>
-                <div class="input-group">
-                    <label>Nivel / Grado / Año</label>
+                <div class="input-box">
+                    <label>Grado / Año Académico</label>
                     <select id="gra">
-                        <option value="">Seleccione el nivel...</option>
-                        <optgroup label="INICIAL">
+                        <option value="">-- Seleccionar --</option>
+                        <optgroup label="PREESCOLAR">
                             <option value="Maternal">Maternal</option>
-                            <option value="Preescolar 1">Preescolar (1er Grupo)</option>
-                            <option value="Preescolar 2">Preescolar (2do Grupo)</option>
-                            <option value="Preescolar 3">Preescolar (3er Grupo)</option>
+                            <option value="Preescolar 1">Preescolar 1</option>
+                            <option value="Preescolar 2">Preescolar 2</option>
+                            <option value="Preescolar 3">Preescolar 3</option>
                         </optgroup>
                         <optgroup label="PRIMARIA">
-                            <option value="1er Grado">1er Grado</option><option value="2do Grado">2do Grado</option>
-                            <option value="3er Grado">3er Grado</option><option value="4to Grado">4to Grado</option>
-                            <option value="5to Grado">5to Grado</option><option value="6to Grado">6to Grado</option>
+                            <option value="1er Grado">1er Grado</option>
+                            <option value="2do Grado">2do Grado</option>
+                            <option value="3er Grado">3er Grado</option>
+                            <option value="4to Grado">4to Grado</option>
+                            <option value="5to Grado">5to Grado</option>
+                            <option value="6to Grado">6to Grado</option>
                         </optgroup>
                         <optgroup label="BACHILLERATO">
-                            <option value="1er Año">1er Año</option><option value="2do Año">2do Año</option>
-                            <option value="3er Año">3er Año</option><option value="4to Año">4to Año</option>
+                            <option value="1er Año">1er Año</option>
+                            <option value="2do Año">2do Año</option>
+                            <option value="3er Año">3er Año</option>
+                            <option value="4to Año">4to Año</option>
                             <option value="5to Año">5to Año</option>
                         </optgroup>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label>Mes Correspondiente</label>
+                <div class="input-box">
+                    <label>Mes de la Deuda</label>
                     <select id="mes">
-                        <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option>
-                        <option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
-                        <option value="Enero">Enero</option><option value="Febrero">Febrero</option>
-                        <option value="Marzo">Marzo</option><option value="Abril">Abril</option>
-                        <option value="Mayo">Mayo</option><option value="Junio">Junio</option>
-                        <option value="Julio">Julio</option><option value="Inscripción">Inscripción</option>
+                        <option value="Inscripción">Inscripción</option>
+                        <option value="Septiembre">Septiembre</option>
+                        <option value="Octubre">Octubre</option>
+                        <option value="Noviembre">Noviembre</option>
+                        <option value="Diciembre">Diciembre</option>
+                        <option value="Enero">Enero</option>
+                        <option value="Febrero">Febrero</option>
+                        <option value="Marzo">Marzo</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Mayo">Mayo</option>
+                        <option value="Junio">Junio</option>
+                        <option value="Julio">Julio</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label>Monto a Deber ($)</label>
+                <div class="input-box">
+                    <label>Monto Adeudado ($)</label>
                     <input type="number" id="mon" placeholder="0.00">
                 </div>
+                <button class="btn-save" id="btnSave">GUARDAR ESTUDIANTE</button>
             </div>
-            <button class="btn-action" id="btnSave">GUARDAR Y ASIGNAR A GRADO</button>
         </div>
     </section>
 
-    <section id="deudores" class="section">
+    <section id="deudores" class="tab-content">
         <div class="card">
-            <h2>Control de Deudores por Grado</h2>
-            <input type="text" id="searchBox" class="input-group" style="width:100%; margin-bottom: 20px; padding:12px; border-radius:10px; border:1px solid #ddd" placeholder="🔍 Filtrar por grado, estudiante o mes...">
-            <div class="table-wrap">
+            <h3 style="margin-bottom:15px">Lista General de Deudores</h3>
+            <input type="text" id="busD" placeholder="🔍 Buscar por nombre o grado..." style="width:100%; margin-bottom:20px; padding:10px; border-radius:8px; border:1px solid #ddd">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>ESTUDIANTE</th>
-                            <th>NIVEL / GRADO</th>
-                            <th>MES ADEUDADO</th>
-                            <th>SALDO</th>
-                            <th>ACCIÓN</th>
+                            <th>Estudiante</th>
+                            <th>Grado</th>
+                            <th>Mes</th>
+                            <th>Saldo</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="dbList"></tbody>
+                    <tbody id="listaDeudores"></tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <section id="pagos" class="section">
+    <section id="verificar" class="tab-content">
         <div class="card">
-            <h2>Pagos Reportados por Validar</h2>
-            <div class="table-wrap">
+            <h3 style="margin-bottom:15px">Reportes de Padres (Por Validar)</h3>
+            <div class="table-container">
                 <table>
                     <thead>
-                        <tr><th>ESTUDIANTE</th><th>REFERENCIA</th><th>MONTO</th><th>ACCIÓN</th></tr>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Referencia</th>
+                            <th>Monto</th>
+                            <th>Validar</th>
+                        </tr>
                     </thead>
-                    <tbody id="paymentList"></tbody>
+                    <tbody id="listaPagos"></tbody>
                 </table>
             </div>
         </div>
@@ -193,89 +199,93 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Navegación
-    window.openTab = (evt, tabName) => {
-        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
-    }
+    // FUNCIÓN PARA CAMBIAR ENTRE APARTADOS
+    window.switchTab = (id) => {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    };
 
-    function showToast(m) {
+    function notify(msg) {
         const t = document.getElementById("toast");
-        t.textContent = m; t.style.display = "block";
+        t.textContent = msg; t.style.display = "block";
         setTimeout(() => t.style.display = "none", 3000);
     }
 
-    // Guardar Estudiante
+    // REGISTRAR
     document.getElementById("btnSave").addEventListener("click", async () => {
-        const nomE = document.getElementById("nomE").value;
+        const nom = document.getElementById("nomE").value;
         const gra = document.getElementById("gra").value;
         const mon = document.getElementById("mon").value;
-        if(!nomE || !mon || !gra) return alert("Por favor complete los datos obligatorios");
+        
+        if(!nom || !gra || !mon) return alert("Por favor complete Nombre, Grado y Monto");
 
         await addDoc(collection(db, "deudas"), {
-            nombreEst: nomE,
+            nombreEst: nom,
             nombreRep: document.getElementById("nomR").value,
             correoRep: document.getElementById("mailR").value,
             gradoEst: gra,
-            mesAdeudado: document.getElementById("mes").value,
+            mesDeuda: document.getElementById("mes").value,
             montoDeuda: mon,
-            fechaRegistro: new Date().toLocaleDateString()
+            fechaReg: new Date().toLocaleDateString()
         });
-        showToast("✅ Registro guardado y organizado");
+        notify("✅ Estudiante registrado con éxito");
         document.querySelectorAll("input").forEach(i => i.value = "");
     });
 
-    // Cargar Deudores por Grados
+    // ESCUCHAR DEUDORES
     onSnapshot(collection(db, "deudas"), (snap) => {
-        const list = document.getElementById("dbList");
+        const list = document.getElementById("listaDeudores");
         list.innerHTML = "";
         snap.forEach(d => {
             const i = d.data();
-            let colorTag = i.gradoEst.includes("Año") ? "tag-bachillerato" : (i.gradoEst.includes("Grado") ? "tag-primaria" : "tag-maternal");
+            let tag = i.gradoEst.includes("Año") ? "tag-bac" : (i.gradoEst.includes("Grado") ? "tag-pri" : "tag-pre");
             list.innerHTML += `
                 <tr>
                     <td><b>${i.nombreEst}</b><br><small>${i.nombreRep}</small></td>
-                    <td><span class="tag ${colorTag}">${i.gradoEst}</span></td>
-                    <td>${i.mesAdeudado}</td>
-                    <td class="status-debt">$${i.montoDeuda}</td>
-                    <td>
-                        <button class="btn-notif" onclick="window.notificar('${i.correoRep}', '${i.nombreEst}', '${i.mesAdeudado}', '${i.montoDeuda}')">Notificar</button>
-                        <button onclick="window.delD('${d.id}')" style="background:none; border:none; color:red; cursor:pointer; font-weight:bold; margin-left:10px">X</button>
+                    <td><span class="tag ${tag}">${i.gradoEst}</span></td>
+                    <td>${i.mesDeuda}</td>
+                    <td style="color:red; font-weight:bold">$${i.montoDeuda}</td>
+                    <td class="actions">
+                        <button class="btn-notif" onclick="window.sendNotif('${i.correoRep}', '${i.nombreEst}', '${i.mesDeuda}', '${i.montoDeuda}')">Notificar</button>
+                        <button class="btn-del" onclick="window.delD('${d.id}')">X</button>
                     </td>
                 </tr>`;
         });
     });
 
-    // Cargar Pagos
+    // ESCUCHAR PAGOS
     onSnapshot(collection(db, "pagos_reportados"), (snap) => {
-        const pList = document.getElementById("paymentList");
-        pList.innerHTML = "";
+        const list = document.getElementById("listaPagos");
+        list.innerHTML = "";
         snap.forEach(d => {
             const i = d.data();
-            pList.innerHTML += `<tr>
-                <td>${i.nombreEst}</td>
-                <td><small>${i.referencia}</small></td>
-                <td><b>$${i.monto}</b></td>
-                <td><button onclick="window.delP('${d.id}')" style="background:var(--success); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer">VERIFICAR</button></td>
-            </tr>`;
+            list.innerHTML += `
+                <tr>
+                    <td>${i.nombreEst}</td>
+                    <td><small>${i.referencia}</small></td>
+                    <td><b>$${i.monto}</b></td>
+                    <td><button onclick="window.delP('${d.id}')" style="background:green; color:white; border:none; padding:8px; border-radius:5px; cursor:pointer">OK</button></td>
+                </tr>`;
         });
     });
 
-    window.notificar = (mail, est, mes, monto) => {
-        if(!mail) return alert("Este representante no tiene correo registrado");
-        const body = `Estimado representante, le recordamos el pago pendiente de ${est} por el mes de ${mes} por un monto de $${monto}. Atentamente, Administración SDJ.`;
-        window.location.href = `mailto:${mail}?subject=Recordatorio de Pago SDJ&body=${encodeURIComponent(body)}`;
+    window.sendNotif = (mail, est, mes, monto) => {
+        if(!mail) return alert("Sin correo registrado");
+        const body = `Hola, le recordamos el pago pendiente de ${est} del mes de ${mes} por $${monto}.`;
+        window.location.href = `mailto:${mail}?subject=Cobro SDJ&body=${encodeURIComponent(body)}`;
     }
 
     window.delD = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "deudas", id)); };
     window.delP = async (id) => { if(confirm("¿Validar este pago?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
 
-    // Filtro de búsqueda
-    document.getElementById("searchBox").addEventListener("input", (e) => {
+    // BUSCADOR
+    document.getElementById("busD").addEventListener("input", (e) => {
         const val = e.target.value.toLowerCase();
-        document.querySelectorAll("#dbList tr").forEach(tr => tr.style.display = tr.textContent.toLowerCase().includes(val) ? "" : "none");
+        document.querySelectorAll("#listaDeudores tr").forEach(tr => {
+            tr.style.display = tr.textContent.toLowerCase().includes(val) ? "" : "none";
+        });
     });
 </script>
 </body>
