@@ -3,136 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistema de Cobros SDJ - Admin</title>
+    <title>Sistema de Cobros Escolares - SDJ Admin</title>
     <style>
-        :root { --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --warning: #f39c12; --dark: #2c3e50; --light: #ecf0f1; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background-color: #f5f7fa; color: var(--dark); padding: 0; margin: 0; }
-        header { background: linear-gradient(135deg, var(--primary), #2980b9); color: white; padding: 25px 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        :root {
+            --primary: #3498db; --success: #2ecc71; --danger: #e74c3c;
+            --warning: #f39c12; --dark: #2c3e50; --light: #ecf0f1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, sans-serif; }
+        body { background-color: #f5f7fa; color: var(--dark); line-height: 1.6; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #2980b9);
+            color: white; padding: 30px 20px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-bottom: 5px solid rgba(0,0,0,0.1);
+        }
+
         .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--primary); }
-        .form-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        input { padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; width: 100%; }
-        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-success { background: var(--success); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 13px; color: #7f8c8d; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+
+        .card {
+            background: white; border-radius: 15px; padding: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 25px;
+            border-top: 5px solid var(--primary); transition: 0.3s;
+        }
+
+        h2 { margin-bottom: 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        
+        input {
+            width: 100%; padding: 12px 15px; border: 2px solid #edf2f7;
+            border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); }
+
+        button {
+            padding: 12px 20px; border: none; border-radius: 10px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-main { background: var(--primary); color: white; width: 100%; margin-top: 15px; font-size: 16px; }
+        .btn-main:hover { background: #2980b9; transform: translateY(-2px); }
+
+        .search-box { margin-bottom: 15px; position: relative; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
         .badge-danger { background: #fee2e2; color: var(--danger); }
         .badge-success { background: #dcfce7; color: var(--success); }
-        .alert { padding: 15px; margin: 10px; border-radius: 8px; text-align: center; color: white; font-weight: bold; }
-        .alert-success { background: var(--success); }
-        .alert-danger { background: var(--danger); }
+
+        /* Alertas Animadas */
+        .alert {
+            position: fixed; top: 20px; right: 20px; padding: 15px 25px;
+            border-radius: 10px; color: white; font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Modal de Notificación */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; align-items: center;
+            justify-content: center; z-index: 2000;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 400px; text-align: center;
+        }
+
+        .btn-action { padding: 6px 12px; font-size: 12px; }
+        .bg-danger { background: var(--danger); color: white; }
+        .bg-success { background: var(--success); color: white; }
     </style>
 </head>
 <body>
-    <header><h1>SISTEMA DE COBROS SDJ</h1></header>
-    <div id="alertContainer"></div>
 
-    <div class="container">
-        <div class="card">
-            <h3 style="margin-bottom:15px">Registrar Estudiante</h3>
-            <div class="form-group">
-                <input type="text" id="nomE" placeholder="Nombre Estudiante">
-                <input type="text" id="nomR" placeholder="Nombre Representante">
-                <input type="text" id="gra" placeholder="Grado">
-                <input type="number" id="mon" placeholder="Monto Deuda $">
-                <button id="btnReg" style="grid-column: span 2;">GUARDAR EN NUBE</button>
-            </div>
+<header>
+    <h1>SDJ COBROS - ADMINISTRACIÓN</h1>
+    <p>Gestión de Pagos y Deudas en Tiempo Real</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>💰 Registrar Nueva Deuda</h2>
+        <div class="form-grid">
+            <input type="text" id="nomE" placeholder="Nombre Estudiante">
+            <input type="text" id="nomR" placeholder="Nombre Representante">
+            <input type="text" id="gra" placeholder="Grado">
+            <input type="number" id="mon" placeholder="Monto Deuda $">
         </div>
+        <button id="btnReg" class="btn-main">GUARDAR REGISTRO EN NUBE</button>
+    </div>
 
-        <div class="card">
-            <h3>Lista de Deudores</h3>
-            <div style="overflow-x:auto">
-                <table>
-                    <thead><tr><th>Estudiante</th><th>Grado</th><th>Saldo</th><th>Acción</th></tr></thead>
-                    <tbody id="tablaDeudores"></tbody>
-                </table>
-            </div>
+    <div class="card" style="border-top-color: var(--danger);">
+        <h2>📋 Lista de Deudores</h2>
+        <div class="search-box">
+            <input type="text" id="searchD" placeholder="🔍 Buscar estudiante por nombre...">
         </div>
-
-        <div class="card" style="border-top-color: var(--success);">
-            <h3>Pagos Reportados por Padres</h3>
-            <div style="overflow-x:auto">
-                <table>
-                    <thead><tr><th>Estudiante</th><th>Referencia</th><th>Monto</th><th>Acción</th></tr></thead>
-                    <tbody id="tablaPagos"></tbody>
-                </table>
-            </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Estudiante</th><th>Grado</th><th>Saldo</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="listaDeudores"></tbody>
+            </table>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div class="card" style="border-top-color: var(--success);">
+        <h2>✅ Pagos Reportados</h2>
+        <div class="search-box">
+            <input type="text" id="searchP" placeholder="🔍 Buscar por estudiante o referencia...">
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Estudiante</th><th>Referencia</th><th>Monto</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="listaPagos"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
-            authDomain: "reportedepagos-d8485.firebaseapp.com",
-            projectId: "reportedepagos-d8485",
-            storageBucket: "reportedepagos-d8485.appspot.com",
-            messagingSenderId: "335664812002",
-            appId: "1:335664812002:web:609ecb3008145281af3bb8"
-        };
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <div id="modalIcon" style="font-size: 50px; margin-bottom: 10px;"></div>
+        <h3 id="modalTitle"></h3>
+        <p id="modalText" style="margin: 15px 0; color: #666;"></p>
+        <button onclick="closeModal()" class="btn-main">Entendido</button>
+    </div>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        function showAlert(msg, type) {
-            const container = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = msg;
-            container.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
-        }
+    const firebaseConfig = {
+        apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
+        authDomain: "reportedepagos-d8485.firebaseapp.com",
+        projectId: "reportedepagos-d8485",
+        storageBucket: "reportedepagos-d8485.appspot.com",
+        messagingSenderId: "335664812002",
+        appId: "1:335664812002:web:609ecb3008145281af3bb8"
+    };
 
-        document.getElementById("btnReg").addEventListener("click", async () => {
-            const nom = document.getElementById("nomE").value.trim();
-            const mon = document.getElementById("mon").value;
-            if(!nom || !mon) return showAlert("Faltan datos obligatorios", "danger");
-            
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- FUNCIONES DE ALERTA ---
+    function toast(msg, color) {
+        const div = document.createElement('div');
+        div.className = 'alert';
+        div.style.background = color;
+        div.textContent = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    window.showModal = (title, text, icon) => {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalText').textContent = text;
+        document.getElementById('modalIcon').textContent = icon;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    window.closeModal = () => { document.getElementById('modal').style.display = 'none'; }
+
+    // --- LÓGICA DE REGISTRO ---
+    document.getElementById("btnReg").addEventListener("click", async () => {
+        const nom = document.getElementById("nomE").value.trim();
+        const mon = document.getElementById("mon").value;
+        
+        if(!nom || !mon) return toast("⚠️ Nombre y Monto son obligatorios", "var(--warning)");
+
+        try {
             await addDoc(collection(db, "deudas"), {
                 nombreEst: nom,
                 nombreRep: document.getElementById("nomR").value,
                 gradoEst: document.getElementById("gra").value,
-                montoDeuda: mon
+                montoDeuda: mon,
+                fecha: new Date()
             });
-            showAlert("¡Estudiante registrado correctamente!", "success");
+            showModal("¡Éxito!", "Estudiante registrado correctamente en la base de datos.", "✅");
             document.querySelectorAll("input").forEach(i => i.value = "");
-        });
+        } catch(e) { toast("Error al guardar", "var(--danger)"); }
+    });
 
-        onSnapshot(collection(db, "deudas"), (snap) => {
-            const t = document.getElementById("tablaDeudores"); t.innerHTML = "";
-            snap.forEach(d => {
-                const i = d.data();
-                t.innerHTML += `<tr>
-                    <td><b>${i.nombreEst}</b></td>
+    // --- ESCUCHA DE DATOS (DEUDORES) ---
+    onSnapshot(collection(db, "deudas"), (snap) => {
+        const t = document.getElementById("listaDeudores");
+        t.innerHTML = "";
+        snap.forEach(d => {
+            const i = d.data();
+            t.innerHTML += `
+                <tr>
+                    <td><b>${i.nombreEst}</b><br><small>${i.nombreRep}</small></td>
                     <td>${i.gradoEst}</td>
                     <td><span class="badge badge-danger">$${i.montoDeuda}</span></td>
-                    <td><button onclick="window.delD('${d.id}')" style="background:var(--danger); padding:5px 8px; font-size:10px">ELIMINAR</button></td>
+                    <td><button class="bg-danger btn-action" onclick="delD('${d.id}')">Eliminar</button></td>
                 </tr>`;
-            });
         });
+    });
 
-        onSnapshot(collection(db, "pagos_reportados"), (snap) => {
-            const t = document.getElementById("tablaPagos"); t.innerHTML = "";
-            snap.forEach(d => {
-                const i = d.data();
-                t.innerHTML += `<tr>
+    // --- ESCUCHA DE DATOS (PAGOS) ---
+    onSnapshot(collection(db, "pagos_reportados"), (snap) => {
+        const t = document.getElementById("listaPagos");
+        t.innerHTML = "";
+        snap.forEach(d => {
+            const i = d.data();
+            t.innerHTML += `
+                <tr>
                     <td>${i.nombreEst}</td>
-                    <td><span class="badge" style="background:#eee">${i.referencia}</span></td>
+                    <td><small>${i.referencia}</small></td>
                     <td><span class="badge badge-success">$${i.monto}</span></td>
-                    <td><button onclick="window.delP('${d.id}')" class="btn-success" style="padding:5px 8px; font-size:10px">VALIDAR</button></td>
+                    <td><button class="bg-success btn-action" onclick="delP('${d.id}')">Validar</button></td>
                 </tr>`;
-            });
         });
+    });
 
-        window.delD = async (id) => { if(confirm("¿Eliminar deudor?")) await deleteDoc(doc(db, "deudas", id)); };
-        window.delP = async (id) => { if(confirm("¿Validar este pago?")) await deleteDoc(doc(db, "pagos_reportados", id)); };
-    </script>
+    // --- ACCIONES ---
+    window.delD = async (id) => { if(confirm("¿Borrar deuda definitivamente?")) await deleteDoc(doc(db, "deudas", id)); }
+    window.delP = async (id) => { if(confirm("¿Marcar pago como verificado?")) await deleteDoc(doc(db, "pagos_reportados", id)); }
+
+    // --- BÚSQUEDA ---
+    document.getElementById("searchD").addEventListener("input", (e) => {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll("#listaDeudores tr").forEach(tr => {
+            tr.style.display = tr.textContent.toLowerCase().includes(val) ? "" : "none";
+        });
+    });
+</script>
 </body>
 </html>
-
