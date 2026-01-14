@@ -3,74 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA SDJ - CONTROL V11</title>
+    <title>SISTEMA INTEGRAL SDJ - V13 FINAL</title>
     <style>
         :root {
             --primary: #1e3a8a; --bg: #f8fafc; --text: #0f172a;
             --green: #22c55e; --yellow: #eab308; --red: #ef4444;
+            --dark: #1e293b;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
-        header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 25px; text-align: center; font-weight: bold; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        /* NAV */
+        /* NAVEGACIÓN */
         nav { display: flex; background: white; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
-        .nav-btn { flex: 1; min-width: 100px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
+        .nav-btn { flex: 1; min-width: 100px; padding: 18px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.3s; }
         .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
 
-        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
         .modulo { display: none; }
         .modulo.active { display: block; animation: fadeIn 0.4s; }
 
-        /* CARDS & FORMS */
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; font-size: 14px; }
-        .btn-main { background: var(--primary); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        /* CARDS */
+        .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        input, select { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 10px; margin-top: 10px; font-size: 15px; }
+        .btn-main { background: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; font-size: 16px; }
         
-        /* ALERTAS & PENDIENTES */
-        .btn-alert-all { background: #4f46e5; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+        /* PENDIENTES Y ALERTAS */
+        .grado-header { background: var(--dark); color: white; padding: 12px 20px; border-radius: 8px; font-weight: bold; text-transform: uppercase; font-size: 14px; margin: 30px 0 12px 0; letter-spacing: 1px; }
+        .student-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px; transition: 0.2s; cursor: pointer; }
+        .student-row:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-        .grado-header { background: #1e293b; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 13px; margin: 25px 0 10px 0; letter-spacing: 0.5px; }
+        .alert-previa { border-left: 8px solid var(--green); }
+        .alert-normal { border-left: 8px solid var(--yellow); }
+        .alert-urgente { border-left: 8px solid var(--red); }
 
-        .student-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; position: relative; }
-        
-        /* BORDES DE ALERTA */
-        .alert-previa { border-left: 6px solid var(--green); }
-        .alert-normal { border-left: 6px solid var(--yellow); }
-        .alert-urgente { border-left: 6px solid var(--red); }
-
-        /* BADGES (ETIQUETAS) */
-        .badge { font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
-        .bg-previa { background: #dcfce7; color: #15803d; }
-        .bg-normal { background: #fef9c3; color: #a16207; }
-        .bg-urgente { background: #fee2e2; color: #b91c1c; }
-
-        .info b { display: block; font-size: 15px; color: var(--primary); }
-        .info small { color: #64748b; font-size: 12px; display: block; }
-        .tag-mes { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin: 4px 2px 0 0; color: #475569; }
+        /* MODAL DE FICHA DEL ALUMNO */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+        .modal-content h2 { color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
+        .info-block { margin-bottom: 15px; }
+        .info-label { font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .info-value { font-size: 16px; color: var(--dark); font-weight: 500; }
 
         /* ARCHIVOS */
-        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
-        .folder { background: white; border: 1px solid #e2e8f0; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-        .folder:hover { background: #f8fafc; border-color: var(--primary); }
-        .icon { font-size: 30px; display: block; margin-bottom: 5px; }
-
-        /* TABLA REPORTES */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 12px; }
-        th { background: #f1f5f9; padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; margin-top: 20px; }
+        .folder { background: white; border: 1px solid #e2e8f0; padding: 30px 15px; text-align: center; border-radius: 15px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .folder:hover { border-color: var(--primary); background: #f8fafc; color: var(--primary); }
         
-        .btn-check { background: var(--green); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-right: 5px; font-weight: bold; }
-        .btn-reject { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        /* REPORTES TABLA */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th { background: #f1f5f9; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+        .btn-act { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; margin-right: 5px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<header>SISTEMA ADMINISTRATIVO SDJ (V11)</header>
+<header>SISTEMA ADMINISTRATIVO SDJ (V13)</header>
 
 <nav>
     <div class="nav-btn active" onclick="go('reg')">1. Registro</div>
@@ -80,17 +72,22 @@
     <div class="nav-btn" onclick="go('rep')">5. Reportes</div>
 </nav>
 
+<div id="studentModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>Ficha del Alumno</h2>
+        <div id="modalData"></div>
+        <button class="btn-main" onclick="closeModal()">CERRAR EXPEDIENTE</button>
+    </div>
+</div>
+
 <div class="container">
 
     <section id="mod-reg" class="modulo active">
         <div class="card">
-            <h3>Registrar Alumno / Deuda</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">* Para hermanos, registre uno por uno.</p>
-            
-            <input type="text" id="rNom" placeholder="Nombre del Alumno">
+            <h3>Nuevo Registro de Estudiante</h3>
+            <input type="text" id="rNom" placeholder="Nombre y Apellido del Estudiante">
             <input type="text" id="rRep" placeholder="Nombre del Representante">
-            <input type="email" id="rMail" placeholder="Correo del Representante">
-            
+            <input type="email" id="rMail" placeholder="Correo Electrónico (Para notificaciones)">
             <div style="display:flex; gap:10px">
                 <select id="rGra">
                     <option>5to Año</option><option>4to Año</option><option>3er Año</option><option>2do Año</option><option>1er Año</option>
@@ -99,72 +96,64 @@
                 </select>
                 <select id="rSec" style="width:100px"><option>A</option><option>B</option></select>
             </div>
-
-            <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block">Meses Pendientes:</label>
-            <select id="rMes" multiple style="height:120px">
-                <option value="Inscripción">Inscripción</option>
+            <label style="display:block; margin-top:15px; font-weight:bold; font-size:12px">MESES PENDIENTES (Presione Ctrl o Cmd para seleccionar varios):</label>
+            <select id="rMes" multiple style="height:150px">
                 <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
                 <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option>
                 <option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option>
             </select>
-            
-            <input type="number" id="rMon" placeholder="Monto Mensual ($)">
-            <button class="btn-main" onclick="guardar()">GUARDAR REGISTRO</button>
+            <input type="number" id="rMon" placeholder="Monto Mensual en $">
+            <button class="btn-main" onclick="guardarAlumno()">REGISTRAR EN BASE DE DATOS</button>
         </div>
     </section>
 
     <section id="mod-arch" class="modulo">
-        <div id="view-level">
-            <h3>Seleccione Nivel</h3>
+        <div id="arch-lvl">
+            <h3>Carpetas por Nivel</h3>
             <div class="folder-grid">
-                <div class="folder" onclick="loadLevel('INICIAL')"><span class="icon">📂</span>INICIAL</div>
-                <div class="folder" onclick="loadLevel('PRIMARIA')"><span class="icon">📂</span>PRIMARIA</div>
-                <div class="folder" onclick="loadLevel('BACHILLERATO')"><span class="icon">📂</span>BACHILLERATO</div>
+                <div class="folder" onclick="openLvl('INICIAL')">📂 INICIAL</div>
+                <div class="folder" onclick="openLvl('PRIMARIA')">📂 PRIMARIA</div>
+                <div class="folder" onclick="openLvl('BACHILLERATO')">📂 BACHILLERATO</div>
             </div>
         </div>
-        <div id="view-grade" style="display:none">
-            <button onclick="resetArch()" style="margin-bottom:10px">⬅ Atrás</button>
-            <h3 id="tit-grade"></h3>
-            <div id="grid-grade" class="folder-grid"></div>
+        <div id="arch-gra" style="display:none">
+            <button onclick="backToLvl()" style="margin-bottom:10px">⬅ Volver</button>
+            <h3 id="h-gra"></h3>
+            <div id="g-gra" class="folder-grid"></div>
         </div>
-        <div id="view-sec" style="display:none">
-            <button onclick="backToGrade()" style="margin-bottom:10px">⬅ Atrás</button>
-            <h3 id="tit-sec"></h3>
+        <div id="arch-sec" style="display:none">
+            <button onclick="backToGra()" style="margin-bottom:10px">⬅ Volver</button>
+            <h3 id="h-sec"></h3>
             <div class="folder-grid">
-                <div class="folder" onclick="loadFinal('A')"><span class="icon">📁</span>Sección A</div>
-                <div class="folder" onclick="loadFinal('B')"><span class="icon">📁</span>Sección B</div>
+                <div class="folder" onclick="openFinal('A')">📁 SECCIÓN A</div>
+                <div class="folder" onclick="openFinal('B')">📁 SECCIÓN B</div>
             </div>
         </div>
-        <div id="view-list" style="display:none">
-            <button onclick="backToSec()" style="margin-bottom:10px">⬅ Atrás</button>
-            <h3 id="tit-list"></h3>
-            <div class="card" style="margin-top:15px">
-                <div id="final-list"></div>
-            </div>
+        <div id="arch-list" style="display:none">
+            <button onclick="backToSec()" style="margin-bottom:10px">⬅ Volver</button>
+            <h3 id="h-list"></h3>
+            <div id="listado-final" style="margin-top:20px"></div>
         </div>
     </section>
 
     <section id="mod-pend" class="modulo">
-        <button class="btn-alert-all" onclick="notifyAll()">
-            📢 ENVIAR ALERTAS MASIVAS (Email)
-        </button>
-        <div class="card">
-            <div id="list-pend">Cargando deudores...</div>
-        </div>
+        <div id="render-pend">Cargando lista de deudores...</div>
     </section>
 
     <section id="mod-solv" class="modulo">
-        <div class="card"><h3>Estudiantes al Día</h3><div id="list-solv"></div></div>
+        <div class="card">
+            <h3>Alumnos Solventes</h3>
+            <div id="render-solv"></div>
+        </div>
     </section>
 
     <section id="mod-rep" class="modulo">
         <div class="card">
-            <h3>Pagos Reportados (Banco)</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">Valide si el dinero está en cuenta o Rechace si hay error.</p>
-            <div class="table-wrap">
+            <h3>Validación de Pagos Reportados</h3>
+            <div style="overflow-x:auto">
                 <table>
-                    <thead><tr><th>Alumno / Rep</th><th>Ref / Banco</th><th>Monto</th><th>Acción</th></tr></thead>
-                    <tbody id="table-rep"></tbody>
+                    <thead><tr><th>Alumno</th><th>Referencia</th><th>Monto</th><th>Acción</th></tr></thead>
+                    <tbody id="table-pagos"></tbody>
                 </table>
             </div>
         </div>
@@ -174,9 +163,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // CONFIGURACIÓN FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
         authDomain: "reportedepagos-d8485.firebaseapp.com",
@@ -188,16 +176,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    
-    // COLECCIONES
-    const DB_MAIN = "sdj_final_v11"; 
-    const DB_PAGOS = "pagos_reportados";
+    const COL_EST = "sdj_v13_estudiantes";
+    const COL_PAG = "pagos_reportados";
 
-    const ORDEN_GRADOS = [
-        "5to Año", "4to Año", "3er Año", "2do Año", "1er Año",
-        "6to Grado", "5to Grado", "4to Grado", "3er Grado", "2do Grado", "1er Grado",
-        "Preescolar 3", "Preescolar 2", "Preescolar 1", "Maternal"
-    ];
+    const ORDEN = ["5to Año", "4to Año", "3er Año", "2do Año", "1er Año", "6to Grado", "5to Grado", "4to Grado", "3er Grado", "2do Grado", "1er Grado", "Preescolar 3", "Preescolar 2", "Preescolar 1", "Maternal"];
 
     window.go = (id) => {
         document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
@@ -206,158 +188,134 @@
         event.currentTarget.classList.add('active');
     };
 
-    window.guardar = async () => {
-        const ms = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
-        const mon = parseFloat(document.getElementById('rMon').value) || 0;
-        
-        await addDoc(collection(db, DB_MAIN), {
+    // REGISTRO
+    window.guardarAlumno = async () => {
+        const meses = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
+        const monto = parseFloat(document.getElementById('rMon').value) || 0;
+        await addDoc(collection(db, COL_EST), {
             nombre: document.getElementById('rNom').value,
             rep: document.getElementById('rRep').value,
             mail: document.getElementById('rMail').value,
             grado: document.getElementById('rGra').value,
             seccion: document.getElementById('rSec').value,
-            meses: ms,
-            total: ms.length * mon,
-            timestamp: new Date()
+            meses: meses,
+            total: meses.length * monto
         });
-        alert("¡Registro Exitoso!"); location.reload();
+        alert("¡Alumno registrado con éxito!");
+        location.reload();
     };
 
-    let cachePendientes = [];
+    // MOTOR DE PENDIENTES
+    onSnapshot(collection(db, COL_EST), (snap) => {
+        const rp = document.getElementById('render-pend');
+        const rs = document.getElementById('render-solv');
+        rp.innerHTML = ""; rs.innerHTML = "";
+        let data = [];
+        snap.forEach(d => data.push({...d.data(), id: d.id}));
 
-    onSnapshot(collection(db, DB_MAIN), (snap) => {
-        const lp = document.getElementById('list-pend');
-        const ls = document.getElementById('list-solv');
-        lp.innerHTML = ""; ls.innerHTML = "";
-        cachePendientes = [];
-
-        let allData = [];
-        snap.forEach(d => allData.push({ ...d.data(), id: d.id }));
-
-        ORDEN_GRADOS.forEach(grado => {
-            const grupo = allData.filter(x => x.grado === grado && x.meses.length > 0);
+        ORDEN.forEach(g => {
+            const grupo = data.filter(a => a.grado === g && a.meses.length > 0);
             if(grupo.length > 0) {
-                lp.innerHTML += `<div class="grado-header">${grado}</div>`;
+                rp.innerHTML += `<div class="grado-header">${g}</div>`;
                 grupo.forEach(a => {
-                    const alerta = getNivelAlerta(a.meses.length);
-                    cachePendientes.push({ ...a, tipoAlerta: alerta.tipo });
-                    lp.innerHTML += `
-                        <div class="student-row alert-${alerta.clase}">
-                            <div class="info">
-                                <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
-                                <b>${a.nombre} (${a.seccion})</b>
-                                <small>Rep: ${a.rep}</small>
-                                <div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
+                    const alerta = getAlerta(a.meses.length);
+                    rp.innerHTML += `
+                        <div class="student-row alert-${alerta}" onclick="verFicha('${encodeURIComponent(JSON.stringify(a))}')">
+                            <div>
+                                <b>${a.nombre}</b><br>
+                                <small>${a.seccion} | Rep: ${a.rep}</small>
                             </div>
-                            <div style="text-align:right">
-                                <b style="color:#ef4444">$${a.total}</b><br>
-                                <button onclick="sendMail('${a.mail}', '${a.nombre}', '${alerta.tipo}')" style="border:none; background:transparent; font-size:20px; cursor:pointer">✉️</button>
-                                <br><button onclick="del('${a.id}')" style="font-size:10px; color:gray; border:none; background:none; cursor:pointer">Eliminar</button>
-                            </div>
+                            <b style="color:var(--red)">$${a.total}</b>
                         </div>`;
                 });
             }
         });
 
-        allData.filter(x => x.meses.length === 0).forEach(a => {
-            ls.innerHTML += `<div class="student-row" style="border-left:5px solid var(--green)"><div class="info"><b>${a.nombre}</b><small>${a.grado} (${a.seccion})</small></div><b style="color:var(--green)">SOLVENTE</b></div>`;
+        data.filter(a => a.meses.length === 0).forEach(a => {
+            rs.innerHTML += `<div class="student-row" style="border-left:8px solid var(--green)"><b>${a.nombre}</b> <span style="color:var(--green)">SOLVENTE</span></div>`;
         });
     });
 
-    function getNivelAlerta(meses) {
+    function getAlerta(n) {
         const dia = new Date().getDate();
-        if (meses >= 3 || (meses >= 1 && dia > 10)) {
-            return { texto: "ALERTA URGENTE", clase: "urgente", tipo: "urgente" };
-        } else if (meses === 2) {
-            return { texto: "ALERTA NORMAL", clase: "normal", tipo: "normal" };
-        } else {
-            return { texto: "ALERTA PREVIA", clase: "previa", tipo: "previa" };
-        }
+        if(n >= 3 || (n >= 1 && dia > 10)) return "urgente";
+        if(n === 2) return "normal";
+        return "previa";
     }
 
-    window.sendMail = (mail, nom, tipo) => {
-        const msgs = {
-            previa: `Estimado representante, le recordamos el pago mensual del alumno ${nom}.`,
-            normal: `Estimado representante, el alumno ${nom} tiene 2 meses pendientes. Favor regularizar.`,
-            urgente: `URGENTE: El alumno ${nom} presenta deuda crítica o vencimiento de plazo. Favor contactar administración.`
-        };
-        window.location.href = `mailto:${mail}?subject=Aviso de Cobro SDJ&body=${msgs[tipo]}`;
+    // FICHA DETALLADA
+    window.verFicha = (json) => {
+        const a = JSON.parse(decodeURIComponent(json));
+        document.getElementById('modalData').innerHTML = `
+            <div class="info-block"><div class="info-label">Alumno</div><div class="info-value">${a.nombre}</div></div>
+            <div class="info-block"><div class="info-label">Representante</div><div class="info-value">${a.rep}</div></div>
+            <div class="info-block"><div class="info-label">Correo</div><div class="info-value">${a.mail}</div></div>
+            <div class="info-block"><div class="info-label">Grado y Sección</div><div class="info-value">${a.grado} - ${a.seccion}</div></div>
+            <div class="info-block"><div class="info-label">Meses Adeudados</div><div class="info-value">${a.meses.join(", ")}</div></div>
+            <div class="info-block"><div class="info-label">Deuda Total</div><div class="info-value" style="color:red; font-size:22px">$${a.total}</div></div>
+        `;
+        document.getElementById('studentModal').style.display = "flex";
     };
+    window.closeModal = () => document.getElementById('studentModal').style.display = "none";
 
-    window.notifyAll = () => {
-        if(confirm(`Enviar correos a ${cachePendientes.length} representantes?`)) {
-            cachePendientes.forEach((a, i) => { setTimeout(() => sendMail(a.mail, a.nombre, a.tipoAlerta), i * 800); });
-        }
-    };
-
-    // --- ARCHIVOS ---
-    let curLvl = "", curGra = "";
-    const struct = {
+    // ARCHIVOS
+    let curL = "", curG = "";
+    const niveles = {
         'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'],
         'PRIMARIA': ['1er Grado','2do Grado','3er Grado','4to Grado','5to Grado','6to Grado'],
         'BACHILLERATO': ['1er Año','2do Año','3er Año','4to Año','5to Año']
     };
 
-    window.loadLevel = (l) => {
-        curLvl = l;
-        document.getElementById('view-level').style.display='none';
-        document.getElementById('view-grade').style.display='block';
-        document.getElementById('tit-grade').innerText = l;
-        const grid = document.getElementById('grid-grade'); grid.innerHTML = "";
-        struct[l].forEach(g => grid.innerHTML += `<div class="folder" onclick="loadSec('${g}')">📁<br>${g}</div>`);
+    window.openLvl = (l) => {
+        curL = l; document.getElementById('arch-lvl').style.display='none'; document.getElementById('arch-gra').style.display='block';
+        document.getElementById('h-gra').innerText = l;
+        const grid = document.getElementById('g-gra'); grid.innerHTML = "";
+        niveles[l].forEach(g => grid.innerHTML += `<div class="folder" onclick="openSec('${g}')">📁 ${g}</div>`);
     };
-    window.loadSec = (g) => { curGra = g; document.getElementById('view-grade').style.display='none'; document.getElementById('view-sec').style.display='block'; document.getElementById('tit-sec').innerText = g; };
-    window.loadFinal = (s) => {
-        document.getElementById('view-sec').style.display='none';
-        document.getElementById('view-list').style.display='block';
-        document.getElementById('tit-list').innerText = `${curGra} - SECCIÓN ${s}`;
-        onSnapshot(collection(db, DB_MAIN), (snap) => {
-            const div = document.getElementById('final-list'); div.innerHTML = "";
-            let count = 0;
+    window.openSec = (g) => {
+        curG = g; document.getElementById('arch-gra').style.display='none'; document.getElementById('arch-sec').style.display='block';
+        document.getElementById('h-sec').innerText = g;
+    };
+    window.openFinal = (s) => {
+        document.getElementById('arch-sec').style.display='none'; document.getElementById('arch-list').style.display='block';
+        document.getElementById('h-list').innerText = `${curG} - SECCIÓN ${s}`;
+        onSnapshot(collection(db, COL_EST), (snap) => {
+            const list = document.getElementById('listado-final'); list.innerHTML = "";
             snap.forEach(d => {
                 const a = d.data();
-                if(a.grado === curGra && a.seccion === s) {
-                    count++;
-                    div.innerHTML += `<div class="student-row"><b>${a.nombre}</b><small>${a.rep}</small></div>`;
+                if(a.grado === curG && a.seccion === s) {
+                    list.innerHTML += `<div class="student-row" onclick="verFicha('${encodeURIComponent(JSON.stringify(a))}')"><b>${a.nombre}</b> <span>ℹ️</span></div>`;
                 }
             });
-            if(count === 0) div.innerHTML = "<p style='text-align:center; padding:20px; color:gray'>Carpeta Vacía</p>";
         });
     };
-    
-    window.resetArch = () => { document.getElementById('view-grade').style.display='none'; document.getElementById('view-level').style.display='block'; };
-    window.backToGrade = () => { document.getElementById('view-sec').style.display='none'; document.getElementById('view-grade').style.display='block'; };
-    window.backToSec = () => { document.getElementById('view-list').style.display='none'; document.getElementById('view-sec').style.display='block'; };
 
-    // --- REPORTES Y VALIDACIÓN ---
-    onSnapshot(collection(db, DB_PAGOS), (snap) => {
-        const tb = document.getElementById('table-rep'); tb.innerHTML = "";
+    window.backToLvl = () => { document.getElementById('arch-gra').style.display='none'; document.getElementById('arch-lvl').style.display='block'; };
+    window.backToGra = () => { document.getElementById('arch-sec').style.display='none'; document.getElementById('arch-gra').style.display='block'; };
+    window.backToSec = () => { document.getElementById('arch-list').style.display='none'; document.getElementById('arch-sec').style.display='block'; };
+
+    // REPORTES
+    onSnapshot(collection(db, COL_PAG), (snap) => {
+        const tb = document.getElementById('table-pagos'); tb.innerHTML = "";
         snap.forEach(d => {
             const p = d.data();
             tb.innerHTML += `<tr>
-                <td>${p.nombreEst}<br><small>${p.nombreRep || '-'}</small></td>
-                <td><b>${p.banco || 'BANCO'}</b><br>${p.referencia || 'REF'}</td>
-                <td>Bs.${p.montoBs || 0}<br>$${p.montoDivisas || p.monto || 0}</td>
+                <td>${p.nombreEst}</td>
+                <td>${p.referencia}</td>
+                <td>$${p.monto}</td>
                 <td>
-                    <button class="btn-check" onclick="validar('${d.id}')">✔</button>
-                    <button class="btn-reject" onclick="rechazar('${d.id}','${p.referencia}')">✖</button>
+                    <button class="btn-act" style="background:var(--green)" onclick="validar('${d.id}')">✅</button>
+                    <button class="btn-act" style="background:var(--red)" onclick="rechazar('${d.id}', '${p.referencia}')">❌</button>
                 </td>
             </tr>`;
         });
     });
 
-    window.del = async(id) => { if(confirm("¿Eliminar Alumno?")) await deleteDoc(doc(db, DB_MAIN, id)); };
-    window.validar = async(id) => { if(confirm("¿Pago VERIFICADO?")) await deleteDoc(doc(db, DB_PAGOS, id)); };
-    
-    // FUNCIÓN RECHAZAR CON EMAIL
-    window.rechazar = async(id, ref) => {
-        if(confirm("¿Reportar como NO VERIFICADO y notificar al representante?")) {
-            // Aquí idealmente tendríamos el correo del usuario que reportó, 
-            // pero como el reporte simple a veces no lo trae, abrimos un mail genérico
-            // o lo borramos de la lista.
-            alert("Se abrirá el correo para notificar el error.");
-            window.location.href = `mailto:?subject=Error en reporte de pago SDJ&body=El pago con referencia ${ref} no aparece en nuestra cuenta bancaria o tiene datos erróneos. Favor verificar.`;
-            await deleteDoc(doc(db, DB_PAGOS, id));
+    window.validar = async (id) => { if(confirm("¿Confirmar ingreso de dinero?")) await deleteDoc(doc(db, COL_PAG, id)); };
+    window.rechazar = async (id, ref) => {
+        if(confirm("¿El pago es falso o erróneo? Se notificará al representante.")){
+            window.location.href = `mailto:?subject=Pago Rechazado SDJ&body=Su reporte con referencia ${ref} no coincide con nuestro banco.`;
+            await deleteDoc(doc(db, COL_PAG, id));
         }
     };
 
