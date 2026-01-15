@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA SDJ - CONTROL V15 (CORREGIDO)</title>
+    <title>SISTEMA SDJ - CONTROL V16 (FULL)</title>
     <style>
         :root {
             --primary: #1e3a8a; --bg: #f8fafc; --text: #0f172a;
@@ -15,9 +15,9 @@
 
         header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
-        /* NAV */
+        /* NAV MEJORADO CON CALENDARIO */
         nav { display: flex; background: white; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
-        .nav-btn { flex: 1; min-width: 100px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
+        .nav-btn { flex: 1; min-width: 90px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 10px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
         .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
 
         .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
@@ -26,23 +26,24 @@
 
         /* CARDS & FORMS */
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; font-size: 14px; }
         .btn-main { background: var(--primary); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
         
         /* ALERTAS & PENDIENTES */
-        .btn-alert-all { background: #4f46e5; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); transition: 0.3s; }
-        .btn-alert-all:active { transform: scale(0.98); background: #4338ca; }
+        .btn-alert-all { background: #4f46e5; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
+        .btn-alert-all:active { transform: scale(0.98); }
 
         .grado-header { background: #1e293b; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 13px; margin: 25px 0 10px 0; letter-spacing: 0.5px; }
 
-        .student-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; position: relative; }
+        .student-row { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; position: relative; }
+        .row-header { display: flex; justify-content: space-between; align-items: center; }
         
         /* BORDES DE ALERTA */
         .alert-previa { border-left: 6px solid var(--green); }
         .alert-normal { border-left: 6px solid var(--yellow); }
         .alert-urgente { border-left: 6px solid var(--red); }
 
-        /* BADGES (ETIQUETAS) */
+        /* BADGES */
         .badge { font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         .bg-previa { background: #dcfce7; color: #15803d; }
         .bg-normal { background: #fef9c3; color: #a16207; }
@@ -52,8 +53,14 @@
         .info small { color: #64748b; font-size: 12px; display: block; }
         .tag-mes { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin: 4px 2px 0 0; color: #475569; }
 
-        /* HISTORIAL PAGOS EN FICHA */
-        .historial-box { margin-top: 10px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px dashed #cbd5e1; font-size: 11px; color: #475569; max-height: 100px; overflow-y: auto; }
+        /* HISTORIAL VISIBLE EN FICHA */
+        .historial-box { margin-top: 10px; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px; border-radius: 6px; font-size: 11px; }
+        .historial-item { padding: 4px 0; border-bottom: 1px solid #e2e8f0; color: #475569; }
+        .tag-pagado { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 3px; display: inline-block; border: 1px solid #bbf7d0; }
+
+        /* CALENDARIO ESTILOS */
+        .event-card { background: white; border-left: 5px solid var(--primary); padding: 15px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .date-box { display: inline-block; background: #eff6ff; padding: 5px 10px; border-radius: 5px; font-weight: bold; color: var(--primary); margin-bottom: 5px; font-size: 12px; }
 
         /* ARCHIVOS */
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
@@ -76,7 +83,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ESTILOS DE IMPRESIÓN */
         @media print {
             nav, header, .btn-print, button, input { display: none !important; }
             body, .container, .modulo { background: white; margin: 0; padding: 0; }
@@ -87,7 +93,7 @@
 </head>
 <body>
 
-<header>SISTEMA ADMINISTRATIVO SDJ (V15 FIXED)</header>
+<header>SISTEMA ADMINISTRATIVO SDJ (V16)</header>
 
 <nav>
     <div class="nav-btn active" onclick="go('reg')">1. Registro</div>
@@ -95,6 +101,7 @@
     <div class="nav-btn" onclick="go('pend')">3. Pendientes</div>
     <div class="nav-btn" onclick="go('solv')">4. Solventes</div>
     <div class="nav-btn" onclick="go('rep')">5. Reportes</div>
+    <div class="nav-btn" onclick="go('cal')">6. Calendario</div>
 </nav>
 
 <div class="container">
@@ -102,11 +109,11 @@
     <section id="mod-reg" class="modulo active">
         <div class="card">
             <h3>Registrar Alumno / Deuda</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">* Use punto para decimales (Ej: 50.00)</p>
+            <p style="font-size:12px; color:gray; margin-bottom:10px">* Asegúrese de usar punto (.) para los decimales.</p>
             
             <input type="text" id="rNom" placeholder="Nombre del Alumno">
             <input type="text" id="rRep" placeholder="Nombre del Representante">
-            <input type="email" id="rMail" placeholder="Correo (Importante para avisos)">
+            <input type="email" id="rMail" placeholder="Correo (Para Cobro Masivo)">
             <input type="tel" id="rTel" placeholder="Teléfono (Ej: 58412...)">
             
             <div style="display:flex; gap:10px">
@@ -198,7 +205,7 @@
     <section id="mod-rep" class="modulo">
         <div class="card">
             <h3>Pagos Reportados (Banco)</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">⚠️ Al "Validar", el sistema descontará el mes más viejo de la deuda y actualizará el historial.</p>
+            <p style="font-size:12px; color:gray; margin-bottom:10px">⚠️ Al "Validar", el sistema descontará el mes más antiguo de la deuda y lo guardará en el historial.</p>
             <div class="table-wrap">
                 <table>
                     <thead><tr><th>Alumno / Rep</th><th>Ref / Banco</th><th>Monto</th><th>Acción</th></tr></thead>
@@ -208,11 +215,24 @@
         </div>
     </section>
 
+    <section id="mod-cal" class="modulo">
+        <div class="card">
+            <h3>Agregar Evento Escolar</h3>
+            <input type="text" id="calTitle" placeholder="Título del Evento (Ej: Entrega de Boletas)">
+            <input type="date" id="calDate">
+            <button class="btn-main" onclick="guardarEvento()">AGENDAR EVENTO</button>
+        </div>
+        <div class="card">
+            <h3>Próximos Eventos</h3>
+            <div id="list-cal">Cargando calendario...</div>
+        </div>
+    </section>
+
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, arrayUnion, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, arrayUnion, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
@@ -228,6 +248,7 @@
     
     const DB_MAIN = "sdj_final_v11"; 
     const DB_PAGOS = "pagos_reportados";
+    const DB_CAL = "sdj_calendario"; // Nueva colección para calendario
 
     const ORDEN_GRADOS = [
         "5to Año", "4to Año", "3er Año", "2do Año", "1er Año",
@@ -242,13 +263,12 @@
         event.currentTarget.classList.add('active');
     };
 
-    // --- 1. SOLUCIÓN ERROR DE CÁLCULO ($0) ---
+    // --- 1. REGISTRO Y CORRECCIÓN DE DEUDA ($0) ---
     window.guardar = async () => {
         const ms = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
-        // IMPORTANTE: Convertimos a Float explícitamente para evitar texto
         const mon = parseFloat(document.getElementById('rMon').value);
         
-        if (isNaN(mon) || mon <= 0) { alert("Error: Ingrese un Monto Mensual válido."); return; }
+        if (isNaN(mon) || mon <= 0) { alert("Error: Ingrese un Monto Mensual válido (Numérico)."); return; }
 
         await addDoc(collection(db, DB_MAIN), {
             nombre: document.getElementById('rNom').value.trim(),
@@ -258,8 +278,8 @@
             grado: document.getElementById('rGra').value,
             seccion: document.getElementById('rSec').value,
             meses: ms,
-            montoMensual: mon, // GUARDAMOS EL PRECIO UNITARIO
-            historial: [], // INICIAMOS HISTORIAL VACIO
+            montoMensual: mon, // Guardamos precio unitario
+            historial: [], 
             timestamp: new Date()
         });
         alert("¡Registro Exitoso!"); location.reload();
@@ -267,7 +287,7 @@
 
     let cachePendientes = [];
 
-    // --- SNAPSHOT PRINCIPAL (Lectura de Datos) ---
+    // --- SNAPSHOT PRINCIPAL (Lectura de Alumnos) ---
     onSnapshot(collection(db, DB_MAIN), (snap) => {
         const lp = document.getElementById('list-pend');
         const ls = document.getElementById('list-solv');
@@ -280,16 +300,14 @@
         let allData = [];
         snap.forEach(d => allData.push({ ...d.data(), id: d.id }));
 
-        // Procesamiento de Alumnos
+        // PENDIENTES
         ORDEN_GRADOS.forEach(grado => {
-            // Un alumno es deudor si tiene meses en su array
-            const grupoPendiente = allData.filter(x => x.grado === grado && x.meses && x.meses.length > 0);
+            const grupo = allData.filter(x => x.grado === grado && x.meses && x.meses.length > 0);
             
-            if(grupoPendiente.length > 0) {
+            if(grupo.length > 0) {
                 lp.innerHTML += `<div class="grado-header">${grado}</div>`;
-                
-                grupoPendiente.forEach(a => {
-                    // CÁLCULO DINÁMICO DE DEUDA (Evita el error $0)
+                grupo.forEach(a => {
+                    // CÁLCULO DINÁMICO
                     const precio = parseFloat(a.montoMensual) || 0;
                     const deudaReal = a.meses.length * precio;
                     totalColegio += deudaReal;
@@ -297,40 +315,58 @@
                     const alerta = getNivelAlerta(a.meses.length);
                     cachePendientes.push({ ...a, deuda: deudaReal, tipoAlerta: alerta.tipo });
 
-                    // BOTONES DE ACCIÓN (WhatsApp + GMAIL)
+                    // BOTONES DE ACCIÓN
                     let wsBtn = "", mailBtn = "";
                     if(a.tel) {
-                        const msg = `Estimado(a) ${a.rep}, le recordamos el pago pendiente de ${a.nombre}. Monto Total: $${deudaReal}. Meses: ${a.meses.join(', ')}.`;
+                        const msg = `Estimado(a) ${a.rep}, recordamos el pago pendiente de ${a.nombre}. Deuda Total: $${deudaReal.toFixed(2)}. Meses: ${a.meses.join(', ')}`;
                         wsBtn = `<button class="btn-ws" onclick="window.open('https://wa.me/${a.tel}?text=${encodeURIComponent(msg)}', '_blank')">📱</button>`;
                     }
                     if(a.mail) {
-                        // Botón directo de Gmail individual
                         mailBtn = `<button class="btn-mail" onclick="sendMail('${a.mail}', '${a.nombre}', '${alerta.tipo}', ${deudaReal})">✉️</button>`;
                     }
 
                     lp.innerHTML += `
                         <div class="student-row alert-${alerta.clase}">
-                            <div class="info">
-                                <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
-                                <b>${a.nombre} (${a.seccion})</b>
-                                <small>${a.rep}</small>
-                                <div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
-                            </div>
-                            <div style="text-align:right">
-                                <b style="color:#ef4444">$${deudaReal.toFixed(2)}</b><br>
-                                <div style="margin-top:5px; display:flex; justify-content:flex-end;">
-                                    ${wsBtn} ${mailBtn}
+                            <div class="row-header">
+                                <div class="info">
+                                    <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
+                                    <b>${a.nombre} (${a.seccion})</b>
+                                    <small>${a.rep}</small>
+                                    <div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
                                 </div>
-                                <button onclick="del('${a.id}')" style="font-size:10px; color:gray; border:none; background:none; cursor:pointer; margin-top:5px">Eliminar</button>
+                                <div style="text-align:right">
+                                    <b style="color:#ef4444">$${deudaReal.toFixed(2)}</b><br>
+                                    <div style="margin-top:5px; display:flex; justify-content:flex-end;">${wsBtn} ${mailBtn}</div>
+                                    <button onclick="del('${a.id}')" style="font-size:10px; color:gray; border:none; background:none; cursor:pointer; margin-top:5px">Eliminar</button>
+                                </div>
                             </div>
                         </div>`;
                 });
             }
         });
 
-        // SOLVENTES (Aquellos sin meses pendientes)
+        // SOLVENTES (Con desglose de meses pagados)
         allData.filter(x => !x.meses || x.meses.length === 0).forEach(a => {
-            ls.innerHTML += `<div class="student-row" style="border-left:5px solid var(--green)"><div class="info"><b>${a.nombre}</b><small>${a.grado} (${a.seccion})</small></div><b style="color:var(--green)">SOLVENTE</b></div>`;
+            let mesesPagadosHTML = "";
+            if (a.historial && a.historial.length > 0) {
+                // Intentar extraer el mes del texto del historial
+                mesesPagadosHTML = a.historial.map(h => {
+                    const match = h.match(/Pagó (.*?) -/);
+                    return match ? `<span class="tag-pagado">${match[1]}</span>` : "";
+                }).join('');
+            }
+
+            ls.innerHTML += `
+                <div class="student-row" style="border-left:5px solid var(--green)">
+                    <div class="row-header">
+                        <div class="info"><b>${a.nombre}</b><small>${a.grado} (${a.seccion})</small></div>
+                        <b style="color:var(--green)">SOLVENTE ✅</b>
+                    </div>
+                    <div style="margin-top:8px">
+                        <small style="color:#64748b; display:block; margin-bottom:4px">Meses al día:</small>
+                        ${mesesPagadosHTML || '<span class="tag-pagado">Sin historial reciente</span>'}
+                    </div>
+                </div>`;
         });
 
         if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -347,34 +383,33 @@
         }
     }
 
-    // --- 2. AUTOMATIZACIÓN DE ALERTAS (CORREO) ---
+    // --- 2. LOGICA DE CORREOS (GMAIL Y MASIVO) ---
     window.sendMail = (mail, nom, tipo, monto) => {
-        const asuntos = { previa: "Recordatorio de Pago", normal: "Aviso de Pago Pendiente", urgente: "URGENTE: Regularización de Pago" };
+        const asuntos = { previa: "Recordatorio", normal: "Aviso de Pago", urgente: "URGENTE: Deuda Vencida" };
         const cuerpos = {
-            previa: `Estimado representante, le recordamos amablemente el pago mensual del alumno ${nom}. Monto pendiente: $${monto}.`,
-            normal: `Estimado representante, el alumno ${nom} presenta meses acumulados. Por favor regularizar su situación. Monto: $${monto}.`,
-            urgente: `AVISO IMPORTANTE: El alumno ${nom} presenta deuda vencida ($${monto}). Requerimos su atención inmediata.`
+            previa: `Estimado representante, recordamos el pago mensual de ${nom}. Monto: $${monto}.`,
+            normal: `El alumno ${nom} presenta acumulación de deuda ($${monto}). Favor regularizar.`,
+            urgente: `AVISO IMPORTANTE: El alumno ${nom} tiene deuda vencida ($${monto}).`
         };
         window.location.href = `mailto:${mail}?subject=${asuntos[tipo]}&body=${cuerpos[tipo]}`;
     };
 
-    // FUNCIÓN DE COBRO MASIVO REAL
     window.notifyAll = () => {
-        if(cachePendientes.length === 0) { alert("No hay deudores para notificar."); return; }
-        if(confirm(`⚠️ ESTO ABRIRÁ ${cachePendientes.length} VENTANAS DE CORREO.\n¿Desea continuar con el cobro masivo?`)) {
+        if(cachePendientes.length === 0) { alert("No hay deudores con correo."); return; }
+        if(confirm(`Se abrirán ${cachePendientes.length} correos. ¿Continuar?`)) {
             let delay = 0;
             cachePendientes.forEach((a) => {
                 if(a.mail) {
                     setTimeout(() => {
-                        window.open(`mailto:${a.mail}?subject=Aviso de Cobro SDJ&body=Estimado representante de ${a.nombre}, tiene una deuda pendiente de $${a.deuda}.`, '_blank');
+                        window.open(`mailto:${a.mail}?subject=Aviso de Cobro SDJ&body=Deuda pendiente: $${a.deuda}`, '_blank');
                     }, delay);
-                    delay += 1500; // Abre uno cada 1.5 segundos para no colapsar el navegador
+                    delay += 1500;
                 }
             });
         }
     };
 
-    // --- ARCHIVOS Y NAVEGACION ---
+    // --- 3. ARCHIVOS E HISTORIAL ---
     let curLvl = "", curGra = "";
     const struct = {
         'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'],
@@ -398,62 +433,47 @@
         document.getElementById('tit-list').innerText = `${curGra} - SECCIÓN ${s}`;
         document.getElementById('search-filter').value = "";
         
-        document.getElementById('final-list').innerHTML = "Cargando...";
-        document.getElementById('sec-total-label').innerHTML = "Calculando...";
-
         onSnapshot(collection(db, DB_MAIN), (snap) => {
             const div = document.getElementById('final-list'); 
             const labelTotal = document.getElementById('sec-total-label');
             div.innerHTML = "";
-            
-            let count = 0;
             let deudaAcumulada = 0;
 
             snap.forEach(d => {
                 const a = d.data();
                 if(a.grado === curGra && a.seccion === s) {
-                    count++;
-                    
                     const precio = parseFloat(a.montoMensual) || 0;
-                    const deuda = a.meses ? a.meses.length * precio : 0;
-                    const esSolvente = (deuda === 0);
-
-                    if(!esSolvente) deudaAcumulada += deuda;
-
-                    let borde = esSolvente ? "border-left: 6px solid var(--green)" : "border-left: 6px solid var(--red)";
-                    let status = esSolvente ? `<b style="color:var(--green)">SOLVENTE</b>` : `<b style="color:var(--red)">DEUDA</b><br><span style="font-size:11px; color:#ef4444">$${deuda.toFixed(2)}</span>`;
+                    const deuda = (a.meses ? a.meses.length : 0) * precio;
+                    if(deuda > 0) deudaAcumulada += deuda;
                     
-                    // MOSTRAR HISTORIAL DE PAGOS EN LA FICHA
+                    const esSolvente = (deuda === 0);
+                    
+                    // MOSTRAR HISTORIAL
                     let historialHTML = "";
                     if(a.historial && a.historial.length > 0) {
-                        historialHTML = `<div class="historial-box"><b>Historial Pagos:</b><br>${a.historial.join('<br>')}</div>`;
+                        historialHTML = `<div class="historial-box"><b>Historial:</b><br>${a.historial.map(h => `<div class="historial-item">${h}</div>`).join('')}</div>`;
                     }
 
                     div.innerHTML += `
-                    <div class="student-row item-lista" data-name="${a.nombre.toLowerCase()}" style="${borde}; display:block">
-                        <div style="display:flex; justify-content:space-between">
+                    <div class="student-row item-lista" data-name="${a.nombre.toLowerCase()}" style="border-left: 6px solid ${esSolvente ? 'var(--green)' : 'var(--red)'}; display:block">
+                        <div class="row-header">
                             <div class="info"><b>${a.nombre}</b><small>${a.rep}</small></div>
-                            <div style="text-align:right">${status}</div>
+                            <div style="text-align:right">
+                                ${esSolvente ? '<b style="color:var(--green)">SOLVENTE</b>' : `<b style="color:var(--red)">DEUDA: $${deuda.toFixed(2)}</b>`}
+                            </div>
                         </div>
-                        ${historialHTML} 
+                        ${historialHTML}
                     </div>`;
                 }
             });
-
-            labelTotal.innerHTML = deudaAcumulada > 0 
-                ? `TOTAL PENDIENTE SECCIÓN: <span style="font-size:16px; color:#ef4444">$${deudaAcumulada.toFixed(2)}</span>`
-                : `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span>`;
-
-            if(count === 0) div.innerHTML = "<p style='text-align:center; padding:20px; color:gray'>Carpeta Vacía</p>";
+            labelTotal.innerHTML = deudaAcumulada > 0 ? `PENDIENTE SECCIÓN: <span style="color:#ef4444">$${deudaAcumulada.toFixed(2)}</span>` : `<span style="color:var(--green)">SECCIÓN AL DÍA</span>`;
         });
     };
 
     window.filterList = () => {
         const term = document.getElementById('search-filter').value.toLowerCase();
-        const items = document.querySelectorAll('.item-lista');
-        items.forEach(item => {
-            const name = item.getAttribute('data-name');
-            item.style.display = name.includes(term) ? "block" : "none";
+        document.querySelectorAll('.item-lista').forEach(item => {
+            item.style.display = item.getAttribute('data-name').includes(term) ? "block" : "none";
         });
     };
     
@@ -461,7 +481,7 @@
     window.backToGrade = () => { document.getElementById('view-sec').style.display='none'; document.getElementById('view-grade').style.display='block'; };
     window.backToSec = () => { document.getElementById('view-list').style.display='none'; document.getElementById('view-sec').style.display='block'; };
 
-    // --- 3. REPORTE Y VALIDACIÓN DE PAGOS (LÓGICA CORREGIDA) ---
+    // --- 4. VALIDACIÓN DE PAGOS ---
     onSnapshot(collection(db, DB_PAGOS), (snap) => {
         const tb = document.getElementById('table-rep'); tb.innerHTML = "";
         snap.forEach(d => {
@@ -469,7 +489,7 @@
             tb.innerHTML += `<tr>
                 <td>${p.nombreEst}<br><small>${p.nombreRep || '-'}</small></td>
                 <td><b>${p.banco || 'BANCO'}</b><br>${p.referencia || 'REF'}</td>
-                <td>Bs.${p.montoBs || 0}<br>$${p.montoDivisas || p.monto || 0}</td>
+                <td>$${p.montoDivisas || p.monto || 0}</td>
                 <td>
                     <button class="btn-check" onclick="validarPago('${d.id}', '${p.nombreEst}', '${p.banco}', '${p.referencia}', '${p.montoDivisas || p.monto}')">✔</button>
                     <button class="btn-reject" onclick="rechazar('${d.id}','${p.referencia}')">✖</button>
@@ -478,61 +498,73 @@
         });
     });
 
-    // NUEVA FUNCIÓN DE VALIDACIÓN CON ACTUALIZACIÓN DE FICHA
-    window.validarPago = async(idPago, nombreEstudiante, banco, ref, monto) => {
-        if(!confirm(`¿Validar pago de ${nombreEstudiante}?\nEsto descontará un mes de deuda y lo agregará al historial.`)) return;
+    window.validarPago = async(idPago, nombreEst, banco, ref, monto) => {
+        if(!confirm(`¿Validar pago de ${nombreEst}?`)) return;
 
-        try {
-            // 1. Buscar al estudiante en DB_MAIN por nombre exacto
-            const q = query(collection(db, DB_MAIN), where("nombre", "==", nombreEstudiante));
-            const querySnapshot = await getDocs(q);
+        // Buscar alumno por nombre exacto
+        const q = query(collection(db, DB_MAIN), where("nombre", "==", nombreEst));
+        const querySnapshot = await getDocs(q);
 
-            if (querySnapshot.empty) {
-                alert("❌ ERROR: No se encontró el estudiante con el nombre exacto: " + nombreEstudiante + ".\nVerifique que el nombre en el reporte coincida con el registro.");
-                return;
-            }
+        if (querySnapshot.empty) { alert("❌ Alumno no encontrado. Verifique nombre."); return; }
 
-            let studentDoc = querySnapshot.docs[0];
-            let studentData = studentDoc.data();
-            let studentId = studentDoc.id;
+        let docRef = querySnapshot.docs[0];
+        let data = docRef.data();
+        let nuevosMeses = [...(data.meses || [])];
+        
+        let mesPagado = "Abono";
+        if(nuevosMeses.length > 0) mesPagado = nuevosMeses.shift(); // Saca el primer mes
 
-            // 2. Lógica para descontar deuda (FIFO - Primero en entrar, primero en salir)
-            let nuevosMeses = [...studentData.meses];
-            let mesPagado = "Abono";
-            
-            if(nuevosMeses.length > 0) {
-                mesPagado = nuevosMeses.shift(); // Saca el primer mes (el más viejo)
-            }
+        let fechaHoy = new Date().toLocaleDateString();
+        // Escribe en Historial
+        await updateDoc(doc(db, DB_MAIN, docRef.id), {
+            meses: nuevosMeses,
+            historial: arrayUnion(`${fechaHoy}: Pagó ${mesPagado} - $${monto} (Ref: ${ref} / ${banco})`)
+        });
 
-            // 3. Crear string de historial
-            let fechaHoy = new Date().toLocaleDateString();
-            let historialString = `${fechaHoy}: Pagó ${mesPagado} - $${monto} (Ref: ${ref} / ${banco})`;
+        // Borra de reportes
+        await deleteDoc(doc(db, DB_PAGOS, idPago));
+        alert("✅ Pago procesado y guardado en historial.");
+    };
 
-            // 4. Actualizar DB_MAIN
-            await updateDoc(doc(db, DB_MAIN, studentId), {
-                meses: nuevosMeses,
-                historial: arrayUnion(historialString)
-            });
-
-            // 5. Eliminar de DB_PAGOS
-            await deleteDoc(doc(db, DB_PAGOS, idPago));
-
-            alert(`✅ Pago procesado exitosamente.\nMes descontado: ${mesPagado}`);
-
-        } catch (error) {
-            console.error("Error validando:", error);
-            alert("Hubo un error procesando el pago: " + error.message);
+    window.rechazar = async(id, ref) => {
+        if(confirm("¿Rechazar pago?")) {
+            window.location.href = `mailto:?subject=Error Pago SDJ&body=Referencia ${ref} no encontrada.`;
+            await deleteDoc(doc(db, DB_PAGOS, id));
         }
     };
     
     window.del = async(id) => { if(confirm("¿Eliminar Alumno?")) await deleteDoc(doc(db, DB_MAIN, id)); };
 
-    window.rechazar = async(id, ref) => {
-        if(confirm("¿Reportar como NO VERIFICADO?")) {
-            window.location.href = `mailto:?subject=Error Pago SDJ&body=Ref ${ref} no verificada.`;
-            await deleteDoc(doc(db, DB_PAGOS, id));
-        }
+    // --- 5. LOGICA DEL CALENDARIO (RESTAURADA) ---
+    window.guardarEvento = async () => {
+        const tit = document.getElementById('calTitle').value;
+        const fec = document.getElementById('calDate').value;
+        if(!tit || !fec) { alert("Complete título y fecha"); return; }
+
+        await addDoc(collection(db, DB_CAL), {
+            titulo: tit,
+            fecha: fec,
+            timestamp: new Date()
+        });
+        document.getElementById('calTitle').value = "";
     };
+
+    onSnapshot(query(collection(db, DB_CAL), orderBy("fecha")), (snap) => {
+        const div = document.getElementById('list-cal');
+        div.innerHTML = "";
+        snap.forEach(d => {
+            const e = d.data();
+            div.innerHTML += `
+                <div class="event-card">
+                    <span class="date-box">📅 ${e.fecha}</span>
+                    <b>${e.titulo}</b>
+                    <button onclick="delEvent('${d.id}')" style="float:right; border:none; color:red; cursor:pointer">🗑</button>
+                </div>
+            `;
+        });
+    });
+
+    window.delEvent = async(id) => await deleteDoc(doc(db, DB_CAL, id));
 
 </script>
 </body>
