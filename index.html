@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA SDJ - CONTROL V16 (FULL)</title>
+    <title>SISTEMA SDJ - CONTROL V16</title>
     <style>
         :root {
             --primary: #1e3a8a; --bg: #f8fafc; --text: #0f172a;
             --green: #22c55e; --yellow: #eab308; --red: #ef4444;
-            --whatsapp: #25D366; --gmail: #DB4437;
+            --whatsapp: #25D366; --gmail: #EA4335;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
         header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
-        /* NAV MEJORADO CON CALENDARIO */
+        /* NAV */
         nav { display: flex; background: white; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
-        .nav-btn { flex: 1; min-width: 90px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 10px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
+        .nav-btn { flex: 1; min-width: 100px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
         .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
 
         .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
@@ -26,24 +26,23 @@
 
         /* CARDS & FORMS */
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; font-size: 14px; }
         .btn-main { background: var(--primary); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
         
         /* ALERTAS & PENDIENTES */
         .btn-alert-all { background: #4f46e5; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
-        .btn-alert-all:active { transform: scale(0.98); }
+        .btn-critico { background: #dc2626; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); }
 
         .grado-header { background: #1e293b; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 13px; margin: 25px 0 10px 0; letter-spacing: 0.5px; }
 
-        .student-row { background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; position: relative; }
-        .row-header { display: flex; justify-content: space-between; align-items: center; }
+        .student-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; position: relative; }
         
         /* BORDES DE ALERTA */
         .alert-previa { border-left: 6px solid var(--green); }
         .alert-normal { border-left: 6px solid var(--yellow); }
         .alert-urgente { border-left: 6px solid var(--red); }
 
-        /* BADGES */
+        /* BADGES (ETIQUETAS) */
         .badge { font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
         .bg-previa { background: #dcfce7; color: #15803d; }
         .bg-normal { background: #fef9c3; color: #a16207; }
@@ -52,15 +51,6 @@
         .info b { display: block; font-size: 15px; color: var(--primary); }
         .info small { color: #64748b; font-size: 12px; display: block; }
         .tag-mes { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin: 4px 2px 0 0; color: #475569; }
-
-        /* HISTORIAL VISIBLE EN FICHA */
-        .historial-box { margin-top: 10px; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 8px; border-radius: 6px; font-size: 11px; }
-        .historial-item { padding: 4px 0; border-bottom: 1px solid #e2e8f0; color: #475569; }
-        .tag-pagado { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 3px; display: inline-block; border: 1px solid #bbf7d0; }
-
-        /* CALENDARIO ESTILOS */
-        .event-card { background: white; border-left: 5px solid var(--primary); padding: 15px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .date-box { display: inline-block; background: #eff6ff; padding: 5px 10px; border-radius: 5px; font-weight: bold; color: var(--primary); margin-bottom: 5px; font-size: 12px; }
 
         /* ARCHIVOS */
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
@@ -77,12 +67,33 @@
         .btn-check { background: var(--green); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-right: 5px; font-weight: bold; }
         .btn-reject { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         
-        .btn-ws { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--whatsapp); margin-right: 5px; }
-        .btn-mail { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--gmail); margin-right: 5px; }
+        .btn-ws { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--whatsapp); margin-right: 10px; }
+        .btn-email { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--gmail); margin-right: 10px; }
         .btn-print { background: #64748b; color: white; border:none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; font-size: 12px;}
+
+        /* FICHA ESTUDIANTE */
+        .ficha-container { margin-top: 20px; }
+        .ficha-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-edit { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* PORTAL PADRES */
+        .parent-portal { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .parent-results { margin-top: 20px; }
+        .family-total { background: #0f172a; color: white; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; font-weight: bold; font-size: 18px; }
+
+        /* MODAL PAGOS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+        .modal { background: white; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+
+        /* EMERGENCIA */
+        .emergencia-badge { background: #dc2626; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 5px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* ESTILOS DE IMPRESIÓN */
         @media print {
             nav, header, .btn-print, button, input { display: none !important; }
             body, .container, .modulo { background: white; margin: 0; padding: 0; }
@@ -101,20 +112,22 @@
     <div class="nav-btn" onclick="go('pend')">3. Pendientes</div>
     <div class="nav-btn" onclick="go('solv')">4. Solventes</div>
     <div class="nav-btn" onclick="go('rep')">5. Reportes</div>
-    <div class="nav-btn" onclick="go('cal')">6. Calendario</div>
+    <div class="nav-btn" onclick="go('padres')">6. Portal Padres</div>
 </nav>
 
 <div class="container">
 
+    <!-- MÓDULO REGISTRO -->
     <section id="mod-reg" class="modulo active">
         <div class="card">
             <h3>Registrar Alumno / Deuda</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">* Asegúrese de usar punto (.) para los decimales.</p>
+            <p style="font-size:12px; color:gray; margin-bottom:10px">* V16: Ahora incluye cédula del representante y cálculo automático.</p>
             
-            <input type="text" id="rNom" placeholder="Nombre del Alumno">
-            <input type="text" id="rRep" placeholder="Nombre del Representante">
-            <input type="email" id="rMail" placeholder="Correo (Para Cobro Masivo)">
-            <input type="tel" id="rTel" placeholder="Teléfono (Ej: 58412...)">
+            <input type="text" id="rNom" placeholder="Nombre del Alumno *">
+            <input type="text" id="rRep" placeholder="Nombre del Representante *">
+            <input type="text" id="rCedula" placeholder="Cédula del Representante *" pattern="[0-9]+" maxlength="10">
+            <input type="email" id="rMail" placeholder="Correo (Opcional)">
+            <input type="tel" id="rTel" placeholder="Teléfono (Ej: 584120000000)">
             
             <div style="display:flex; gap:10px">
                 <select id="rGra">
@@ -133,11 +146,17 @@
                 <option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option>
             </select>
             
-            <input type="number" id="rMon" placeholder="Monto Mensual ($)" step="0.01">
-            <button class="btn-main" onclick="guardar()">GUARDAR REGISTRO</button>
+            <input type="number" id="rMon" placeholder="Monto Mensual ($)">
+            
+            <div style="margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px;">
+                <small>Total calculado: <span id="totalPreview" style="font-weight:bold; color:#1e40af">$0</span></small>
+            </div>
+            
+            <button class="btn-main" onclick="guardar()">GUARDAR REGISTRO V16</button>
         </div>
     </section>
 
+    <!-- MÓDULO ARCHIVOS -->
     <section id="mod-arch" class="modulo">
         <div id="view-level">
             <h3>Explorador de Archivos</h3>
@@ -186,53 +205,133 @@
             <div class="card" style="margin-top:15px">
                 <div id="final-list"></div>
             </div>
+            
+            <!-- FICHA DEL ESTUDIANTE (EDITABLE) -->
+            <div id="ficha-estudiante" class="ficha-container" style="display:none;">
+                <div class="card">
+                    <h3>📋 Ficha del Estudiante</h3>
+                    <div id="ficha-content">
+                        <div style="margin-bottom: 15px;">
+                            <label>Nombre del Alumno:</label>
+                            <input type="text" id="edit-nombre" class="ficha-input">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Nombre del Representante:</label>
+                            <input type="text" id="edit-representante" class="ficha-input">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Cédula del Representante:</label>
+                            <input type="text" id="edit-cedula" class="ficha-input" readonly>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Teléfono:</label>
+                            <input type="tel" id="edit-telefono" class="ficha-input">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Correo:</label>
+                            <input type="email" id="edit-correo" class="ficha-input">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Grado y Sección:</label>
+                            <input type="text" id="edit-grado" class="ficha-input" readonly>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Meses Pendientes:</label>
+                            <div id="edit-meses" style="padding: 10px; background: #f8fafc; border-radius: 6px;"></div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label>Total Deuda:</label>
+                            <h3 id="edit-total" style="color: #ef4444;"></h3>
+                        </div>
+                        <div class="ficha-actions">
+                            <button class="btn-edit" onclick="guardarCambiosEstudiante()">💾 Guardar Cambios</button>
+                            <button class="btn-edit" onclick="volverALista()">⬅ Volver a la Lista</button>
+                            <button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar Alumno</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
+    <!-- MÓDULO PENDIENTES -->
     <section id="mod-pend" class="modulo">
-        <button class="btn-alert-all" onclick="notifyAll()">
-            📢 COBRO MASIVO (Disparar Correos)
+        <button class="btn-critico" onclick="enviarAvisoCritico()">
+            ⚠️ AVISO CRÍTICO (Día 10) - Email Masivo
         </button>
+        <button class="btn-alert-all" onclick="notifyAll()">
+            📢 ENVIAR RECORDATORIOS (Email Individual)
+        </button>
+        
         <div class="card">
             <div id="list-pend">Cargando deudores...</div>
         </div>
     </section>
 
+    <!-- MÓDULO SOLVENTES -->
     <section id="mod-solv" class="modulo">
         <div class="card"><h3>Estudiantes al Día</h3><div id="list-solv"></div></div>
     </section>
 
+    <!-- MÓDULO REPORTES -->
     <section id="mod-rep" class="modulo">
         <div class="card">
-            <h3>Pagos Reportados (Banco)</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">⚠️ Al "Validar", el sistema descontará el mes más antiguo de la deuda y lo guardará en el historial.</p>
+            <h3>📊 Pagos Reportados (V16)</h3>
+            <p style="font-size:12px; color:gray; margin-bottom:10px">Nuevo: Método de pago, referencia y divisas.</p>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>Alumno / Rep</th><th>Ref / Banco</th><th>Monto</th><th>Acción</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Alumno / Rep</th>
+                            <th>Método / Ref</th>
+                            <th>Bs / $</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
                     <tbody id="table-rep"></tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    <section id="mod-cal" class="modulo">
-        <div class="card">
-            <h3>Agregar Evento Escolar</h3>
-            <input type="text" id="calTitle" placeholder="Título del Evento (Ej: Entrega de Boletas)">
-            <input type="date" id="calDate">
-            <button class="btn-main" onclick="guardarEvento()">AGENDAR EVENTO</button>
+    <!-- PORTAL PADRES -->
+    <section id="mod-padres" class="modulo">
+        <div class="parent-portal">
+            <h3 style="color:white; margin-bottom:15px;">👨‍👩‍👧‍👦 Portal para Padres</h3>
+            <p style="font-size:14px; opacity:0.9;">Ingrese su cédula para consultar la situación de todos sus hijos.</p>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <input type="text" id="cedula-consulta" placeholder="Cédula del Representante" style="flex:1;">
+                <button class="btn-main" onclick="consultarFamilia()" style="width:auto; padding:12px 25px;">🔍 Consultar</button>
+            </div>
         </div>
-        <div class="card">
-            <h3>Próximos Eventos</h3>
-            <div id="list-cal">Cargando calendario...</div>
+        
+        <div id="resultados-familia" class="parent-results" style="display:none;">
+            <div class="card">
+                <h3>👨‍👩‍👧‍👦 Resultados de la Consulta</h3>
+                <div id="lista-hijos"></div>
+                <div class="family-total" id="total-familiar"></div>
+            </div>
         </div>
     </section>
 
 </div>
 
+<!-- MODAL PARA VERIFICAR PAGOS -->
+<div id="modal-pago" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>✅ Verificar Pago</h3>
+            <button class="close-modal" onclick="cerrarModalPago()">×</button>
+        </div>
+        <div id="modal-pago-content">
+            <!-- Contenido dinámico -->
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, arrayUnion, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
@@ -246,15 +345,32 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
-    const DB_MAIN = "sdj_final_v11"; 
+    const DB_MAIN = "sdj_final_v16"; 
     const DB_PAGOS = "pagos_reportados";
-    const DB_CAL = "sdj_calendario"; // Nueva colección para calendario
+    const DB_HISTORIAL = "historial_pagos";
 
     const ORDEN_GRADOS = [
         "5to Año", "4to Año", "3er Año", "2do Año", "1er Año",
         "6to Grado", "5to Grado", "4to Grado", "3er Grado", "2do Grado", "1er Grado",
         "Preescolar 3", "Preescolar 2", "Preescolar 1", "Maternal"
     ];
+
+    // Variables globales
+    let cachePendientes = [];
+    let cacheTodosEstudiantes = [];
+    let estudianteActual = null;
+
+    // 1. CORRECCIÓN DEL ERROR DE DEUDA $0
+    // Calcular total automáticamente cuando cambian meses o monto
+    document.getElementById('rMes').addEventListener('change', calcularTotal);
+    document.getElementById('rMon').addEventListener('input', calcularTotal);
+
+    function calcularTotal() {
+        const mesesSeleccionados = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
+        const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
+        const total = mesesSeleccionados.length * montoMensual;
+        document.getElementById('totalPreview').innerText = `$${total}`;
+    }
 
     window.go = (id) => {
         document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
@@ -263,113 +379,128 @@
         event.currentTarget.classList.add('active');
     };
 
-    // --- 1. REGISTRO Y CORRECCIÓN DE DEUDA ($0) ---
     window.guardar = async () => {
-        const ms = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
-        const mon = parseFloat(document.getElementById('rMon').value);
+        const meses = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
+        const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
+        const total = meses.length * montoMensual;
         
-        if (isNaN(mon) || mon <= 0) { alert("Error: Ingrese un Monto Mensual válido (Numérico)."); return; }
-
+        // Validar campos obligatorios
+        if (!document.getElementById('rCedula').value) {
+            alert("Por favor ingrese la cédula del representante");
+            return;
+        }
+        
         await addDoc(collection(db, DB_MAIN), {
-            nombre: document.getElementById('rNom').value.trim(),
+            nombre: document.getElementById('rNom').value,
             rep: document.getElementById('rRep').value,
+            cedula: document.getElementById('rCedula').value,
             mail: document.getElementById('rMail').value,
             tel: document.getElementById('rTel').value,
             grado: document.getElementById('rGra').value,
             seccion: document.getElementById('rSec').value,
-            meses: ms,
-            montoMensual: mon, // Guardamos precio unitario
-            historial: [], 
+            meses: meses,
+            montoMensual: montoMensual,
+            total: total,
+            historial: [], // Array para historial de pagos
             timestamp: new Date()
         });
-        alert("¡Registro Exitoso!"); location.reload();
+        alert("¡Registro Exitoso V16!");
+        // Limpiar formulario
+        document.getElementById('rNom').value = '';
+        document.getElementById('rRep').value = '';
+        document.getElementById('rCedula').value = '';
+        document.getElementById('rMail').value = '';
+        document.getElementById('rTel').value = '';
+        document.getElementById('rMon').value = '';
+        document.getElementById('rMes').selectedIndex = -1;
+        document.getElementById('totalPreview').innerText = '$0';
     };
 
-    let cachePendientes = [];
-
-    // --- SNAPSHOT PRINCIPAL (Lectura de Alumnos) ---
+    // SNAPSHOT PRINCIPAL
     onSnapshot(collection(db, DB_MAIN), (snap) => {
         const lp = document.getElementById('list-pend');
         const ls = document.getElementById('list-solv');
         const globalDebt = document.getElementById('global-debt');
         
-        lp.innerHTML = ""; ls.innerHTML = "";
+        lp.innerHTML = ""; 
+        ls.innerHTML = "";
         cachePendientes = [];
+        cacheTodosEstudiantes = [];
         let totalColegio = 0;
 
         let allData = [];
-        snap.forEach(d => allData.push({ ...d.data(), id: d.id }));
+        snap.forEach(d => {
+            const data = d.data();
+            allData.push({ ...data, id: d.id });
+            cacheTodosEstudiantes.push({ ...data, id: d.id });
+        });
 
         // PENDIENTES
         ORDEN_GRADOS.forEach(grado => {
             const grupo = allData.filter(x => x.grado === grado && x.meses && x.meses.length > 0);
-            
             if(grupo.length > 0) {
                 lp.innerHTML += `<div class="grado-header">${grado}</div>`;
                 grupo.forEach(a => {
-                    // CÁLCULO DINÁMICO
-                    const precio = parseFloat(a.montoMensual) || 0;
-                    const deudaReal = a.meses.length * precio;
-                    totalColegio += deudaReal;
-
+                    // Calcular total correctamente
+                    const totalDeuda = (a.montoMensual || 0) * (a.meses ? a.meses.length : 0);
                     const alerta = getNivelAlerta(a.meses.length);
-                    cachePendientes.push({ ...a, deuda: deudaReal, tipoAlerta: alerta.tipo });
+                    cachePendientes.push({ ...a, tipoAlerta: alerta.tipo, total: totalDeuda });
+                    totalColegio += totalDeuda;
 
-                    // BOTONES DE ACCIÓN
-                    let wsBtn = "", mailBtn = "";
+                    // Botones de WhatsApp y Gmail
+                    let wsBtn = "";
+                    let emailBtn = "";
+                    
                     if(a.tel) {
-                        const msg = `Estimado(a) ${a.rep}, recordamos el pago pendiente de ${a.nombre}. Deuda Total: $${deudaReal.toFixed(2)}. Meses: ${a.meses.join(', ')}`;
-                        wsBtn = `<button class="btn-ws" onclick="window.open('https://wa.me/${a.tel}?text=${encodeURIComponent(msg)}', '_blank')">📱</button>`;
+                        const mesesTexto = a.meses.join(', ');
+                        const msg = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${a.nombre} debe ${mesesTexto} para un total de $${totalDeuda}.`;
+                        wsBtn = `<button class="btn-ws" onclick="enviarWhatsApp('${a.tel}', '${a.nombre}', '${mesesTexto}', ${totalDeuda})">📱</button>`;
                     }
+                    
                     if(a.mail) {
-                        mailBtn = `<button class="btn-mail" onclick="sendMail('${a.mail}', '${a.nombre}', '${alerta.tipo}', ${deudaReal})">✉️</button>`;
+                        emailBtn = `<button class="btn-email" onclick="enviarGmailIndividual('${a.mail}', '${a.nombre}', '${a.rep}', ${totalDeuda}, '${a.meses.join(', ')}')">✉️</button>`;
                     }
 
                     lp.innerHTML += `
                         <div class="student-row alert-${alerta.clase}">
-                            <div class="row-header">
-                                <div class="info">
-                                    <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
-                                    <b>${a.nombre} (${a.seccion})</b>
-                                    <small>${a.rep}</small>
-                                    <div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
+                            <div class="info">
+                                <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
+                                <b>${a.nombre} (${a.seccion})</b>
+                                <small>${a.rep} - C.I. ${a.cedula || 'No registrada'}</small>
+                                <div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
+                            </div>
+                            <div style="text-align:right">
+                                <b style="color:#ef4444">$${totalDeuda}</b><br>
+                                <div style="margin-top:5px">
+                                    ${wsBtn}
+                                    ${emailBtn}
                                 </div>
-                                <div style="text-align:right">
-                                    <b style="color:#ef4444">$${deudaReal.toFixed(2)}</b><br>
-                                    <div style="margin-top:5px; display:flex; justify-content:flex-end;">${wsBtn} ${mailBtn}</div>
-                                    <button onclick="del('${a.id}')" style="font-size:10px; color:gray; border:none; background:none; cursor:pointer; margin-top:5px">Eliminar</button>
-                                </div>
+                                <button onclick="del('${a.id}')" style="font-size:10px; color:gray; border:none; background:none; cursor:pointer; margin-top:5px">Eliminar</button>
                             </div>
                         </div>`;
                 });
             }
         });
 
-        // SOLVENTES (Con desglose de meses pagados)
-        allData.filter(x => !x.meses || x.meses.length === 0).forEach(a => {
-            let mesesPagadosHTML = "";
-            if (a.historial && a.historial.length > 0) {
-                // Intentar extraer el mes del texto del historial
-                mesesPagadosHTML = a.historial.map(h => {
-                    const match = h.match(/Pagó (.*?) -/);
-                    return match ? `<span class="tag-pagado">${match[1]}</span>` : "";
-                }).join('');
-            }
-
+        // SOLVENTES
+        const solventes = allData.filter(x => !x.meses || x.meses.length === 0);
+        solventes.forEach(a => {
             ls.innerHTML += `
                 <div class="student-row" style="border-left:5px solid var(--green)">
-                    <div class="row-header">
-                        <div class="info"><b>${a.nombre}</b><small>${a.grado} (${a.seccion})</small></div>
-                        <b style="color:var(--green)">SOLVENTE ✅</b>
+                    <div class="info">
+                        <b>${a.nombre}</b>
+                        <small>${a.grado} (${a.seccion}) - ${a.rep}</small>
                     </div>
-                    <div style="margin-top:8px">
-                        <small style="color:#64748b; display:block; margin-bottom:4px">Meses al día:</small>
-                        ${mesesPagadosHTML || '<span class="tag-pagado">Sin historial reciente</span>'}
-                    </div>
+                    <b style="color:var(--green)">SOLVENTE</b>
                 </div>`;
         });
 
-        if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        if(solventes.length === 0) {
+            ls.innerHTML = '<p style="text-align:center; padding:20px; color:gray">No hay estudiantes solventes</p>';
+        }
+
+        // ACTUALIZAR DEUDA GLOBAL
+        if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString()}`;
     });
 
     function getNivelAlerta(meses) {
@@ -383,34 +514,91 @@
         }
     }
 
-    // --- 2. LOGICA DE CORREOS (GMAIL Y MASIVO) ---
-    window.sendMail = (mail, nom, tipo, monto) => {
-        const asuntos = { previa: "Recordatorio", normal: "Aviso de Pago", urgente: "URGENTE: Deuda Vencida" };
-        const cuerpos = {
-            previa: `Estimado representante, recordamos el pago mensual de ${nom}. Monto: $${monto}.`,
-            normal: `El alumno ${nom} presenta acumulación de deuda ($${monto}). Favor regularizar.`,
-            urgente: `AVISO IMPORTANTE: El alumno ${nom} tiene deuda vencida ($${monto}).`
-        };
-        window.location.href = `mailto:${mail}?subject=${asuntos[tipo]}&body=${cuerpos[tipo]}`;
+    // 3. MÓDULO DE COBRANZA MEJORADO
+    window.enviarWhatsApp = (telefono, nombre, meses, monto) => {
+        const mensaje = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${nombre} debe ${meses} para un total de $${monto}.`;
+        window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    };
+
+    window.enviarGmailIndividual = (email, nombre, representante, monto, meses) => {
+        const asunto = "Recordatorio de Pago - Colegio Santiago de Jesús";
+        const cuerpo = `Estimado Sr(a) ${representante},
+
+Le escribimos del Colegio Santiago de Jesús para recordarle el pago pendiente:
+
+Estudiante: ${nombre}
+Meses pendientes: ${meses}
+Total adeudado: $${monto}
+
+Por favor regularizar su situación lo antes posible.
+
+Atentamente,
+Administración
+Colegio Santiago de Jesús`;
+        
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    };
+
+    window.enviarAvisoCritico = () => {
+        const dia = new Date().getDate();
+        if (dia < 10) {
+            alert("El aviso crítico solo se puede enviar a partir del día 10 del mes.");
+            return;
+        }
+
+        if(cachePendientes.length === 0) {
+            alert("No hay deudores para enviar aviso crítico.");
+            return;
+        }
+
+        // Generar lista de correos
+        const correos = cachePendientes
+            .filter(a => a.mail)
+            .map(a => a.mail)
+            .join(',');
+        
+        if(!correos) {
+            alert("No hay correos registrados para enviar aviso masivo.");
+            return;
+        }
+
+        const asunto = "AVISO CRÍTICO - Colegio Santiago de Jesús (Día " + dia + ")";
+        const cuerpo = `Estimados representantes,
+
+ESTE ES UN AVISO CRÍTICO DE COBRANZA
+
+A la fecha (día ${dia} del mes), su(s) representado(s) presenta(n) deuda pendiente en nuestra institución.
+
+Por favor acercarse a la administración a la mayor brevedad posible para regularizar su situación y evitar consecuencias académicas.
+
+Total de deudores en esta lista: ${cachePendientes.length}
+
+Atentamente,
+Administración
+Colegio Santiago de Jesús`;
+
+        window.location.href = `mailto:${correos}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     };
 
     window.notifyAll = () => {
-        if(cachePendientes.length === 0) { alert("No hay deudores con correo."); return; }
-        if(confirm(`Se abrirán ${cachePendientes.length} correos. ¿Continuar?`)) {
-            let delay = 0;
-            cachePendientes.forEach((a) => {
-                if(a.mail) {
-                    setTimeout(() => {
-                        window.open(`mailto:${a.mail}?subject=Aviso de Cobro SDJ&body=Deuda pendiente: $${a.deuda}`, '_blank');
-                    }, delay);
-                    delay += 1500;
-                }
+        if(cachePendientes.length === 0) {
+            alert("No hay deudores para enviar recordatorios.");
+            return;
+        }
+
+        if(confirm(`¿Enviar correos individuales a ${cachePendientes.length} representantes?`)) {
+            cachePendientes.forEach((a, i) => { 
+                setTimeout(() => {
+                    if(a.mail) {
+                        enviarGmailIndividual(a.mail, a.nombre, a.rep, a.total, a.meses.join(', '));
+                    }
+                }, i * 1000);
             });
         }
     };
 
-    // --- 3. ARCHIVOS E HISTORIAL ---
-    let curLvl = "", curGra = "";
+    // --- ARCHIVOS Y NAVEGACION ---
+    let curLvl = "", curGra = "", curSec = "";
     const struct = {
         'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'],
         'PRIMARIA': ['1er Grado','2do Grado','3er Grado','4to Grado','5to Grado','6to Grado'],
@@ -422,150 +610,429 @@
         document.getElementById('view-level').style.display='none';
         document.getElementById('view-grade').style.display='block';
         document.getElementById('tit-grade').innerText = l;
-        const grid = document.getElementById('grid-grade'); grid.innerHTML = "";
+        const grid = document.getElementById('grid-grade'); 
+        grid.innerHTML = "";
         struct[l].forEach(g => grid.innerHTML += `<div class="folder" onclick="loadSec('${g}')">📁<br>${g}</div>`);
     };
-    window.loadSec = (g) => { curGra = g; document.getElementById('view-grade').style.display='none'; document.getElementById('view-sec').style.display='block'; document.getElementById('tit-sec').innerText = g; };
-    
+
+    window.loadSec = (g) => { 
+        curGra = g; 
+        document.getElementById('view-grade').style.display='none'; 
+        document.getElementById('view-sec').style.display='block'; 
+        document.getElementById('tit-sec').innerText = g; 
+    };
+
+    // CARGAR LISTA FINAL CON FICHA ESTUDIANTE
     window.loadFinal = (s) => {
+        curSec = s;
         document.getElementById('view-sec').style.display='none';
         document.getElementById('view-list').style.display='block';
+        document.getElementById('ficha-estudiante').style.display = 'none';
         document.getElementById('tit-list').innerText = `${curGra} - SECCIÓN ${s}`;
         document.getElementById('search-filter').value = "";
         
+        document.getElementById('final-list').innerHTML = "Cargando...";
+        document.getElementById('sec-total-label').innerHTML = "Calculando...";
+
         onSnapshot(collection(db, DB_MAIN), (snap) => {
             const div = document.getElementById('final-list'); 
             const labelTotal = document.getElementById('sec-total-label');
             div.innerHTML = "";
+            
             let deudaAcumulada = 0;
+            let contador = 0;
 
             snap.forEach(d => {
                 const a = d.data();
                 if(a.grado === curGra && a.seccion === s) {
-                    const precio = parseFloat(a.montoMensual) || 0;
-                    const deuda = (a.meses ? a.meses.length : 0) * precio;
-                    if(deuda > 0) deudaAcumulada += deuda;
+                    contador++;
+                    const total = (a.montoMensual || 0) * (a.meses ? a.meses.length : 0);
+                    const esSolvente = (!a.meses || a.meses.length === 0);
                     
-                    const esSolvente = (deuda === 0);
-                    
-                    // MOSTRAR HISTORIAL
-                    let historialHTML = "";
-                    if(a.historial && a.historial.length > 0) {
-                        historialHTML = `<div class="historial-box"><b>Historial:</b><br>${a.historial.map(h => `<div class="historial-item">${h}</div>`).join('')}</div>`;
-                    }
+                    if(!esSolvente) deudaAcumulada += total;
 
                     div.innerHTML += `
-                    <div class="student-row item-lista" data-name="${a.nombre.toLowerCase()}" style="border-left: 6px solid ${esSolvente ? 'var(--green)' : 'var(--red)'}; display:block">
-                        <div class="row-header">
-                            <div class="info"><b>${a.nombre}</b><small>${a.rep}</small></div>
-                            <div style="text-align:right">
-                                ${esSolvente ? '<b style="color:var(--green)">SOLVENTE</b>' : `<b style="color:var(--red)">DEUDA: $${deuda.toFixed(2)}</b>`}
-                            </div>
+                    <div class="student-row item-lista" data-id="${d.id}" data-name="${a.nombre.toLowerCase()}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; ${esSolvente ? 'border-left: 6px solid var(--green)' : 'border-left: 6px solid var(--red)'}">
+                        <div class="info">
+                            <b>${a.nombre}</b>
+                            <small>${a.rep} - ${a.cedula || 'Sin cédula'}</small>
+                            ${!esSolvente ? `<div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>` : ''}
                         </div>
-                        ${historialHTML}
+                        <div style="text-align:right">
+                            ${esSolvente ? 
+                                `<b style="color:var(--green)">SOLVENTE</b>` : 
+                                `<b style="color:var(--red)">DEUDA</b><br><span style="font-size:11px; color:#ef4444">$${total}</span>`}
+                        </div>
                     </div>`;
                 }
             });
-            labelTotal.innerHTML = deudaAcumulada > 0 ? `PENDIENTE SECCIÓN: <span style="color:#ef4444">$${deudaAcumulada.toFixed(2)}</span>` : `<span style="color:var(--green)">SECCIÓN AL DÍA</span>`;
+
+            if(deudaAcumulada > 0) {
+                labelTotal.innerHTML = `TOTAL PENDIENTE SECCIÓN: <span style="font-size:16px; color:#ef4444">$${deudaAcumulada}</span> (${contador} estudiantes)`;
+            } else {
+                labelTotal.innerHTML = `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador} estudiantes)`;
+            }
+
+            if(contador === 0) div.innerHTML = "<p style='text-align:center; padding:20px; color:gray'>Carpeta Vacía</p>";
         });
     };
 
+    // 5. EDICIÓN DE DATOS - FICHA DEL ESTUDIANTE
+    window.mostrarFichaEstudiante = async (id) => {
+        const docRef = doc(db, DB_MAIN, id);
+        const estudiantes = await getDocs(collection(db, DB_MAIN));
+        
+        estudiantes.forEach(d => {
+            if(d.id === id) {
+                estudianteActual = { ...d.data(), id: d.id };
+                
+                document.getElementById('edit-nombre').value = estudianteActual.nombre;
+                document.getElementById('edit-representante').value = estudianteActual.rep;
+                document.getElementById('edit-cedula').value = estudianteActual.cedula || '';
+                document.getElementById('edit-telefono').value = estudianteActual.tel || '';
+                document.getElementById('edit-correo').value = estudianteActual.mail || '';
+                document.getElementById('edit-grado').value = `${estudianteActual.grado} - ${estudianteActual.seccion}`;
+                
+                // Mostrar meses pendientes
+                const mesesDiv = document.getElementById('edit-meses');
+                if(estudianteActual.meses && estudianteActual.meses.length > 0) {
+                    mesesDiv.innerHTML = estudianteActual.meses.map(m => 
+                        `<span class="tag-mes" style="margin:2px; display:inline-block;">${m}</span>`
+                    ).join('');
+                } else {
+                    mesesDiv.innerHTML = '<span style="color:var(--green)">Sin deudas</span>';
+                }
+                
+                // Calcular y mostrar total
+                const total = (estudianteActual.montoMensual || 0) * (estudianteActual.meses ? estudianteActual.meses.length : 0);
+                document.getElementById('edit-total').innerHTML = `$${total}`;
+                
+                // Mostrar ficha y ocultar lista
+                document.getElementById('final-list').style.display = 'none';
+                document.getElementById('ficha-estudiante').style.display = 'block';
+            }
+        });
+    };
+
+    window.guardarCambiosEstudiante = async () => {
+        if(!estudianteActual) return;
+        
+        try {
+            await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
+                rep: document.getElementById('edit-representante').value,
+                tel: document.getElementById('edit-telefono').value,
+                mail: document.getElementById('edit-correo').value
+            });
+            
+            alert("✅ Cambios guardados exitosamente");
+            // Volver a cargar la lista
+            loadFinal(curSec);
+        } catch (error) {
+            alert("Error al guardar cambios: " + error.message);
+        }
+    };
+
+    window.volverALista = () => {
+        document.getElementById('final-list').style.display = 'block';
+        document.getElementById('ficha-estudiante').style.display = 'none';
+    };
+
+    window.eliminarEstudiante = async () => {
+        if(!estudianteActual) return;
+        
+        if(confirm(`¿Está seguro de eliminar a ${estudianteActual.nombre}? Esta acción no se puede deshacer.`)) {
+            try {
+                await deleteDoc(doc(db, DB_MAIN, estudianteActual.id));
+                alert("✅ Estudiante eliminado");
+                volverALista();
+                loadFinal(curSec);
+            } catch (error) {
+                alert("Error al eliminar: " + error.message);
+            }
+        }
+    };
+
+    // FUNCION DE FILTRADO (BUSCADOR)
     window.filterList = () => {
         const term = document.getElementById('search-filter').value.toLowerCase();
-        document.querySelectorAll('.item-lista').forEach(item => {
-            item.style.display = item.getAttribute('data-name').includes(term) ? "block" : "none";
+        const items = document.querySelectorAll('.item-lista');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name');
+            item.style.display = name.includes(term) ? "flex" : "none";
         });
     };
     
-    window.resetArch = () => { document.getElementById('view-grade').style.display='none'; document.getElementById('view-level').style.display='block'; };
-    window.backToGrade = () => { document.getElementById('view-sec').style.display='none'; document.getElementById('view-grade').style.display='block'; };
-    window.backToSec = () => { document.getElementById('view-list').style.display='none'; document.getElementById('view-sec').style.display='block'; };
+    window.resetArch = () => { 
+        document.getElementById('view-grade').style.display='none'; 
+        document.getElementById('view-level').style.display='block'; 
+    };
+    
+    window.backToGrade = () => { 
+        document.getElementById('view-sec').style.display='none'; 
+        document.getElementById('view-grade').style.display='block'; 
+    };
+    
+    window.backToSec = () => { 
+        document.getElementById('view-list').style.display='none'; 
+        document.getElementById('ficha-estudiante').style.display = 'none';
+        document.getElementById('view-sec').style.display='block'; 
+    };
 
-    // --- 4. VALIDACIÓN DE PAGOS ---
+    // 4. GESTIÓN DE PAGOS DETALLADA
     onSnapshot(collection(db, DB_PAGOS), (snap) => {
-        const tb = document.getElementById('table-rep'); tb.innerHTML = "";
+        const tb = document.getElementById('table-rep'); 
+        tb.innerHTML = "";
+        
         snap.forEach(d => {
             const p = d.data();
             tb.innerHTML += `<tr>
-                <td>${p.nombreEst}<br><small>${p.nombreRep || '-'}</small></td>
-                <td><b>${p.banco || 'BANCO'}</b><br>${p.referencia || 'REF'}</td>
-                <td>$${p.montoDivisas || p.monto || 0}</td>
                 <td>
-                    <button class="btn-check" onclick="validarPago('${d.id}', '${p.nombreEst}', '${p.banco}', '${p.referencia}', '${p.montoDivisas || p.monto}')">✔</button>
-                    <button class="btn-reject" onclick="rechazar('${d.id}','${p.referencia}')">✖</button>
+                    <strong>${p.nombreEst}</strong><br>
+                    <small>${p.nombreRep || '-'}</small>
+                </td>
+                <td>
+                    <strong>${p.metodo || 'Sin método'}</strong><br>
+                    ${p.referencia || 'Sin referencia'}<br>
+                    <small>${p.banco || ''}</small>
+                </td>
+                <td>
+                    <strong>Bs. ${p.montoBs || '0'}</strong><br>
+                    <small>$ ${p.montoDivisas || p.monto || '0'}</small>
+                </td>
+                <td>
+                    <button class="btn-check" onclick="mostrarModalPago('${d.id}')">✔ Verificar</button>
+                    <button class="btn-reject" onclick="rechazar('${d.id}','${p.referencia}')">✖ Rechazar</button>
                 </td>
             </tr>`;
         });
     });
 
-    window.validarPago = async(idPago, nombreEst, banco, ref, monto) => {
-        if(!confirm(`¿Validar pago de ${nombreEst}?`)) return;
-
-        // Buscar alumno por nombre exacto
-        const q = query(collection(db, DB_MAIN), where("nombre", "==", nombreEst));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) { alert("❌ Alumno no encontrado. Verifique nombre."); return; }
-
-        let docRef = querySnapshot.docs[0];
-        let data = docRef.data();
-        let nuevosMeses = [...(data.meses || [])];
+    window.mostrarModalPago = async (idPago) => {
+        const docRef = doc(db, DB_PAGOS, idPago);
+        const pagos = await getDocs(collection(db, DB_PAGOS));
         
-        let mesPagado = "Abono";
-        if(nuevosMeses.length > 0) mesPagado = nuevosMeses.shift(); // Saca el primer mes
-
-        let fechaHoy = new Date().toLocaleDateString();
-        // Escribe en Historial
-        await updateDoc(doc(db, DB_MAIN, docRef.id), {
-            meses: nuevosMeses,
-            historial: arrayUnion(`${fechaHoy}: Pagó ${mesPagado} - $${monto} (Ref: ${ref} / ${banco})`)
+        let pagoData = null;
+        pagos.forEach(d => {
+            if(d.id === idPago) {
+                pagoData = { ...d.data(), id: d.id };
+            }
         });
-
-        // Borra de reportes
-        await deleteDoc(doc(db, DB_PAGOS, idPago));
-        alert("✅ Pago procesado y guardado en historial.");
+        
+        if(!pagoData) return;
+        
+        document.getElementById('modal-pago-content').innerHTML = `
+            <div style="margin-bottom: 15px;">
+                <strong>Estudiante:</strong> ${pagoData.nombreEst}<br>
+                <strong>Representante:</strong> ${pagoData.nombreRep || 'No registrado'}<br>
+                <strong>Método de pago:</strong> ${pagoData.metodo || 'No especificado'}
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <strong>Referencia:</strong> ${pagoData.referencia || 'N/A'}<br>
+                <strong>Banco:</strong> ${pagoData.banco || 'N/A'}
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+                <h4>Monto del Pago</h4>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <div>
+                        <strong>Bolívares:</strong><br>
+                        <span style="font-size: 18px; color: #1e40af;">Bs. ${pagoData.montoBs || '0'}</span>
+                    </div>
+                    <div>
+                        <strong>Dólares:</strong><br>
+                        <span style="font-size: 18px; color: #059669;">$ ${pagoData.montoDivisas || pagoData.monto || '0'}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-check" style="flex: 1; padding: 12px;" onclick="validarPagoConHistorial('${idPago}')">
+                    ✅ Confirmar Pago y Guardar Historial
+                </button>
+                <button class="btn-reject" style="flex: 1; padding: 12px;" onclick="cerrarModalPago()">
+                    Cancelar
+                </button>
+            </div>
+        `;
+        
+        document.getElementById('modal-pago').style.display = 'flex';
     };
 
+    window.cerrarModalPago = () => {
+        document.getElementById('modal-pago').style.display = 'none';
+    };
+
+    window.validarPagoConHistorial = async (idPago) => {
+        // Obtener datos del pago
+        const pagos = await getDocs(collection(db, DB_PAGOS));
+        let pagoData = null;
+        let pagoDocId = null;
+        
+        pagos.forEach(d => {
+            if(d.id === idPago) {
+                pagoData = d.data();
+                pagoDocId = d.id;
+            }
+        });
+        
+        if(!pagoData) {
+            alert("No se encontró el pago");
+            return;
+        }
+        
+        // Buscar al estudiante para agregar al historial
+        const estudiantes = await getDocs(collection(db, DB_MAIN));
+        let estudianteDoc = null;
+        let estudianteId = null;
+        
+        estudiantes.forEach(d => {
+            const data = d.data();
+            if(data.nombre === pagoData.nombreEst) {
+                estudianteDoc = data;
+                estudianteId = d.id;
+            }
+        });
+        
+        if(estudianteDoc) {
+            // Crear registro de historial
+            const registroHistorial = {
+                fecha: new Date(),
+                montoBs: pagoData.montoBs || 0,
+                montoDolares: pagoData.montoDivisas || pagoData.monto || 0,
+                metodoPago: pagoData.metodo || '',
+                referencia: pagoData.referencia || '',
+                banco: pagoData.banco || '',
+                descripcion: `Pago verificado - ${pagoData.metodo || ''}`
+            };
+            
+            // Agregar al array de historial del estudiante
+            const historialActual = estudianteDoc.historial || [];
+            historialActual.push(registroHistorial);
+            
+            // Actualizar el estudiante con el nuevo historial
+            await updateDoc(doc(db, DB_MAIN, estudianteId), {
+                historial: historialActual,
+                meses: [], // Limpiar meses pendientes
+                total: 0 // Poner total en 0
+            });
+            
+            // Guardar en colección de historial general
+            await addDoc(collection(db, DB_HISTORIAL), {
+                ...registroHistorial,
+                estudianteId: estudianteId,
+                estudianteNombre: pagoData.nombreEst,
+                representante: pagoData.nombreRep
+            });
+            
+            // Eliminar el pago de la lista de pendientes
+            await deleteDoc(doc(db, DB_PAGOS, pagoDocId));
+            
+            alert("✅ Pago verificado y guardado en historial");
+            cerrarModalPago();
+        } else {
+            alert("No se encontró al estudiante en la base de datos");
+        }
+    };
+
+    // 2. PORTAL DEL REPRESENTANTE (MULTI-HIJOS)
+    window.consultarFamilia = async () => {
+        const cedula = document.getElementById('cedula-consulta').value.trim();
+        if(!cedula) {
+            alert("Por favor ingrese su cédula");
+            return;
+        }
+        
+        const estudiantes = await getDocs(collection(db, DB_MAIN));
+        const hijos = [];
+        let totalFamiliar = 0;
+        let representanteNombre = '';
+        
+        estudiantes.forEach(d => {
+            const data = d.data();
+            if(data.cedula === cedula) {
+                if(!representanteNombre && data.rep) {
+                    representanteNombre = data.rep;
+                }
+                
+                const total = (data.montoMensual || 0) * (data.meses ? data.meses.length : 0);
+                hijos.push({
+                    nombre: data.nombre,
+                    grado: data.grado,
+                    seccion: data.seccion,
+                    meses: data.meses || [],
+                    total: total,
+                    solvente: (!data.meses || data.meses.length === 0)
+                });
+                
+                if(!data.meses || data.meses.length > 0) {
+                    totalFamiliar += total;
+                }
+            }
+        });
+        
+        const resultadosDiv = document.getElementById('resultados-familia');
+        const listaHijosDiv = document.getElementById('lista-hijos');
+        const totalFamiliarDiv = document.getElementById('total-familiar');
+        
+        if(hijos.length === 0) {
+            listaHijosDiv.innerHTML = `
+                <div style="text-align:center; padding:20px; color:gray">
+                    <p>No se encontraron estudiantes asociados a esta cédula.</p>
+                    <p>Cédula consultada: ${cedula}</p>
+                </div>
+            `;
+        } else {
+            listaHijosDiv.innerHTML = `
+                <h4>👨‍👩‍👧‍👦 Representante: ${representanteNombre || 'No registrado'}</h4>
+                <p style="font-size:12px; color:#64748b; margin-bottom:15px;">Cédula: ${cedula} - ${hijos.length} hijo(s) registrado(s)</p>
+                <div style="margin-top:15px;">
+                    ${hijos.map((hijo, index) => `
+                        <div class="student-row" style="margin-bottom:10px; ${hijo.solvente ? 'border-left: 5px solid var(--green)' : 'border-left: 5px solid var(--red)'}">
+                            <div class="info">
+                                <b>${hijo.nombre}</b>
+                                <small>${hijo.grado} - Sección ${hijo.seccion}</small>
+                                ${!hijo.solvente ? `
+                                    <div style="margin-top:5px;">
+                                        ${hijo.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div style="text-align:right">
+                                ${hijo.solvente ? 
+                                    '<b style="color:var(--green)">AL DÍA</b>' : 
+                                    `<b style="color:var(--red)">$${hijo.total}</b>`}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        totalFamiliarDiv.innerHTML = totalFamiliar > 0 ? 
+            `TOTAL DEUDA FAMILIAR: $${totalFamiliar}` : 
+            '🎉 FAMILIA COMPLETAMENTE SOLVENTE';
+        
+        resultadosDiv.style.display = 'block';
+    };
+
+    window.del = async(id) => { 
+        if(confirm("¿Eliminar Alumno?")) await deleteDoc(doc(db, DB_MAIN, id)); 
+    };
+    
+    window.validar = async(id) => { 
+        if(confirm("¿Pago VERIFICADO?")) await deleteDoc(doc(db, DB_PAGOS, id)); 
+    };
+    
     window.rechazar = async(id, ref) => {
-        if(confirm("¿Rechazar pago?")) {
-            window.location.href = `mailto:?subject=Error Pago SDJ&body=Referencia ${ref} no encontrada.`;
+        if(confirm("¿Reportar como NO VERIFICADO?")) {
+            window.location.href = `mailto:?subject=Error Pago SDJ&body=Ref ${ref} no verificada.`;
             await deleteDoc(doc(db, DB_PAGOS, id));
         }
     };
-    
-    window.del = async(id) => { if(confirm("¿Eliminar Alumno?")) await deleteDoc(doc(db, DB_MAIN, id)); };
 
-    // --- 5. LOGICA DEL CALENDARIO (RESTAURADA) ---
-    window.guardarEvento = async () => {
-        const tit = document.getElementById('calTitle').value;
-        const fec = document.getElementById('calDate').value;
-        if(!tit || !fec) { alert("Complete título y fecha"); return; }
-
-        await addDoc(collection(db, DB_CAL), {
-            titulo: tit,
-            fecha: fec,
-            timestamp: new Date()
-        });
-        document.getElementById('calTitle').value = "";
-    };
-
-    onSnapshot(query(collection(db, DB_CAL), orderBy("fecha")), (snap) => {
-        const div = document.getElementById('list-cal');
-        div.innerHTML = "";
-        snap.forEach(d => {
-            const e = d.data();
-            div.innerHTML += `
-                <div class="event-card">
-                    <span class="date-box">📅 ${e.fecha}</span>
-                    <b>${e.titulo}</b>
-                    <button onclick="delEvent('${d.id}')" style="float:right; border:none; color:red; cursor:pointer">🗑</button>
-                </div>
-            `;
-        });
-    });
-
-    window.delEvent = async(id) => await deleteDoc(doc(db, DB_CAL, id));
-
+    // Inicializar cálculo de total
+    calcularTotal();
 </script>
 </body>
 </html>
