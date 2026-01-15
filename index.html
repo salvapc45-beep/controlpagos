@@ -20,7 +20,7 @@
         .nav-btn { flex: 1; min-width: 100px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
         .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
 
-        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .modulo { display: none; }
         .modulo.active { display: block; animation: fadeIn 0.4s; }
 
@@ -64,6 +64,10 @@
         th { background: #f1f5f9; padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0; }
         td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         
+        /* FILA CLICKABLE */
+        .clickable-row { cursor: pointer; transition: background 0.2s; }
+        .clickable-row:hover { background: #f8fafc; }
+        
         .btn-check { background: var(--green); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-right: 5px; font-weight: bold; }
         .btn-reject { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         
@@ -82,14 +86,77 @@
         .parent-results { margin-top: 20px; }
         .family-total { background: #0f172a; color: white; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; font-weight: bold; font-size: 18px; }
 
-        /* MODAL PAGOS */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
-        .modal { background: white; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
-
-        /* EMERGENCIA */
-        .emergencia-badge { background: #dc2626; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 5px; }
+        /* MODAL DETALLES PAGO */
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 2000; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+        }
+        .modal { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 25px; 
+            width: 90%; 
+            max-width: 500px; 
+            max-height: 80vh; 
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+        }
+        .modal-header h3 { color: var(--primary); margin: 0; }
+        .close-modal { 
+            background: none; 
+            border: none; 
+            font-size: 28px; 
+            cursor: pointer; 
+            color: #64748b;
+            line-height: 1;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-modal:hover { color: var(--red); }
+        
+        .modal-details { margin: 20px 0; }
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .detail-label { color: #64748b; font-size: 14px; font-weight: 600; }
+        .detail-value { color: var(--text); font-size: 14px; text-align: right; }
+        .detail-value.amount { font-weight: bold; font-size: 16px; }
+        .detail-value.amount.bs { color: #1e40af; }
+        .detail-value.amount.usd { color: #059669; }
+        
+        .modal-actions { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f5f9;
+        }
+        .modal-actions button { flex: 1; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -273,19 +340,20 @@
         <div class="card"><h3>Estudiantes al Día</h3><div id="list-solv"></div></div>
     </section>
 
-    <!-- MÓDULO REPORTES -->
+    <!-- MÓDULO REPORTES - ACTUALIZADO -->
     <section id="mod-rep" class="modulo">
         <div class="card">
             <h3>📊 Pagos Reportados (V16)</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">Nuevo: Método de pago, referencia y divisas.</p>
+            <p style="font-size:12px; color:gray; margin-bottom:10px">Haga clic en cualquier fila para ver todos los detalles del pago.</p>
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
-                            <th>Alumno / Rep</th>
-                            <th>Método / Ref</th>
-                            <th>Bs / $</th>
-                            <th>Acción</th>
+                            <th>Alumno / Representante</th>
+                            <th>Método / Referencia</th>
+                            <th>Monto $</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="table-rep"></tbody>
@@ -316,22 +384,26 @@
 
 </div>
 
-<!-- MODAL PARA VERIFICAR PAGOS -->
-<div id="modal-pago" class="modal-overlay">
-    <div class="modal">
+<!-- MODAL PARA VER DETALLES DEL PAGO -->
+<div id="modal-detalles-pago" class="modal-overlay" onclick="cerrarModalDetalles(event)">
+    <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3>✅ Verificar Pago</h3>
-            <button class="close-modal" onclick="cerrarModalPago()">×</button>
+            <h3>📋 Detalles del Pago Reportado</h3>
+            <button class="close-modal" onclick="cerrarModalDetalles()">×</button>
         </div>
-        <div id="modal-pago-content">
+        <div class="modal-details" id="detalles-pago-content">
             <!-- Contenido dinámico -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn-check" onclick="validarPagoDesdeModal()">✅ Verificar Pago</button>
+            <button class="btn-reject" onclick="rechazarPagoDesdeModal()">✖ Rechazar</button>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
@@ -359,9 +431,16 @@
     let cachePendientes = [];
     let cacheTodosEstudiantes = [];
     let estudianteActual = null;
+    let pagoSeleccionado = null;
+    let curLvl = "", curGra = "", curSec = "";
+    
+    const struct = {
+        'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'],
+        'PRIMARIA': ['1er Grado','2do Grado','3er Grado','4to Grado','5to Grado','6to Grado'],
+        'BACHILLERATO': ['1er Año','2do Año','3er Año','4to Año','5to Año']
+    };
 
     // 1. CORRECCIÓN DEL ERROR DE DEUDA $0
-    // Calcular total automáticamente cuando cambian meses o monto
     document.getElementById('rMes').addEventListener('change', calcularTotal);
     document.getElementById('rMon').addEventListener('input', calcularTotal);
 
@@ -384,7 +463,6 @@
         const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
         const total = meses.length * montoMensual;
         
-        // Validar campos obligatorios
         if (!document.getElementById('rCedula').value) {
             alert("Por favor ingrese la cédula del representante");
             return;
@@ -401,11 +479,10 @@
             meses: meses,
             montoMensual: montoMensual,
             total: total,
-            historial: [], // Array para historial de pagos
+            historial: [],
             timestamp: new Date()
         });
         alert("¡Registro Exitoso V16!");
-        // Limpiar formulario
         document.getElementById('rNom').value = '';
         document.getElementById('rRep').value = '';
         document.getElementById('rCedula').value = '';
@@ -416,7 +493,7 @@
         document.getElementById('totalPreview').innerText = '$0';
     };
 
-    // SNAPSHOT PRINCIPAL
+    // SNAPSHOT PRINCIPAL para pendientes y solventes
     onSnapshot(collection(db, DB_MAIN), (snap) => {
         const lp = document.getElementById('list-pend');
         const ls = document.getElementById('list-solv');
@@ -441,13 +518,11 @@
             if(grupo.length > 0) {
                 lp.innerHTML += `<div class="grado-header">${grado}</div>`;
                 grupo.forEach(a => {
-                    // Calcular total correctamente
                     const totalDeuda = (a.montoMensual || 0) * (a.meses ? a.meses.length : 0);
                     const alerta = getNivelAlerta(a.meses.length);
                     cachePendientes.push({ ...a, tipoAlerta: alerta.tipo, total: totalDeuda });
                     totalColegio += totalDeuda;
 
-                    // Botones de WhatsApp y Gmail
                     let wsBtn = "";
                     let emailBtn = "";
                     
@@ -499,112 +574,232 @@
             ls.innerHTML = '<p style="text-align:center; padding:20px; color:gray">No hay estudiantes solventes</p>';
         }
 
-        // ACTUALIZAR DEUDA GLOBAL
         if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString()}`;
     });
 
-    function getNivelAlerta(meses) {
-        const dia = new Date().getDate();
-        if (meses >= 3 || (meses >= 1 && dia > 10)) {
-            return { texto: "ALERTA URGENTE", clase: "urgente", tipo: "urgente" };
-        } else if (meses === 2) {
-            return { texto: "ALERTA NORMAL", clase: "normal", tipo: "normal" };
-        } else {
-            return { texto: "ALERTA PREVIA", clase: "previa", tipo: "previa" };
-        }
-    }
-
-    // 3. MÓDULO DE COBRANZA MEJORADO
-    window.enviarWhatsApp = (telefono, nombre, meses, monto) => {
-        const mensaje = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${nombre} debe ${meses} para un total de $${monto}.`;
-        window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-    };
-
-    window.enviarGmailIndividual = (email, nombre, representante, monto, meses) => {
-        const asunto = "Recordatorio de Pago - Colegio Santiago de Jesús";
-        const cuerpo = `Estimado Sr(a) ${representante},
-
-Le escribimos del Colegio Santiago de Jesús para recordarle el pago pendiente:
-
-Estudiante: ${nombre}
-Meses pendientes: ${meses}
-Total adeudado: $${monto}
-
-Por favor regularizar su situación lo antes posible.
-
-Atentamente,
-Administración
-Colegio Santiago de Jesús`;
+    // SNAPSHOT PARA REPORTES - ACTUALIZADO CON MODAL
+    onSnapshot(collection(db, DB_PAGOS), (snap) => {
+        const tb = document.getElementById('table-rep'); 
+        tb.innerHTML = "";
         
-        window.location.href = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
-    };
-
-    window.enviarAvisoCritico = () => {
-        const dia = new Date().getDate();
-        if (dia < 10) {
-            alert("El aviso crítico solo se puede enviar a partir del día 10 del mes.");
+        if(snap.empty) {
+            tb.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; padding:40px; color:#64748b;">
+                        <div style="font-size:50px;">📭</div>
+                        <h4>No hay pagos reportados</h4>
+                        <small>Los padres aún no han reportado ningún pago.</small>
+                    </td>
+                </tr>
+            `;
             return;
         }
-
-        if(cachePendientes.length === 0) {
-            alert("No hay deudores para enviar aviso crítico.");
-            return;
-        }
-
-        // Generar lista de correos
-        const correos = cachePendientes
-            .filter(a => a.mail)
-            .map(a => a.mail)
-            .join(',');
         
-        if(!correos) {
-            alert("No hay correos registrados para enviar aviso masivo.");
-            return;
+        let contador = 0;
+        snap.forEach(d => {
+            const p = d.data();
+            contador++;
+            
+            // Determinar color del estado
+            let estadoColor = '#64748b';
+            let estadoTexto = p.estado || 'Pendiente';
+            
+            if(estadoTexto.includes('Pendiente')) estadoColor = '#eab308';
+            if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
+            if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
+            
+            // Formatear fecha
+            let fechaFormateada = 'Sin fecha';
+            if(p.fechaPago) {
+                const fecha = new Date(p.fechaPago);
+                fechaFormateada = fecha.toLocaleDateString('es-ES');
+            } else if(p.timestamp) {
+                const fecha = p.timestamp.toDate();
+                fechaFormateada = fecha.toLocaleDateString('es-ES');
+            }
+            
+            tb.innerHTML += `
+                <tr class="clickable-row" data-id="${d.id}" onclick="mostrarDetallesPago('${d.id}')">
+                    <td>
+                        <strong>${p.nombreEst || 'Sin nombre'}</strong><br>
+                        <small style="color:#64748b;">${p.nombreRep || 'Sin representante'}</small><br>
+                        <small style="font-size:10px; color:#94a3b8;">${fechaFormateada}</small>
+                    </td>
+                    <td>
+                        <strong style="color:#1e40af;">${p.metodo || 'Sin método'}</strong><br>
+                        <small>${p.referencia || 'Sin referencia'}</small><br>
+                        <small style="color:#64748b;">${p.banco || ''}</small>
+                    </td>
+                    <td>
+                        <strong style="color:#059669;">$${p.montoDivisas || p.monto || '0'}</strong><br>
+                        <small style="color:#1e40af;">Bs. ${p.montoBs || '0'}</small>
+                    </td>
+                    <td>
+                        <span style="color:${estadoColor}; font-weight:bold; font-size:11px;">
+                            ${estadoTexto}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-check" onclick="event.stopPropagation(); validarPago('${d.id}')">✔</button>
+                        <button class="btn-reject" onclick="event.stopPropagation(); rechazar('${d.id}','${p.referencia}')">✖</button>
+                    </td>
+                </tr>
+            `;
+        });
+    });
+
+    // FUNCIÓN PARA MOSTRAR DETALLES COMPLETOS DEL PAGO (MODAL)
+    window.mostrarDetallesPago = async (idPago) => {
+        try {
+            const docRef = doc(db, DB_PAGOS, idPago);
+            const docSnap = await getDoc(docRef);
+            
+            if(!docSnap.exists()) {
+                alert("El pago no existe");
+                return;
+            }
+            
+            pagoSeleccionado = { id: idPago, ...docSnap.data() };
+            
+            // Formatear fecha
+            let fechaFormateada = 'No especificada';
+            if(pagoSeleccionado.fechaPago) {
+                const fecha = new Date(pagoSeleccionado.fechaPago);
+                fechaFormateada = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES');
+            } else if(pagoSeleccionado.timestamp) {
+                const fecha = pagoSeleccionado.timestamp.toDate();
+                fechaFormateada = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES');
+            }
+            
+            // Determinar estado y color
+            let estadoColor = '#64748b';
+            let estadoTexto = pagoSeleccionado.estado || 'Pendiente de verificación';
+            
+            if(estadoTexto.includes('Pendiente')) estadoColor = '#eab308';
+            if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
+            if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
+            
+            // Construir contenido del modal
+            const contenido = `
+                <div class="detail-row">
+                    <span class="detail-label">Estudiante:</span>
+                    <span class="detail-value">${pagoSeleccionado.nombreEst || 'No especificado'}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Representante:</span>
+                    <span class="detail-value">${pagoSeleccionado.nombreRep || 'No especificado'}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Cédula:</span>
+                    <span class="detail-value">${pagoSeleccionado.cedulaRep || 'No registrada'}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Método de pago:</span>
+                    <span class="detail-value"><strong>${pagoSeleccionado.metodo || 'No especificado'}</strong></span>
+                </div>
+                
+                ${pagoSeleccionado.banco ? `
+                <div class="detail-row">
+                    <span class="detail-label">Banco:</span>
+                    <span class="detail-value">${pagoSeleccionado.banco}</span>
+                </div>
+                ` : ''}
+                
+                ${pagoSeleccionado.referencia ? `
+                <div class="detail-row">
+                    <span class="detail-label">Referencia:</span>
+                    <span class="detail-value">${pagoSeleccionado.referencia}</span>
+                </div>
+                ` : ''}
+                
+                ${pagoSeleccionado.cuenta ? `
+                <div class="detail-row">
+                    <span class="detail-label">Cuenta/RIF:</span>
+                    <span class="detail-value">${pagoSeleccionado.cuenta}</span>
+                </div>
+                ` : ''}
+                
+                <div class="detail-row">
+                    <span class="detail-label">Monto en Bolívares:</span>
+                    <span class="detail-value amount bs">Bs. ${pagoSeleccionado.montoBs || '0.00'}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Monto en Dólares:</span>
+                    <span class="detail-value amount usd">$ ${pagoSeleccionado.montoDivisas || pagoSeleccionado.monto || '0.00'}</span>
+                </div>
+                
+                ${pagoSeleccionado.mesesPagados && pagoSeleccionado.mesesPagados.length > 0 ? `
+                <div class="detail-row">
+                    <span class="detail-label">Meses pagados:</span>
+                    <span class="detail-value">
+                        ${Array.isArray(pagoSeleccionado.mesesPagados) ? 
+                            pagoSeleccionado.mesesPagados.join(', ') : 
+                            pagoSeleccionado.mesesPagados}
+                    </span>
+                </div>
+                ` : ''}
+                
+                <div class="detail-row">
+                    <span class="detail-label">Fecha del pago:</span>
+                    <span class="detail-value">${fechaFormateada}</span>
+                </div>
+                
+                ${pagoSeleccionado.observaciones ? `
+                <div class="detail-row">
+                    <span class="detail-label">Observaciones:</span>
+                    <span class="detail-value">${pagoSeleccionado.observaciones}</span>
+                </div>
+                ` : ''}
+                
+                <div class="detail-row">
+                    <span class="detail-label">Estado:</span>
+                    <span class="detail-value" style="color:${estadoColor}; font-weight:bold;">
+                        ${estadoTexto}
+                    </span>
+                </div>
+            `;
+            
+            document.getElementById('detalles-pago-content').innerHTML = contenido;
+            document.getElementById('modal-detalles-pago').style.display = 'flex';
+            
+        } catch (error) {
+            console.error("Error al cargar detalles:", error);
+            alert("Error al cargar los detalles del pago");
         }
-
-        const asunto = "AVISO CRÍTICO - Colegio Santiago de Jesús (Día " + dia + ")";
-        const cuerpo = `Estimados representantes,
-
-ESTE ES UN AVISO CRÍTICO DE COBRANZA
-
-A la fecha (día ${dia} del mes), su(s) representado(s) presenta(n) deuda pendiente en nuestra institución.
-
-Por favor acercarse a la administración a la mayor brevedad posible para regularizar su situación y evitar consecuencias académicas.
-
-Total de deudores en esta lista: ${cachePendientes.length}
-
-Atentamente,
-Administración
-Colegio Santiago de Jesús`;
-
-        window.location.href = `mailto:${correos}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
     };
 
-    window.notifyAll = () => {
-        if(cachePendientes.length === 0) {
-            alert("No hay deudores para enviar recordatorios.");
-            return;
-        }
-
-        if(confirm(`¿Enviar correos individuales a ${cachePendientes.length} representantes?`)) {
-            cachePendientes.forEach((a, i) => { 
-                setTimeout(() => {
-                    if(a.mail) {
-                        enviarGmailIndividual(a.mail, a.nombre, a.rep, a.total, a.meses.join(', '));
-                    }
-                }, i * 1000);
-            });
+    // FUNCIONES DEL MODAL
+    window.cerrarModalDetalles = function(e) {
+        if(e && e.target.id === 'modal-detalles-pago') {
+            document.getElementById('modal-detalles-pago').style.display = 'none';
+        } else if(!e) {
+            document.getElementById('modal-detalles-pago').style.display = 'none';
         }
     };
 
-    // --- ARCHIVOS Y NAVEGACION ---
-    let curLvl = "", curGra = "", curSec = "";
-    const struct = {
-        'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'],
-        'PRIMARIA': ['1er Grado','2do Grado','3er Grado','4to Grado','5to Grado','6to Grado'],
-        'BACHILLERATO': ['1er Año','2do Año','3er Año','4to Año','5to Año']
+    window.validarPagoDesdeModal = async function() {
+        if(!pagoSeleccionado) return;
+        
+        if(confirm(`¿Verificar el pago de ${pagoSeleccionado.nombreEst || 'este estudiante'}?`)) {
+            await validarPago(pagoSeleccionado.id);
+            document.getElementById('modal-detalles-pago').style.display = 'none';
+        }
     };
 
+    window.rechazarPagoDesdeModal = async function() {
+        if(!pagoSeleccionado) return;
+        
+        if(confirm(`¿Rechazar el pago de ${pagoSeleccionado.nombreEst || 'este estudiante'}?`)) {
+            await rechazar(pagoSeleccionado.id, pagoSeleccionado.referencia || '');
+            document.getElementById('modal-detalles-pago').style.display = 'none';
+        }
+    };
+
+    // FUNCIONES DE ARCHIVOS
     window.loadLevel = (l) => {
         curLvl = l;
         document.getElementById('view-level').style.display='none';
@@ -622,7 +817,6 @@ Colegio Santiago de Jesús`;
         document.getElementById('tit-sec').innerText = g; 
     };
 
-    // CARGAR LISTA FINAL CON FICHA ESTUDIANTE
     window.loadFinal = (s) => {
         curSec = s;
         document.getElementById('view-sec').style.display='none';
@@ -677,9 +871,8 @@ Colegio Santiago de Jesús`;
         });
     };
 
-    // 5. EDICIÓN DE DATOS - FICHA DEL ESTUDIANTE
+    // FICHA DEL ESTUDIANTE
     window.mostrarFichaEstudiante = async (id) => {
-        const docRef = doc(db, DB_MAIN, id);
         const estudiantes = await getDocs(collection(db, DB_MAIN));
         
         estudiantes.forEach(d => {
@@ -693,7 +886,6 @@ Colegio Santiago de Jesús`;
                 document.getElementById('edit-correo').value = estudianteActual.mail || '';
                 document.getElementById('edit-grado').value = `${estudianteActual.grado} - ${estudianteActual.seccion}`;
                 
-                // Mostrar meses pendientes
                 const mesesDiv = document.getElementById('edit-meses');
                 if(estudianteActual.meses && estudianteActual.meses.length > 0) {
                     mesesDiv.innerHTML = estudianteActual.meses.map(m => 
@@ -703,11 +895,9 @@ Colegio Santiago de Jesús`;
                     mesesDiv.innerHTML = '<span style="color:var(--green)">Sin deudas</span>';
                 }
                 
-                // Calcular y mostrar total
                 const total = (estudianteActual.montoMensual || 0) * (estudianteActual.meses ? estudianteActual.meses.length : 0);
                 document.getElementById('edit-total').innerHTML = `$${total}`;
                 
-                // Mostrar ficha y ocultar lista
                 document.getElementById('final-list').style.display = 'none';
                 document.getElementById('ficha-estudiante').style.display = 'block';
             }
@@ -725,7 +915,6 @@ Colegio Santiago de Jesús`;
             });
             
             alert("✅ Cambios guardados exitosamente");
-            // Volver a cargar la lista
             loadFinal(curSec);
         } catch (error) {
             alert("Error al guardar cambios: " + error.message);
@@ -752,7 +941,6 @@ Colegio Santiago de Jesús`;
         }
     };
 
-    // FUNCION DE FILTRADO (BUSCADOR)
     window.filterList = () => {
         const term = document.getElementById('search-filter').value.toLowerCase();
         const items = document.querySelectorAll('.item-lista');
@@ -778,164 +966,7 @@ Colegio Santiago de Jesús`;
         document.getElementById('view-sec').style.display='block'; 
     };
 
-    // 4. GESTIÓN DE PAGOS DETALLADA
-    onSnapshot(collection(db, DB_PAGOS), (snap) => {
-        const tb = document.getElementById('table-rep'); 
-        tb.innerHTML = "";
-        
-        snap.forEach(d => {
-            const p = d.data();
-            tb.innerHTML += `<tr>
-                <td>
-                    <strong>${p.nombreEst}</strong><br>
-                    <small>${p.nombreRep || '-'}</small>
-                </td>
-                <td>
-                    <strong>${p.metodo || 'Sin método'}</strong><br>
-                    ${p.referencia || 'Sin referencia'}<br>
-                    <small>${p.banco || ''}</small>
-                </td>
-                <td>
-                    <strong>Bs. ${p.montoBs || '0'}</strong><br>
-                    <small>$ ${p.montoDivisas || p.monto || '0'}</small>
-                </td>
-                <td>
-                    <button class="btn-check" onclick="mostrarModalPago('${d.id}')">✔ Verificar</button>
-                    <button class="btn-reject" onclick="rechazar('${d.id}','${p.referencia}')">✖ Rechazar</button>
-                </td>
-            </tr>`;
-        });
-    });
-
-    window.mostrarModalPago = async (idPago) => {
-        const docRef = doc(db, DB_PAGOS, idPago);
-        const pagos = await getDocs(collection(db, DB_PAGOS));
-        
-        let pagoData = null;
-        pagos.forEach(d => {
-            if(d.id === idPago) {
-                pagoData = { ...d.data(), id: d.id };
-            }
-        });
-        
-        if(!pagoData) return;
-        
-        document.getElementById('modal-pago-content').innerHTML = `
-            <div style="margin-bottom: 15px;">
-                <strong>Estudiante:</strong> ${pagoData.nombreEst}<br>
-                <strong>Representante:</strong> ${pagoData.nombreRep || 'No registrado'}<br>
-                <strong>Método de pago:</strong> ${pagoData.metodo || 'No especificado'}
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <strong>Referencia:</strong> ${pagoData.referencia || 'N/A'}<br>
-                <strong>Banco:</strong> ${pagoData.banco || 'N/A'}
-            </div>
-            
-            <div style="margin-bottom: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
-                <h4>Monto del Pago</h4>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                    <div>
-                        <strong>Bolívares:</strong><br>
-                        <span style="font-size: 18px; color: #1e40af;">Bs. ${pagoData.montoBs || '0'}</span>
-                    </div>
-                    <div>
-                        <strong>Dólares:</strong><br>
-                        <span style="font-size: 18px; color: #059669;">$ ${pagoData.montoDivisas || pagoData.monto || '0'}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-check" style="flex: 1; padding: 12px;" onclick="validarPagoConHistorial('${idPago}')">
-                    ✅ Confirmar Pago y Guardar Historial
-                </button>
-                <button class="btn-reject" style="flex: 1; padding: 12px;" onclick="cerrarModalPago()">
-                    Cancelar
-                </button>
-            </div>
-        `;
-        
-        document.getElementById('modal-pago').style.display = 'flex';
-    };
-
-    window.cerrarModalPago = () => {
-        document.getElementById('modal-pago').style.display = 'none';
-    };
-
-    window.validarPagoConHistorial = async (idPago) => {
-        // Obtener datos del pago
-        const pagos = await getDocs(collection(db, DB_PAGOS));
-        let pagoData = null;
-        let pagoDocId = null;
-        
-        pagos.forEach(d => {
-            if(d.id === idPago) {
-                pagoData = d.data();
-                pagoDocId = d.id;
-            }
-        });
-        
-        if(!pagoData) {
-            alert("No se encontró el pago");
-            return;
-        }
-        
-        // Buscar al estudiante para agregar al historial
-        const estudiantes = await getDocs(collection(db, DB_MAIN));
-        let estudianteDoc = null;
-        let estudianteId = null;
-        
-        estudiantes.forEach(d => {
-            const data = d.data();
-            if(data.nombre === pagoData.nombreEst) {
-                estudianteDoc = data;
-                estudianteId = d.id;
-            }
-        });
-        
-        if(estudianteDoc) {
-            // Crear registro de historial
-            const registroHistorial = {
-                fecha: new Date(),
-                montoBs: pagoData.montoBs || 0,
-                montoDolares: pagoData.montoDivisas || pagoData.monto || 0,
-                metodoPago: pagoData.metodo || '',
-                referencia: pagoData.referencia || '',
-                banco: pagoData.banco || '',
-                descripcion: `Pago verificado - ${pagoData.metodo || ''}`
-            };
-            
-            // Agregar al array de historial del estudiante
-            const historialActual = estudianteDoc.historial || [];
-            historialActual.push(registroHistorial);
-            
-            // Actualizar el estudiante con el nuevo historial
-            await updateDoc(doc(db, DB_MAIN, estudianteId), {
-                historial: historialActual,
-                meses: [], // Limpiar meses pendientes
-                total: 0 // Poner total en 0
-            });
-            
-            // Guardar en colección de historial general
-            await addDoc(collection(db, DB_HISTORIAL), {
-                ...registroHistorial,
-                estudianteId: estudianteId,
-                estudianteNombre: pagoData.nombreEst,
-                representante: pagoData.nombreRep
-            });
-            
-            // Eliminar el pago de la lista de pendientes
-            await deleteDoc(doc(db, DB_PAGOS, pagoDocId));
-            
-            alert("✅ Pago verificado y guardado en historial");
-            cerrarModalPago();
-        } else {
-            alert("No se encontró al estudiante en la base de datos");
-        }
-    };
-
-    // 2. PORTAL DEL REPRESENTANTE (MULTI-HIJOS)
+    // PORTAL DE PADRES
     window.consultarFamilia = async () => {
         const cedula = document.getElementById('cedula-consulta').value.trim();
         if(!cedula) {
@@ -1016,19 +1047,198 @@ Colegio Santiago de Jesús`;
         resultadosDiv.style.display = 'block';
     };
 
+    function getNivelAlerta(meses) {
+        const dia = new Date().getDate();
+        if (meses >= 3 || (meses >= 1 && dia > 10)) {
+            return { texto: "ALERTA URGENTE", clase: "urgente", tipo: "urgente" };
+        } else if (meses === 2) {
+            return { texto: "ALERTA NORMAL", clase: "normal", tipo: "normal" };
+        } else {
+            return { texto: "ALERTA PREVIA", clase: "previa", tipo: "previa" };
+        }
+    }
+
+    // 3. MÓDULO DE COBRANZA MEJORADO
+    window.enviarWhatsApp = (telefono, nombre, meses, monto) => {
+        const mensaje = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${nombre} debe ${meses} para un total de $${monto}.`;
+        window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    };
+
+    window.enviarGmailIndividual = (email, nombre, representante, monto, meses) => {
+        const asunto = "Recordatorio de Pago - Colegio Santiago de Jesús";
+        const cuerpo = `Estimado Sr(a) ${representante},
+
+Le escribimos del Colegio Santiago de Jesús para recordarle el pago pendiente:
+
+Estudiante: ${nombre}
+Meses pendientes: ${meses}
+Total adeudado: $${monto}
+
+Por favor regularizar su situación lo antes posible.
+
+Atentamente,
+Administración
+Colegio Santiago de Jesús`;
+        
+        window.location.href = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    };
+
+    window.enviarAvisoCritico = () => {
+        const dia = new Date().getDate();
+        if (dia < 10) {
+            alert("El aviso crítico solo se puede enviar a partir del día 10 del mes.");
+            return;
+        }
+
+        if(cachePendientes.length === 0) {
+            alert("No hay deudores para enviar aviso crítico.");
+            return;
+        }
+
+        const correos = cachePendientes
+            .filter(a => a.mail)
+            .map(a => a.mail)
+            .join(',');
+        
+        if(!correos) {
+            alert("No hay correos registrados para enviar aviso masivo.");
+            return;
+        }
+
+        const asunto = "AVISO CRÍTICO - Colegio Santiago de Jesús (Día " + dia + ")";
+        const cuerpo = `Estimados representantes,
+
+ESTE ES UN AVISO CRÍTICO DE COBRANZA
+
+A la fecha (día ${dia} del mes), su(s) representado(s) presenta(n) deuda pendiente en nuestra institución.
+
+Por favor acercarse a la administración a la mayor brevedad posible para regularizar su situación y evitar consecuencias académicas.
+
+Total de deudores en esta lista: ${cachePendientes.length}
+
+Atentamente,
+Administración
+Colegio Santiago de Jesús`;
+
+        window.location.href = `mailto:${correos}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    };
+
+    window.notifyAll = () => {
+        if(cachePendientes.length === 0) {
+            alert("No hay deudores para enviar recordatorios.");
+            return;
+        }
+
+        if(confirm(`¿Enviar correos individuales a ${cachePendientes.length} representantes?`)) {
+            cachePendientes.forEach((a, i) => { 
+                setTimeout(() => {
+                    if(a.mail) {
+                        enviarGmailIndividual(a.mail, a.nombre, a.rep, a.total, a.meses.join(', '));
+                    }
+                }, i * 1000);
+            });
+        }
+    };
+
+    // FUNCIONES DE VALIDACIÓN Y RECHAZO
+    window.validarPago = async function(id) {
+        const docRef = doc(db, DB_PAGOS, id);
+        const docSnap = await getDoc(docRef);
+        
+        if(!docSnap.exists()) {
+            alert("El pago no existe");
+            return;
+        }
+        
+        const pagoData = docSnap.data();
+        
+        const confirmacion = confirm(`¿Verificar el pago de ${pagoData.nombreEst}?\n\nMétodo: ${pagoData.metodo}\nReferencia: ${pagoData.referencia || 'N/A'}\nMonto: $${pagoData.montoDivisas || pagoData.monto || '0'}`);
+        
+        if(confirmacion) {
+            try {
+                const estudiantesQuery = query(collection(db, DB_MAIN), where("nombre", "==", pagoData.nombreEst));
+                const estudiantesSnap = await getDocs(estudiantesQuery);
+                
+                if(!estudiantesSnap.empty) {
+                    estudiantesSnap.forEach(async (estDoc) => {
+                        const estudianteData = estDoc.data();
+                        
+                        const registroHistorial = {
+                            fecha: new Date(),
+                            montoBs: pagoData.montoBs || 0,
+                            montoDolares: pagoData.montoDivisas || pagoData.monto || 0,
+                            metodoPago: pagoData.metodo || '',
+                            referencia: pagoData.referencia || '',
+                            banco: pagoData.banco || '',
+                            cuenta: pagoData.cuenta || '',
+                            mesesPagados: pagoData.mesesPagados || [],
+                            descripcion: `Pago verificado - ${pagoData.metodo || ''}`
+                        };
+                        
+                        const historialActual = estudianteData.historial || [];
+                        historialActual.push(registroHistorial);
+                        
+                        let nuevosMeses = estudianteData.meses || [];
+                        if(pagoData.mesesPagados && pagoData.mesesPagados.length > 0) {
+                            if(Array.isArray(pagoData.mesesPagados)) {
+                                nuevosMeses = nuevosMeses.filter(mes => !pagoData.mesesPagados.includes(mes));
+                            }
+                        }
+                        
+                        const nuevoTotal = (estudianteData.montoMensual || 0) * nuevosMeses.length;
+                        
+                        await updateDoc(doc(db, DB_MAIN, estDoc.id), {
+                            historial: historialActual,
+                            meses: nuevosMeses,
+                            total: nuevoTotal
+                        });
+                        
+                        await addDoc(collection(db, DB_HISTORIAL), {
+                            ...registroHistorial,
+                            estudianteId: estDoc.id,
+                            estudianteNombre: pagoData.nombreEst,
+                            representanteNombre: pagoData.nombreRep,
+                            cedulaRepresentante: pagoData.cedulaRep,
+                            reporteId: id,
+                            timestamp: new Date()
+                        });
+                    });
+                }
+                
+                await deleteDoc(docRef);
+                alert("✅ Pago verificado exitosamente");
+                
+            } catch (error) {
+                console.error("Error al verificar pago:", error);
+                alert("Error al verificar el pago: " + error.message);
+            }
+        }
+    };
+
+    window.rechazar = async(id, ref) => {
+        const motivo = prompt("Ingrese el motivo del rechazo (opcional):");
+        
+        if(motivo !== null) {
+            try {
+                await updateDoc(doc(db, DB_PAGOS, id), {
+                    estado: `Rechazado - ${motivo || 'Sin motivo especificado'}`
+                });
+                
+                alert("✅ Pago marcado como rechazado");
+                
+                if(confirm("¿Enviar correo al representante informando el rechazo?")) {
+                    window.location.href = `mailto:?subject=Rechazo de pago SDJ&body=La referencia ${ref} fue rechazada. Motivo: ${motivo || 'No especificado'}`;
+                }
+                
+            } catch (error) {
+                console.error("Error al rechazar pago:", error);
+                alert("Error al rechazar el pago");
+            }
+        }
+    };
+
     window.del = async(id) => { 
         if(confirm("¿Eliminar Alumno?")) await deleteDoc(doc(db, DB_MAIN, id)); 
-    };
-    
-    window.validar = async(id) => { 
-        if(confirm("¿Pago VERIFICADO?")) await deleteDoc(doc(db, DB_PAGOS, id)); 
-    };
-    
-    window.rechazar = async(id, ref) => {
-        if(confirm("¿Reportar como NO VERIFICADO?")) {
-            window.location.href = `mailto:?subject=Error Pago SDJ&body=Ref ${ref} no verificada.`;
-            await deleteDoc(doc(db, DB_PAGOS, id));
-        }
     };
 
     // Inicializar cálculo de total
@@ -1036,5 +1246,4 @@ Colegio Santiago de Jesús`;
 </script>
 </body>
 </html>
-
 
