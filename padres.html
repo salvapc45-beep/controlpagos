@@ -10,6 +10,8 @@
             --bg: #f8fafc; 
             --text: #0f172a;
             --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #eab308;
             --white: #ffffff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -22,26 +24,87 @@
         header h1 { color: var(--primary); font-size: 24px; font-weight: 800; }
         header p { color: #64748b; font-size: 14px; }
 
+        /* LOGIN */
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .login-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .login-icon {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
         /* CARDS */
         .card { background: var(--white); border-radius: 15px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         
         /* INPUTS */
         label { font-size: 13px; font-weight: bold; color: #475569; display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; margin-top: 5px; font-size: 16px; outline: none; transition: 0.3s; }
-        input:focus, select:focus { border-color: var(--primary); }
+        input, select, textarea { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; margin-top: 5px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
 
         /* BOTONES */
-        .btn-main { background: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; transition: transform 0.1s; }
+        .btn-main { background: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; transition: transform 0.1s, background 0.3s; }
+        .btn-main:hover { background: #1e40af; }
         .btn-main:active { transform: scale(0.98); }
-        .btn-secondary { background: #e2e8f0; color: #475569; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        
+        .btn-secondary { background: #e2e8f0; color: #475569; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; }
+        .btn-secondary:hover { background: #cbd5e1; }
+        
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.3s; }
+        .btn-outline:hover { background: var(--primary); color: white; }
 
         /* RESULTADOS */
         .student-card { border-left: 5px solid var(--primary); background: #f1f5f9; padding: 15px; margin-top: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .student-card:hover { background: #e2e8f0; }
         .student-card h3 { font-size: 18px; color: var(--primary); }
         .student-card p { font-size: 13px; color: #64748b; }
-        .debt-tag { background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
+        .debt-tag { background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; margin-right: 5px; }
         .solvente-tag { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
+        
+        .month-selector { margin: 10px 0; }
+        .month-checkbox { display: inline-block; margin: 5px; }
+        .month-checkbox input { width: auto; margin-right: 5px; }
+        
+        .alert-box { 
+            background: #fef3c7; 
+            border: 1px solid #fbbf24; 
+            color: #92400e; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+            font-size: 14px;
+        }
+        
+        .success-box { 
+            background: #d1fae5; 
+            border: 1px solid #10b981; 
+            color: #065f46; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+            font-size: 14px;
+        }
+        
+        .info-box { 
+            background: #dbeafe; 
+            border: 1px solid #3b82f6; 
+            color: #1e40af; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+            font-size: 14px;
+        }
 
         /* STEPS */
         .step { display: none; animation: fadeIn 0.4s; }
@@ -49,91 +112,218 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .loading { text-align: center; color: var(--primary); font-weight: bold; display: none; }
+        
+        /* TABLA */
+        .table-container { overflow-x: auto; margin: 15px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f1f5f9; padding: 10px; text-align: left; font-size: 12px; color: #475569; }
+        td { padding: 10px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+        
+        /* WELCOME MESSAGE */
+        .welcome-header { 
+            background: linear-gradient(135deg, #1e40af, #3b82f6); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-bottom: 20px;
+        }
+        
+        /* ERROR */
+        .error-message { 
+            background: #fee2e2; 
+            color: #b91c1c; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 15px 0; 
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>Portal de Pagos SDJ</h1>
-        <p>Consulta tu deuda y reporta tu pago</p>
-    </header>
-
+    <!-- PASO 1: LOGIN -->
     <div id="step-1" class="step active">
-        <div class="card">
-            <h3>🔍 Consultar Estudiante</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:15px">Ingrese la Cédula del Representante o el Nombre del Alumno.</p>
+        <header>
+            <h1>👨‍👩‍👧‍👦 Portal de Padres SDJ</h1>
+            <p>Sistema de Consulta y Reporte de Pagos</p>
+        </header>
+        
+        <div class="login-container">
+            <div class="login-header">
+                <span class="login-icon">🔐</span>
+                <h3>Acceso al Sistema</h3>
+            </div>
             
-            <label>Cédula o Nombre:</label>
-            <input type="text" id="search-input" placeholder="Ej: 12345678 o Juan Perez">
+            <div class="info-box">
+                <strong>⚠️ Importante:</strong> Ingrese la <strong>Cédula del Representante</strong> exactamente como fue registrada en el sistema administrativo.
+            </div>
             
-            <button class="btn-main" onclick="buscarAlumno()">CONSULTAR</button>
-            <div id="loading-msg" class="loading" style="margin-top:10px">Buscando...</div>
+            <label>Cédula del Representante:</label>
+            <input type="text" id="input-cedula" placeholder="Ej: 12345678" maxlength="10">
+            
+            <button class="btn-main" onclick="login()">INGRESAR AL SISTEMA</button>
+            <div id="loading-login" class="loading" style="margin-top:10px; display:none;">
+                <div style="display:inline-block; width:20px; height:20px; border:2px solid #1e3a8a; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-right:10px;"></div>
+                Verificando datos...
+            </div>
         </div>
-        <div id="results-area"></div>
+        
+        <div class="alert-box">
+            <strong>📌 Información:</strong> Si tiene problemas para acceder, comuníquese con la administración del colegio.
+        </div>
     </div>
 
+    <!-- PASO 2: LISTA DE HIJOS -->
     <div id="step-2" class="step">
-        <button class="btn-secondary" onclick="volver()">⬅ Volver a la búsqueda</button>
+        <div class="welcome-header">
+            <button class="btn-outline" onclick="logout()" style="width:auto; float:right; padding:5px 15px;">Cerrar Sesión</button>
+            <h2 id="welcome-name">Bienvenido(a)</h2>
+            <p id="welcome-cedula">Cédula: </p>
+        </div>
+        
+        <div class="card">
+            <h3>👨‍👩‍👧‍👦 Mis Hijos Registrados</h3>
+            <p style="font-size:12px; color:gray; margin-bottom:15px">Haga clic en un estudiante para ver detalles y reportar pagos.</p>
+            
+            <div id="hijos-lista"></div>
+        </div>
+        
+        <div class="alert-box">
+            <strong>📋 Recordatorio:</strong> Los pagos reportados serán verificados por la administración en un plazo de 24-48 horas.
+        </div>
+    </div>
+
+    <!-- PASO 3: DETALLE DEL ESTUDIANTE Y PAGO -->
+    <div id="step-3" class="step">
+        <button class="btn-secondary" onclick="volverAListaHijos()">⬅ Volver a la lista</button>
         
         <div class="card" style="margin-top:15px">
-            <h3 style="color:var(--primary)">Reportar Pago</h3>
-            <div style="background:#eff6ff; padding:10px; border-radius:8px; margin:10px 0; font-size:13px;">
-                Estudiante: <b id="form-est-name">...</b><br>
-                Deuda Total: <b id="form-deuda" style="color:#ef4444">...</b>
+            <h3 style="color:var(--primary)">📋 Detalle del Estudiante</h3>
+            <div id="estudiante-info" style="background:#eff6ff; padding:15px; border-radius:8px; margin:15px 0; font-size:14px;">
+                <!-- Información dinámica -->
             </div>
-
+            
+            <div class="month-selector" id="meses-container">
+                <!-- Meses pendientes dinámicos -->
+            </div>
+            
+            <div id="deuda-info" style="margin:15px 0;">
+                <!-- Información de deuda -->
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>💳 Reportar Pago</h3>
+            <div class="info-box">
+                <strong>📝 Instrucciones:</strong> Complete todos los campos según su comprobante de pago.
+            </div>
+            
             <form id="payment-form" onsubmit="enviarPago(event)">
                 <input type="hidden" id="input-id-doc">
                 <input type="hidden" id="input-nombre-est">
                 <input type="hidden" id="input-nombre-rep">
-
-                <label>Banco de Origen:</label>
-                <select id="input-banco" required>
+                <input type="hidden" id="input-cedula-rep">
+                <input type="hidden" id="input-meses-seleccionados" value="">
+                
+                <label>Método de Pago:</label>
+                <select id="input-metodo" required onchange="toggleMetodoPago()">
                     <option value="">Seleccione...</option>
-                    <option value="Banesco">Banesco</option>
-                    <option value="Mercantil">Mercantil</option>
-                    <option value="Provincial">Provincial</option>
-                    <option value="Venezuela">Banco de Venezuela</option>
-                    <option value="BNC">BNC</option>
-                    <option value="PagoMovil">Pago Móvil</option>
-                    <option value="Zelle">Zelle / Efectivo</option>
-                    <option value="Otro">Otro</option>
+                    <option value="Punto de Venta">Punto de Venta</option>
+                    <option value="Pago Móvil">Pago Móvil</option>
+                    <option value="Referencia Bancaria">Referencia Bancaria</option>
+                    <option value="Efectivo">Efectivo</option>
                 </select>
-
-                <label>Número de Referencia (Últimos 6 dígitos):</label>
-                <input type="number" id="input-ref" placeholder="Ej: 123456" required>
-
-                <label>Fecha de la Transferencia:</label>
-                <input type="date" id="input-fecha" required>
-
-                <label>Monto Transferido ($):</label>
-                <input type="number" id="input-monto" placeholder="0.00" step="0.01" required>
-
-                <label>Concepto / Meses a Pagar:</label>
-                <input type="text" id="input-concepto" placeholder="Ej: Septiembre y Octubre" required>
-
-                <button type="submit" class="btn-main" id="btn-submit">ENVIAR REPORTE</button>
+                
+                <div id="div-banco" style="display:none;">
+                    <label>Banco de Origen:</label>
+                    <select id="input-banco">
+                        <option value="">Seleccione...</option>
+                        <option value="Banesco">Banesco</option>
+                        <option value="Mercantil">Mercantil</option>
+                        <option value="Provincial">Provincial</option>
+                        <option value="Banco de Venezuela">Banco de Venezuela</option>
+                        <option value="BNC">BNC</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                
+                <div id="div-cuenta" style="display:none;">
+                    <label>Número de Cuenta/Cédula/RIF:</label>
+                    <input type="text" id="input-cuenta" placeholder="Ej: 12345678 o J-12345678-1">
+                </div>
+                
+                <div id="div-referencia" style="display:none;">
+                    <label>Número de Referencia:</label>
+                    <input type="text" id="input-ref" placeholder="Ej: 1234567890">
+                </div>
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label>Monto en Bolívares (Bs.):</label>
+                        <input type="number" id="input-monto-bs" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div style="flex:1;">
+                        <label>Monto en Dólares ($):</label>
+                        <input type="number" id="input-monto-usd" placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                </div>
+                
+                <label>Fecha de la Transacción:</label>
+                <input type="date" id="input-fecha" required value="">
+                
+                <label>Observaciones (Opcional):</label>
+                <textarea id="input-observaciones" rows="3" placeholder="Alguna información adicional..."></textarea>
+                
+                <div class="alert-box">
+                    <strong>✅ Confirmación:</strong> Al enviar este reporte, automáticamente se registrarán los meses seleccionados como "pagados" en el sistema.
+                </div>
+                
+                <button type="submit" class="btn-main" id="btn-submit">📤 ENVIAR REPORTE DE PAGO</button>
+                <div id="loading-submit" class="loading" style="margin-top:10px; display:none;">Enviando reporte...</div>
             </form>
         </div>
     </div>
     
-    <div id="step-3" class="step" style="text-align: center;">
+    <!-- PASO 4: CONFIRMACIÓN -->
+    <div id="step-4" class="step" style="text-align: center;">
         <div class="card">
-            <div style="font-size: 50px;">✅</div>
-            <h3 style="color:var(--green)">¡Reporte Enviado!</h3>
-            <p style="color:#64748b; margin-top:10px">Tu pago ha sido enviado a la administración para su validación.</p>
-            <button class="btn-main" onclick="location.reload()">Hacer otro reporte</button>
+            <div style="font-size: 50px; color: var(--green);">✅</div>
+            <h3 style="color:var(--green)">¡Reporte Enviado Exitosamente!</h3>
+            
+            <div class="success-box" style="margin: 20px 0;">
+                <strong>📋 Resumen del Reporte:</strong><br>
+                <div id="resumen-reporte"></div>
+            </div>
+            
+            <p style="color:#64748b; margin-top:10px">Su pago ha sido registrado y será verificado por la administración en breve.</p>
+            
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-secondary" onclick="volverAListaHijos()">Ver mis hijos</button>
+                <button class="btn-main" onclick="location.reload()">Hacer otro reporte</button>
+            </div>
         </div>
     </div>
 
 </div>
 
 <script type="module">
-    // CONEXIÓN EXACTA A TU FIREBASE
+    // CONEXIÓN A TU FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { 
+        getFirestore, 
+        collection, 
+        addDoc, 
+        query, 
+        where, 
+        getDocs,
+        updateDoc,
+        doc,
+        arrayUnion,
+        arrayRemove 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Configuración de tu Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
         authDomain: "reportedepagos-d8485.firebaseapp.com",
@@ -146,121 +336,396 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // COLECCIONES (Mismas que tu admin)
-    const DB_MAIN = "sdj_final_v11"; 
+    // COLECCIONES (Actualizadas a V16)
+    const DB_MAIN = "sdj_final_v16"; 
     const DB_PAGOS = "pagos_reportados";
+    const DB_HISTORIAL = "historial_pagos";
 
-    // --- FUNCIONES DEL SISTEMA ---
+    // Variables globales
+    let cedulaActual = "";
+    let representanteActual = "";
+    let hijosActuales = [];
+    let estudianteSeleccionado = null;
+    let mesesSeleccionadosPago = [];
 
-    window.buscarAlumno = async () => {
-        const val = document.getElementById('search-input').value.trim();
-        const area = document.getElementById('results-area');
-        const loader = document.getElementById('loading-msg');
+    // Establecer fecha actual por defecto
+    document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
+
+    // Función para alternar campos según método de pago
+    window.toggleMetodoPago = function() {
+        const metodo = document.getElementById('input-metodo').value;
+        const divBanco = document.getElementById('div-banco');
+        const divCuenta = document.getElementById('div-cuenta');
+        const divReferencia = document.getElementById('div-referencia');
         
-        if(val.length < 3) { alert("Por favor escribe al menos 3 letras o números"); return; }
-        
-        area.innerHTML = "";
-        loader.style.display = "block";
-
-        try {
-            // BUSCAMOS POR NOMBRE DE ALUMNO O CEDULA (Si existe el campo)
-            // Firebase no permite búsquedas "OR" nativas fáciles, así que haremos una lógica simple:
-            // Buscaremos por nombre primero. (Nota: Es Case Sensitive, así que intentaremos manejarlo).
-            
-            // 1. Intentar buscar coincidencia exacta de nombre
-            const qByName = query(collection(db, DB_MAIN), where("nombre", "==", val));
-            // 2. Intentar buscar por cedula_rep (si la agregaste)
-            const qByCed = query(collection(db, DB_MAIN), where("cedula_rep", "==", val));
-
-            const [snapName, snapCed] = await Promise.all([getDocs(qByName), getDocs(qByCed)]);
-            
-            let resultados = [];
-            snapName.forEach(d => resultados.push({id: d.id, ...d.data()}));
-            snapCed.forEach(d => {
-                // Evitar duplicados si encuentra por ambos lados
-                if(!resultados.find(r => r.id === d.id)) resultados.push({id: d.id, ...d.data()});
-            });
-
-            // Si no hay resultados exactos, alerta (Firebase básico no tiene "LIKE/Contains" gratis fácilmente)
-            if(resultados.length === 0) {
-                area.innerHTML = `<p style="text-align:center; color:red; margin-top:20px">No se encontraron alumnos. <br><small>Intenta escribir el <b>Nombre Completo</b> tal cual aparece en el sistema.</small></p>`;
-            } else {
-                resultados.forEach(alumno => {
-                    const precio = parseFloat(alumno.montoMensual) || 0;
-                    const meses = alumno.meses || [];
-                    const deuda = meses.length * precio;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'student-card';
-                    div.innerHTML = `
-                        <h3>${alumno.nombre}</h3>
-                        <p>${alumno.grado} "${alumno.seccion}"</p>
-                        ${deuda > 0 
-                            ? `<span class="debt-tag">Deuda: $${deuda.toFixed(2)} (${meses.length} meses)</span>` 
-                            : `<span class="solvente-tag">¡SOLVENTE!</span>`
-                        }
-                    `;
-                    div.onclick = () => seleccionarAlumno(alumno, deuda);
-                    area.appendChild(div);
-                });
-            }
-
-        } catch (e) {
-            console.error(e);
-            alert("Error de conexión");
+        switch(metodo) {
+            case 'Pago Móvil':
+                divBanco.style.display = 'block';
+                divCuenta.style.display = 'block';
+                divReferencia.style.display = 'block';
+                document.getElementById('input-banco').required = true;
+                document.getElementById('input-cuenta').required = true;
+                document.getElementById('input-ref').required = true;
+                break;
+            case 'Referencia Bancaria':
+                divBanco.style.display = 'block';
+                divCuenta.style.display = 'none';
+                divReferencia.style.display = 'block';
+                document.getElementById('input-banco').required = true;
+                document.getElementById('input-cuenta').required = false;
+                document.getElementById('input-ref').required = true;
+                break;
+            case 'Punto de Venta':
+            case 'Efectivo':
+                divBanco.style.display = 'none';
+                divCuenta.style.display = 'none';
+                divReferencia.style.display = 'none';
+                document.getElementById('input-banco').required = false;
+                document.getElementById('input-cuenta').required = false;
+                document.getElementById('input-ref').required = false;
+                break;
+            default:
+                divBanco.style.display = 'none';
+                divCuenta.style.display = 'none';
+                divReferencia.style.display = 'none';
         }
-        loader.style.display = "none";
     };
 
-    window.seleccionarAlumno = (alumno, deuda) => {
-        // Llenar datos ocultos y visuales
-        document.getElementById('form-est-name').innerText = alumno.nombre;
-        document.getElementById('form-deuda').innerText = `$${deuda.toFixed(2)}`;
+    // LOGIN CON CÉDULA
+    window.login = async function() {
+        const cedula = document.getElementById('input-cedula').value.trim();
+        const loader = document.getElementById('loading-login');
         
-        document.getElementById('input-id-doc').value = alumno.id;
-        document.getElementById('input-nombre-est').value = alumno.nombre;
-        document.getElementById('input-nombre-rep').value = alumno.rep || "No especificado";
+        if(!cedula) {
+            alert("Por favor ingrese su cédula");
+            return;
+        }
         
-        // Cambiar vista
-        document.getElementById('step-1').classList.remove('active');
+        if(cedula.length < 6) {
+            alert("La cédula debe tener al menos 6 dígitos");
+            return;
+        }
+        
+        loader.style.display = "block";
+        
+        try {
+            // Buscar todos los estudiantes con esta cédula
+            const q = query(collection(db, DB_MAIN), where("cedula", "==", cedula));
+            const querySnapshot = await getDocs(q);
+            
+            if(querySnapshot.empty) {
+                // Intentar con "cedula_rep" si no hay resultados
+                const q2 = query(collection(db, DB_MAIN), where("cedula_rep", "==", cedula));
+                const querySnapshot2 = await getDocs(q2);
+                
+                if(querySnapshot2.empty) {
+                    document.getElementById('step-1').innerHTML += `
+                        <div class="error-message">
+                            ❌ No se encontraron estudiantes asociados a esta cédula.<br>
+                            <small>Verifique que la cédula sea correcta o contacte a la administración.</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                hijosActuales = [];
+                querySnapshot2.forEach(doc => {
+                    const data = doc.data();
+                    hijosActuales.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+            } else {
+                hijosActuales = [];
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    hijosActuales.push({
+                        id: doc.id,
+                        ...data
+                    });
+                });
+            }
+            
+            if(hijosActuales.length > 0) {
+                cedulaActual = cedula;
+                representanteActual = hijosActuales[0].rep || "Representante";
+                
+                // Actualizar interfaz
+                document.getElementById('welcome-name').innerHTML = `Bienvenido(a), <strong>${representanteActual}</strong>`;
+                document.getElementById('welcome-cedula').innerHTML = `Cédula: ${cedula}`;
+                
+                mostrarListaHijos();
+                
+                // Cambiar a paso 2
+                document.getElementById('step-1').classList.remove('active');
+                document.getElementById('step-2').classList.add('active');
+            }
+            
+        } catch (error) {
+            console.error("Error en login:", error);
+            alert("Error al conectar con la base de datos. Intente nuevamente.");
+        } finally {
+            loader.style.display = "none";
+        }
+    };
+
+    // MOSTRAR LISTA DE HIJOS
+    function mostrarListaHijos() {
+        const listaDiv = document.getElementById('hijos-lista');
+        listaDiv.innerHTML = "";
+        
+        if(hijosActuales.length === 0) {
+            listaDiv.innerHTML = '<p style="text-align:center; color:gray; padding:20px;">No se encontraron estudiantes</p>';
+            return;
+        }
+        
+        hijosActuales.forEach((hijo, index) => {
+            const montoMensual = parseFloat(hijo.montoMensual) || 0;
+            const meses = hijo.meses || [];
+            const totalDeuda = montoMensual * meses.length;
+            const esSolvente = meses.length === 0;
+            
+            const card = document.createElement('div');
+            card.className = 'student-card';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div>
+                        <h3>${hijo.nombre}</h3>
+                        <p>${hijo.grado} - Sección ${hijo.seccion}</p>
+                        ${!esSolvente ? 
+                            `<span class="debt-tag">$${totalDeuda.toFixed(2)}</span>
+                             <span class="debt-tag">${meses.length} mes(es)</span>` :
+                            `<span class="solvente-tag">AL DÍA</span>`
+                        }
+                    </div>
+                    <button onclick="seleccionarEstudiante(${index})" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:6px; font-size:12px; cursor:pointer;">
+                        Ver detalles
+                    </button>
+                </div>
+            `;
+            
+            listaDiv.appendChild(card);
+        });
+    }
+
+    // SELECCIONAR ESTUDIANTE
+    window.seleccionarEstudiante = function(index) {
+        estudianteSeleccionado = hijosActuales[index];
+        mostrarDetalleEstudiante();
+        
+        // Cambiar a paso 3
+        document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-3').classList.add('active');
+    };
+
+    // MOSTRAR DETALLE DEL ESTUDIANTE
+    function mostrarDetalleEstudiante() {
+        const estudiante = estudianteSeleccionado;
+        const montoMensual = parseFloat(estudiante.montoMensual) || 0;
+        const meses = estudiante.meses || [];
+        const totalDeuda = montoMensual * meses.length;
+        
+        // Información del estudiante
+        document.getElementById('estudiante-info').innerHTML = `
+            <strong>Estudiante:</strong> ${estudiante.nombre}<br>
+            <strong>Grado:</strong> ${estudiante.grado} - Sección ${estudiante.seccion}<br>
+            <strong>Representante:</strong> ${estudiante.rep}<br>
+            <strong>Cédula:</strong> ${estudiante.cedula || 'No registrada'}<br>
+            <strong>Teléfono:</strong> ${estudiante.tel || 'No registrado'}<br>
+            <strong>Monto Mensual:</strong> $${montoMensual.toFixed(2)}
+        `;
+        
+        // Llenar campos ocultos del formulario
+        document.getElementById('input-id-doc').value = estudiante.id;
+        document.getElementById('input-nombre-est').value = estudiante.nombre;
+        document.getElementById('input-nombre-rep').value = estudiante.rep;
+        document.getElementById('input-cedula-rep').value = estudiante.cedula || '';
+        
+        // Mostrar meses pendientes para selección
+        const mesesContainer = document.getElementById('meses-container');
+        if(meses.length > 0) {
+            mesesContainer.innerHTML = `
+                <label>Seleccione los meses que está pagando:</label><br>
+                ${meses.map((mes, i) => `
+                    <label class="month-checkbox">
+                        <input type="checkbox" value="${mes}" onchange="actualizarMesesSeleccionados()">
+                        ${mes}
+                    </label>
+                `).join('')}
+            `;
+            
+            document.getElementById('deuda-info').innerHTML = `
+                <div style="background:#fef3c7; padding:15px; border-radius:8px; margin:10px 0;">
+                    <strong>💰 Deuda Actual:</strong> $${totalDeuda.toFixed(2)}<br>
+                    <strong>📅 Meses Pendientes:</strong> ${meses.length}<br>
+                    <small>Seleccione los meses que cancelará con este pago.</small>
+                </div>
+            `;
+        } else {
+            mesesContainer.innerHTML = '<div class="success-box">✅ Este estudiante está al día, no tiene meses pendientes.</div>';
+            document.getElementById('deuda-info').innerHTML = '';
+        }
+    };
+
+    // ACTUALIZAR MESES SELECCIONADOS PARA PAGO
+    window.actualizarMesesSeleccionados = function() {
+        const checkboxes = document.querySelectorAll('#meses-container input[type="checkbox"]:checked');
+        mesesSeleccionadosPago = Array.from(checkboxes).map(cb => cb.value);
+        document.getElementById('input-meses-seleccionados').value = mesesSeleccionadosPago.join(', ');
+    };
+
+    // VOLVER A LISTA DE HIJOS
+    window.volverAListaHijos = function() {
+        document.getElementById('step-3').classList.remove('active');
+        document.getElementById('step-4').classList.remove('active');
         document.getElementById('step-2').classList.add('active');
     };
 
-    window.volver = () => {
+    // LOGOUT
+    window.logout = function() {
+        cedulaActual = "";
+        representanteActual = "";
+        hijosActuales = [];
+        estudianteSeleccionado = null;
+        
         document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-3').classList.remove('active');
+        document.getElementById('step-4').classList.remove('active');
         document.getElementById('step-1').classList.add('active');
+        
+        document.getElementById('input-cedula').value = "";
     };
 
-    window.enviarPago = async (e) => {
+    // ENVIAR REPORTE DE PAGO
+    window.enviarPago = async function(e) {
         e.preventDefault();
+        
         const btn = document.getElementById('btn-submit');
+        const loader = document.getElementById('loading-submit');
+        
+        // Validaciones
+        if(mesesSeleccionadosPago.length === 0 && estudianteSeleccionado.meses.length > 0) {
+            alert("Por favor seleccione al menos un mes que está pagando");
+            return;
+        }
+        
+        const montoUSD = parseFloat(document.getElementById('input-monto-usd').value) || 0;
+        if(montoUSD <= 0) {
+            alert("Por favor ingrese un monto en dólares válido");
+            return;
+        }
+        
         btn.disabled = true;
-        btn.innerText = "Enviando...";
-
+        loader.style.display = "block";
+        
         try {
-            await addDoc(collection(db, DB_PAGOS), {
+            // 1. Guardar el reporte de pago en la colección de pagos_reportados
+            const metodo = document.getElementById('input-metodo').value;
+            const banco = document.getElementById('input-banco').value;
+            const cuenta = document.getElementById('input-cuenta').value;
+            const referencia = document.getElementById('input-ref').value;
+            const montoBs = parseFloat(document.getElementById('input-monto-bs').value) || 0;
+            const fecha = document.getElementById('input-fecha').value;
+            const observaciones = document.getElementById('input-observaciones').value;
+            
+            const reporteData = {
                 nombreEst: document.getElementById('input-nombre-est').value,
                 nombreRep: document.getElementById('input-nombre-rep').value,
-                banco: document.getElementById('input-banco').value,
-                referencia: document.getElementById('input-ref').value,
-                montoDivisas: parseFloat(document.getElementById('input-monto').value),
-                fechaPago: document.getElementById('input-fecha').value,
-                concepto: document.getElementById('input-concepto').value,
-                estado: "Pendiente",
+                cedulaRep: document.getElementById('input-cedula-rep').value,
+                metodo: metodo,
+                banco: banco,
+                referencia: referencia,
+                cuenta: cuenta,
+                montoBs: montoBs,
+                montoDivisas: montoUSD,
+                fechaPago: fecha,
+                observaciones: observaciones,
+                mesesPagados: mesesSeleccionadosPago,
+                estado: "Pendiente de verificación",
                 timestamp: new Date()
-            });
-
-            document.getElementById('step-2').classList.remove('active');
-            document.getElementById('step-3').classList.add('active');
-
+            };
+            
+            // Guardar en pagos_reportados
+            const docRef = await addDoc(collection(db, DB_PAGOS), reporteData);
+            
+            // 2. Si se seleccionaron meses, actualizar al estudiante quitando esos meses
+            if(mesesSeleccionadosPago.length > 0 && estudianteSeleccionado) {
+                const estudianteRef = doc(db, DB_MAIN, estudianteSeleccionado.id);
+                
+                // Remover los meses pagados del array de meses pendientes
+                const nuevosMeses = estudianteSeleccionado.meses.filter(mes => !mesesSeleccionadosPago.includes(mes));
+                
+                // Calcular nuevo total
+                const nuevoTotal = (estudianteSeleccionado.montoMensual || 0) * nuevosMeses.length;
+                
+                // Actualizar en Firebase
+                await updateDoc(estudianteRef, {
+                    meses: nuevosMeses,
+                    total: nuevoTotal
+                });
+                
+                // 3. Guardar en historial de pagos
+                const historialData = {
+                    estudianteId: estudianteSeleccionado.id,
+                    estudianteNombre: estudianteSeleccionado.nombre,
+                    representanteNombre: estudianteSeleccionado.rep,
+                    cedulaRepresentante: estudianteSeleccionado.cedula,
+                    metodoPago: metodo,
+                    banco: banco,
+                    referencia: referencia,
+                    cuenta: cuenta,
+                    montoBs: montoBs,
+                    montoDolares: montoUSD,
+                    mesesPagados: mesesSeleccionadosPago,
+                    fechaPago: fecha,
+                    observaciones: observaciones,
+                    reporteId: docRef.id,
+                    timestamp: new Date()
+                };
+                
+                await addDoc(collection(db, DB_HISTORIAL), historialData);
+            }
+            
+            // Mostrar resumen
+            const resumen = `
+                <strong>Estudiante:</strong> ${reporteData.nombreEst}<br>
+                <strong>Método:</strong> ${reporteData.metodo}<br>
+                ${reporteData.banco ? `<strong>Banco:</strong> ${reporteData.banco}<br>` : ''}
+                ${reporteData.referencia ? `<strong>Referencia:</strong> ${reporteData.referencia}<br>` : ''}
+                <strong>Monto en $:</strong> $${reporteData.montoDivisas.toFixed(2)}<br>
+                ${reporteData.montoBs > 0 ? `<strong>Monto en Bs:</strong> Bs. ${reporteData.montoBs.toFixed(2)}<br>` : ''}
+                <strong>Meses pagados:</strong> ${mesesSeleccionadosPago.join(', ') || 'Ninguno seleccionado'}<br>
+                <strong>Fecha:</strong> ${new Date(reporteData.fechaPago).toLocaleDateString('es-ES')}
+            `;
+            
+            document.getElementById('resumen-reporte').innerHTML = resumen;
+            
+            // Cambiar a paso 4
+            document.getElementById('step-3').classList.remove('active');
+            document.getElementById('step-4').classList.add('active');
+            
         } catch (error) {
-            console.error(error);
-            alert("Error al enviar el reporte. Intente nuevamente.");
+            console.error("Error al enviar pago:", error);
+            alert("Error al enviar el reporte. Por favor intente nuevamente.");
+        } finally {
             btn.disabled = false;
-            btn.innerText = "ENVIAR REPORTE";
+            loader.style.display = "none";
         }
     };
+
+    // Estilos para animación de spinner
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
 </script>
 
 </body>
 </html>
+
