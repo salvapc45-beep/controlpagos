@@ -3,115 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA SDJ V9 - CONTROL DE ALERTAS</title>
+    <title>Portal de Pagos - Colegio SDJ</title>
     <style>
         :root {
-            --primary: #1e3a8a; --accent: #3b82f6; --bg: #f8fafc;
-            --folder: #fcd34d; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --primary: #1e3a8a; 
+            --bg: #f8fafc; 
+            --text: #0f172a;
+            --green: #22c55e;
+            --white: #ffffff;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--bg); color: #1e293b; padding-bottom: 50px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-        header { background: var(--primary); color: white; padding: 25px; text-align: center; font-weight: bold; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .container { width: 100%; max-width: 500px; }
+
+        /* HEADER */
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { color: var(--primary); font-size: 24px; font-weight: 800; }
+        header p { color: #64748b; font-size: 14px; }
+
+        /* CARDS */
+        .card { background: var(--white); border-radius: 15px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         
-        /* NAVEGACIÓN */
-        nav { display: flex; background: white; position: sticky; top: 0; z-index: 1000; overflow-x: auto; border-bottom: 2px solid #e2e8f0; }
-        .nav-btn { flex: 1; min-width: 100px; padding: 18px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 10px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; }
-        .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
+        /* INPUTS */
+        label { font-size: 13px; font-weight: bold; color: #475569; display: block; margin-top: 10px; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; margin-top: 5px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--primary); }
 
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-        .modulo { display: none; }
-        .modulo.active { display: block; animation: fadeIn 0.3s; }
+        /* BOTONES */
+        .btn-main { background: var(--primary); color: white; width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; transition: transform 0.1s; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-secondary { background: #e2e8f0; color: #475569; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
 
-        /* BOTONES DE ACCIÓN */
-        .btn-mass-action { background: #2563eb; color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
+        /* RESULTADOS */
+        .student-card { border-left: 5px solid var(--primary); background: #f1f5f9; padding: 15px; margin-top: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .student-card:hover { background: #e2e8f0; }
+        .student-card h3 { font-size: 18px; color: var(--primary); }
+        .student-card p { font-size: 13px; color: #64748b; }
+        .debt-tag { background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
+        .solvente-tag { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
+
+        /* STEPS */
+        .step { display: none; animation: fadeIn 0.4s; }
+        .step.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* TARJETAS DE ALUMNO */
-        .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .grado-header { background: #0f172a; color: white; padding: 12px 18px; border-radius: 10px; margin: 30px 0 15px 0; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-
-        .student-box { display: flex; justify-content: space-between; align-items: center; background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; transition: 0.2s; }
-        
-        /* ESTADOS DE ALERTA */
-        .alerta-previa { border-left: 8px solid var(--success); }   /* 1 mes, antes del 10 */
-        .alerta-normal { border-left: 8px solid var(--warning); }   /* 2 meses */
-        .alerta-urgente { border-left: 8px solid var(--danger); }   /* 3+ meses o después del 10 */
-
-        .badge { font-size: 9px; padding: 3px 8px; border-radius: 5px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
-        .badge-previa { background: #dcfce7; color: #166534; }
-        .badge-normal { background: #fef9c3; color: #854d0e; }
-        .badge-urgente { background: #fee2e2; color: #991b1b; }
-
-        .info b { font-size: 16px; display: block; color: var(--primary); }
-        .info span { font-size: 13px; color: #64748b; }
-
-        .tag-mes { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 4px; border: 1px solid #e2e8f0; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .loading { text-align: center; color: var(--primary); font-weight: bold; display: none; }
     </style>
 </head>
 <body>
 
-<header>SDJ - GESTIÓN ADMINISTRATIVA V9</header>
-
-<nav>
-    <div class="nav-btn active" onclick="showTab('reg')">1. Registro</div>
-    <div class="nav-btn" onclick="showTab('arch')">2. Archivos</div>
-    <div class="nav-btn" onclick="showTab('pend')">3. Pendientes</div>
-    <div class="nav-btn" onclick="showTab('solv')">4. Solventes</div>
-    <div class="nav-btn" onclick="showTab('valid')">5. Reportes</div>
-</nav>
-
 <div class="container">
+    <header>
+        <h1>Portal de Pagos SDJ</h1>
+        <p>Consulta tu deuda y reporta tu pago</p>
+    </header>
 
-    <section id="tab-reg" class="modulo active">
+    <div id="step-1" class="step active">
         <div class="card">
-            <h3>Registrar Alumno / Deuda</h3>
-            <input type="text" id="nomEst" placeholder="Nombre Estudiante" style="width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ccc;">
-            <input type="text" id="nomRep" placeholder="Nombre Representante" style="width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ccc;">
-            <input type="email" id="mailRep" placeholder="Correo de contacto" style="width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ccc;">
+            <h3>🔍 Consultar Estudiante</h3>
+            <p style="font-size:12px; color:gray; margin-bottom:15px">Ingrese la Cédula del Representante o el Nombre del Alumno.</p>
             
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <select id="gradoEst" style="flex:2; padding:12px; border-radius:8px;">
-                    <option>5to Año</option><option>4to Año</option><option>3er Año</option><option>2do Año</option><option>1er Año</option>
-                    <option>6to Grado</option><option>5to Grado</option><option>4to Grado</option><option>3er Grado</option><option>2do Grado</option><option>1er Grado</option>
-                    <option>Preescolar 3</option><option>Preescolar 2</option><option>Preescolar 1</option><option>Maternal</option>
-                </select>
-                <select id="secEst" style="flex:1; padding:12px; border-radius:8px;">
-                    <option>A</option><option>B</option>
-                </select>
+            <label>Cédula o Nombre:</label>
+            <input type="text" id="search-input" placeholder="Ej: 12345678 o Juan Perez">
+            
+            <button class="btn-main" onclick="buscarAlumno()">CONSULTAR</button>
+            <div id="loading-msg" class="loading" style="margin-top:10px">Buscando...</div>
+        </div>
+        <div id="results-area"></div>
+    </div>
+
+    <div id="step-2" class="step">
+        <button class="btn-secondary" onclick="volver()">⬅ Volver a la búsqueda</button>
+        
+        <div class="card" style="margin-top:15px">
+            <h3 style="color:var(--primary)">Reportar Pago</h3>
+            <div style="background:#eff6ff; padding:10px; border-radius:8px; margin:10px 0; font-size:13px;">
+                Estudiante: <b id="form-est-name">...</b><br>
+                Deuda Total: <b id="form-deuda" style="color:#ef4444">...</b>
             </div>
 
-            <label style="display:block; margin-top:15px; font-weight:bold; font-size:12px;">Seleccione Meses:</label>
-            <select id="mesesEst" multiple style="width:100%; height:120px; margin-top:5px; padding:10px; border-radius:8px;">
-                <option value="Inscripción">Inscripción</option>
-                <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
-                <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option>
-                <option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option>
-            </select>
-            
-            <input type="number" id="montoEst" placeholder="Monto Mensual $" style="width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ccc;">
-            
-            <button onclick="dbSave()" style="width:100%; padding:18px; background:var(--primary); color:white; border:none; border-radius:12px; margin-top:20px; font-weight:bold; cursor:pointer;">GUARDAR ESTUDIANTE</button>
+            <form id="payment-form" onsubmit="enviarPago(event)">
+                <input type="hidden" id="input-id-doc">
+                <input type="hidden" id="input-nombre-est">
+                <input type="hidden" id="input-nombre-rep">
+
+                <label>Banco de Origen:</label>
+                <select id="input-banco" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Banesco">Banesco</option>
+                    <option value="Mercantil">Mercantil</option>
+                    <option value="Provincial">Provincial</option>
+                    <option value="Venezuela">Banco de Venezuela</option>
+                    <option value="BNC">BNC</option>
+                    <option value="PagoMovil">Pago Móvil</option>
+                    <option value="Zelle">Zelle / Efectivo</option>
+                    <option value="Otro">Otro</option>
+                </select>
+
+                <label>Número de Referencia (Últimos 6 dígitos):</label>
+                <input type="number" id="input-ref" placeholder="Ej: 123456" required>
+
+                <label>Fecha de la Transferencia:</label>
+                <input type="date" id="input-fecha" required>
+
+                <label>Monto Transferido ($):</label>
+                <input type="number" id="input-monto" placeholder="0.00" step="0.01" required>
+
+                <label>Concepto / Meses a Pagar:</label>
+                <input type="text" id="input-concepto" placeholder="Ej: Septiembre y Octubre" required>
+
+                <button type="submit" class="btn-main" id="btn-submit">ENVIAR REPORTE</button>
+            </form>
         </div>
-    </section>
-
-    <section id="tab-pend" class="modulo">
-        <button class="btn-mass-action" onclick="alertarMasivo()">
-            📩 ENVIAR NOTIFICACIÓN A TODOS (Según Alerta)
-        </button>
-        <div id="renderPendientes"></div>
-    </section>
-
-    <section id="tab-solv" class="modulo"><div class="card" id="renderSolventes"></div></section>
-    <section id="tab-arch" class="modulo"><div class="card">Módulo de Archivos (Configurado)</div></section>
-    <section id="tab-valid" class="modulo"><div class="card">Módulo de Reportes (Configurado)</div></section>
+    </div>
+    
+    <div id="step-3" class="step" style="text-align: center;">
+        <div class="card">
+            <div style="font-size: 50px;">✅</div>
+            <h3 style="color:var(--green)">¡Reporte Enviado!</h3>
+            <p style="color:#64748b; margin-top:10px">Tu pago ha sido enviado a la administración para su validación.</p>
+            <button class="btn-main" onclick="location.reload()">Hacer otro reporte</button>
+        </div>
+    </div>
 
 </div>
 
 <script type="module">
+    // CONEXIÓN EXACTA A TU FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
@@ -124,103 +145,122 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const COLEC = "alumnos_v9_alertas";
 
-    const GRADOS_ORDEN = ["5to Año", "4to Año", "3er Año", "2do Año", "1er Año", "6to Grado", "5to Grado", "4to Grado", "3er Grado", "2do Grado", "1er Grado", "Preescolar 3", "Preescolar 2", "Preescolar 1", "Maternal"];
+    // COLECCIONES (Mismas que tu admin)
+    const DB_MAIN = "sdj_final_v11"; 
+    const DB_PAGOS = "pagos_reportados";
 
-    window.showTab = (id) => {
-        document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-'+id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    };
+    // --- FUNCIONES DEL SISTEMA ---
 
-    window.dbSave = async () => {
-        const ms = Array.from(document.getElementById('mesesEst').selectedOptions).map(o => o.value);
-        const data = {
-            nombre: document.getElementById('nomEst').value,
-            rep: document.getElementById('nomRep').value,
-            mail: document.getElementById('mailRep').value,
-            grado: document.getElementById('gradoEst').value,
-            sec: document.getElementById('secEst').value,
-            meses: ms,
-            total: ms.length * (parseFloat(document.getElementById('montoEst').value) || 0)
-        };
-        await addDoc(collection(db, COLEC), data);
-        alert("¡Estudiante Guardado!"); location.reload();
-    };
+    window.buscarAlumno = async () => {
+        const val = document.getElementById('search-input').value.trim();
+        const area = document.getElementById('results-area');
+        const loader = document.getElementById('loading-msg');
+        
+        if(val.length < 3) { alert("Por favor escribe al menos 3 letras o números"); return; }
+        
+        area.innerHTML = "";
+        loader.style.display = "block";
 
-    let cacheDeudores = [];
+        try {
+            // BUSCAMOS POR NOMBRE DE ALUMNO O CEDULA (Si existe el campo)
+            // Firebase no permite búsquedas "OR" nativas fáciles, así que haremos una lógica simple:
+            // Buscaremos por nombre primero. (Nota: Es Case Sensitive, así que intentaremos manejarlo).
+            
+            // 1. Intentar buscar coincidencia exacta de nombre
+            const qByName = query(collection(db, DB_MAIN), where("nombre", "==", val));
+            // 2. Intentar buscar por cedula_rep (si la agregaste)
+            const qByCed = query(collection(db, DB_MAIN), where("cedula_rep", "==", val));
 
-    onSnapshot(collection(db, COLEC), (snap) => {
-        const divP = document.getElementById('renderPendientes');
-        const divS = document.getElementById('renderSolventes');
-        divP.innerHTML = ""; divS.innerHTML = "<h3>Estudiantes Solventes</h3>";
-        cacheDeudores = [];
+            const [snapName, snapCed] = await Promise.all([getDocs(qByName), getDocs(qByCed)]);
+            
+            let resultados = [];
+            snapName.forEach(d => resultados.push({id: d.id, ...d.data()}));
+            snapCed.forEach(d => {
+                // Evitar duplicados si encuentra por ambos lados
+                if(!resultados.find(r => r.id === d.id)) resultados.push({id: d.id, ...d.data()});
+            });
 
-        let base = [];
-        snap.forEach(d => base.push({ ...d.data(), id: d.id }));
-
-        GRADOS_ORDEN.forEach(grado => {
-            const grupo = base.filter(a => a.grado === grado && a.meses.length > 0);
-            if(grupo.length > 0) {
-                divP.innerHTML += `<div class="grado-header">${grado}</div>`;
-                grupo.forEach(a => {
-                    const tipo = getAlertaInfo(a.meses.length);
-                    cacheDeudores.push({ ...a, alertaTipo: tipo.key });
-                    divP.innerHTML += `
-                        <div class="student-box alerta-${tipo.clase}">
-                            <div class="info">
-                                <span class="badge badge-${tipo.clase}">${tipo.label}</span>
-                                <b>${a.nombre} (${a.sec})</b>
-                                <span>Rep: ${a.rep}</span>
-                                <div style="margin-top:5px">${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
-                            </div>
-                            <div style="text-align:right">
-                                <b style="color:red; font-size:20px;">$${a.total}</b><br>
-                                <button onclick="sendMail('${a.mail}', '${a.nombre}', '${tipo.key}')" style="background:none; border:none; cursor:pointer; font-size:22px;">✉️</button>
-                                <br><button onclick="elim('${a.id}')" style="color:gray; font-size:9px; border:none; background:none; cursor:pointer; margin-top:10px;">Eliminar</button>
-                            </div>
-                        </div>`;
+            // Si no hay resultados exactos, alerta (Firebase básico no tiene "LIKE/Contains" gratis fácilmente)
+            if(resultados.length === 0) {
+                area.innerHTML = `<p style="text-align:center; color:red; margin-top:20px">No se encontraron alumnos. <br><small>Intenta escribir el <b>Nombre Completo</b> tal cual aparece en el sistema.</small></p>`;
+            } else {
+                resultados.forEach(alumno => {
+                    const precio = parseFloat(alumno.montoMensual) || 0;
+                    const meses = alumno.meses || [];
+                    const deuda = meses.length * precio;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'student-card';
+                    div.innerHTML = `
+                        <h3>${alumno.nombre}</h3>
+                        <p>${alumno.grado} "${alumno.seccion}"</p>
+                        ${deuda > 0 
+                            ? `<span class="debt-tag">Deuda: $${deuda.toFixed(2)} (${meses.length} meses)</span>` 
+                            : `<span class="solvente-tag">¡SOLVENTE!</span>`
+                        }
+                    `;
+                    div.onclick = () => seleccionarAlumno(alumno, deuda);
+                    area.appendChild(div);
                 });
             }
-        });
 
-        base.filter(a => a.meses.length === 0).forEach(a => {
-            divS.innerHTML += `<div class="student-box" style="border-left:8px solid var(--success)"><b>${a.nombre}</b><span>${a.grado}</span></div>`;
-        });
-    });
-
-    function getAlertaInfo(nMeses) {
-        const hoy = new Date().getDate();
-        if (nMeses >= 3 || (nMeses >= 1 && hoy > 10)) {
-            return { label: "ALERTA URGENTE / ÚLTIMA", clase: "urgente", key: "urgente" };
-        } else if (nMeses === 2) {
-            return { label: "ALERTA NORMAL", clase: "normal", key: "normal" };
-        } else {
-            return { label: "ALERTA PREVIA", clase: "previa", key: "previa" };
+        } catch (e) {
+            console.error(e);
+            alert("Error de conexión");
         }
-    }
-
-    window.sendMail = (mail, nombre, tipo) => {
-        const textos = {
-            previa: `Estimado representante de ${nombre}, recordamos que su mensualidad está próxima a vencer.`,
-            normal: `Estimado representante de ${nombre}, su cuenta presenta un retraso de 2 meses. Favor ponerse al día.`,
-            urgente: `ALERTA CRÍTICA - Representante de ${nombre}, el plazo de pago ha vencido o su mora es alta. Evite suspensión de servicios.`
-        };
-        window.location.href = `mailto:${mail}?subject=AVISO ADMINISTRATIVO SDJ&body=${textos[tipo]}`;
+        loader.style.display = "none";
     };
 
-    window.alertarMasivo = () => {
-        if(confirm(`Se procesarán ${cacheDeudores.length} avisos. ¿Continuar?`)) {
-            cacheDeudores.forEach((a, i) => {
-                setTimeout(() => sendMail(a.mail, a.nombre, a.alertaTipo), i * 600);
+    window.seleccionarAlumno = (alumno, deuda) => {
+        // Llenar datos ocultos y visuales
+        document.getElementById('form-est-name').innerText = alumno.nombre;
+        document.getElementById('form-deuda').innerText = `$${deuda.toFixed(2)}`;
+        
+        document.getElementById('input-id-doc').value = alumno.id;
+        document.getElementById('input-nombre-est').value = alumno.nombre;
+        document.getElementById('input-nombre-rep').value = alumno.rep || "No especificado";
+        
+        // Cambiar vista
+        document.getElementById('step-1').classList.remove('active');
+        document.getElementById('step-2').classList.add('active');
+    };
+
+    window.volver = () => {
+        document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-1').classList.add('active');
+    };
+
+    window.enviarPago = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = true;
+        btn.innerText = "Enviando...";
+
+        try {
+            await addDoc(collection(db, DB_PAGOS), {
+                nombreEst: document.getElementById('input-nombre-est').value,
+                nombreRep: document.getElementById('input-nombre-rep').value,
+                banco: document.getElementById('input-banco').value,
+                referencia: document.getElementById('input-ref').value,
+                montoDivisas: parseFloat(document.getElementById('input-monto').value),
+                fechaPago: document.getElementById('input-fecha').value,
+                concepto: document.getElementById('input-concepto').value,
+                estado: "Pendiente",
+                timestamp: new Date()
             });
+
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-3').classList.add('active');
+
+        } catch (error) {
+            console.error(error);
+            alert("Error al enviar el reporte. Intente nuevamente.");
+            btn.disabled = false;
+            btn.innerText = "ENVIAR REPORTE";
         }
     };
-
-    window.elim = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, COLEC, id)); };
-
 </script>
+
 </body>
 </html>
