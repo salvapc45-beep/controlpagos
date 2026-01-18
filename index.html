@@ -4,6 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SISTEMA SDJ - CONTROL V16</title>
+    
+    <!-- ESTILOS PARA EL OVERLAY DE LOGIN (INYECTADO SIN MODIFICAR CSS EXISTENTE) -->
+    <style>
+        /* OVERLAY DE SEGURIDAD - NO MODIFICA LOS ESTILOS EXISTENTES */
+        #securityOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        #securityOverlay .login-box {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+        
+        #securityOverlay h2 {
+            margin-bottom: 10px;
+            color: #f8fafc;
+        }
+        
+        #securityOverlay p {
+            color: #cbd5e1;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        #securityOverlay input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        #securityOverlay input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        #securityOverlay button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        
+        #securityOverlay button:hover {
+            background: #2563eb;
+        }
+        
+        #securityOverlay .error {
+            color: #ef4444;
+            margin-top: 10px;
+            font-size: 13px;
+            min-height: 18px;
+        }
+        
+        #securityOverlay .user-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #1e40af;
+            border-radius: 6px;
+            display: none;
+        }
+    </style>
+    
     <style>
         :root {
             --primary: #1e3a8a; --bg: #f8fafc; --text: #0f172a;
@@ -170,6 +262,28 @@
     </style>
 </head>
 <body>
+
+<!-- OVERLAY DE SEGURIDAD - INYECTADO -->
+<div id="securityOverlay">
+    <div class="login-box">
+        <h2>🔒 ACCESO RESTRINGIDO</h2>
+        <p>Sistema Administrativo SDJ V16<br>Ingrese su cédula para continuar</p>
+        
+        <input type="text" id="cedulaInput" placeholder="Ej: 34.861.896 o 22.943.126" autocomplete="off">
+        <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
+        
+        <div class="error" id="loginError"></div>
+        
+        <div class="user-info" id="userInfo">
+            Usuario autorizado: <strong id="userName"></strong>
+        </div>
+        
+        <p style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
+            Usuarios autorizados:<br>
+            Genesis (34.861.896) | Edward (22.943.126)
+        </p>
+    </div>
+</div>
 
 <header>SISTEMA ADMINISTRATIVO SDJ (V16)</header>
 
@@ -401,6 +515,69 @@
     </div>
 </div>
 
+<!-- SCRIPT DE SEGURIDAD Y AUDITORÍA INYECTADO -->
+<script>
+    // ============================================
+    // SISTEMA DE SEGURIDAD Y AUDITORÍA
+    // ============================================
+    
+    // Variable global para rastrear usuario activo
+    let usuarioActivo = null;
+    
+    // Función para verificar cédula
+    function verificarCedula() {
+        const cedulaInput = document.getElementById('cedulaInput').value;
+        const errorDiv = document.getElementById('loginError');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        
+        // Limpiar mensajes anteriores
+        errorDiv.textContent = '';
+        userInfo.style.display = 'none';
+        
+        // Normalizar cédula (quitar puntos y espacios)
+        const cedulaNormalizada = cedulaInput.replace(/[.\s]/g, '');
+        
+        // Base de datos de usuarios autorizados
+        const usuariosAutorizados = {
+            '34861896': { nombre: 'Genesis', cedula: '34.861.896' },
+            '22943126': { nombre: 'Edward', cedula: '22.943.126' }
+        };
+        
+        // Verificar si la cédula está autorizada
+        if (usuariosAutorizados[cedulaNormalizada]) {
+            const usuario = usuariosAutorizados[cedulaNormalizada];
+            usuarioActivo = usuario.nombre;
+            
+            // Mostrar mensaje de bienvenida
+            userName.textContent = usuario.nombre;
+            userInfo.style.display = 'block';
+            
+            // Ocultar overlay después de 1.5 segundos
+            setTimeout(() => {
+                document.getElementById('securityOverlay').style.display = 'none';
+                document.title = `SDJ V16 | ${usuario.nombre}`;
+                
+                // Mostrar notificación de acceso
+                alert(`✅ Acceso concedido\nBienvenido(a), ${usuario.nombre}\nCédula: ${usuario.cedula}`);
+            }, 1500);
+            
+        } else {
+            // Mostrar error
+            errorDiv.textContent = '❌ Cédula no autorizada. Intente nuevamente.';
+            document.getElementById('cedulaInput').value = '';
+            document.getElementById('cedulaInput').focus();
+        }
+    }
+    
+    // Permitir acceso con Enter
+    document.getElementById('cedulaInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            verificarCedula();
+        }
+    });
+</script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -459,6 +636,13 @@
     };
 
     window.guardar = async () => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Sistema bloqueado\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         const meses = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
         const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
         const total = meses.length * montoMensual;
@@ -480,7 +664,10 @@
             montoMensual: montoMensual,
             total: total,
             historial: [],
-            timestamp: new Date()
+            timestamp: new Date(),
+            // Auditoría: quién creó el registro
+            creadoPor: usuarioActivo,
+            fechaCreacion: new Date()
         });
         alert("¡Registro Exitoso V16!");
         document.getElementById('rNom').value = '';
@@ -650,6 +837,13 @@
 
     // FUNCIÓN PARA MOSTRAR DETALLES COMPLETOS DEL PAGO (MODAL)
     window.mostrarDetallesPago = async (idPago) => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         try {
             const docRef = doc(db, DB_PAGOS, idPago);
             const docSnap = await getDoc(docRef);
@@ -761,6 +955,25 @@
                         ${estadoTexto}
                     </span>
                 </div>
+                
+                <!-- INFORMACIÓN DE AUDITORÍA -->
+                ${pagoSeleccionado.procesadoPor ? `
+                <div class="detail-row" style="background:#f1f5f9; padding:8px; border-radius:6px;">
+                    <span class="detail-label">Verificado por:</span>
+                    <span class="detail-value" style="color:#1e40af; font-weight:bold;">
+                        ${pagoSeleccionado.procesadoPor}
+                    </span>
+                </div>
+                ` : ''}
+                
+                ${pagoSeleccionado.rechazadoPor ? `
+                <div class="detail-row" style="background:#fef2f2; padding:8px; border-radius:6px;">
+                    <span class="detail-label">Rechazado por:</span>
+                    <span class="detail-value" style="color:#dc2626; font-weight:bold;">
+                        ${pagoSeleccionado.rechazadoPor}
+                    </span>
+                </div>
+                ` : ''}
             `;
             
             document.getElementById('detalles-pago-content').innerHTML = contenido;
@@ -873,6 +1086,13 @@
 
     // FICHA DEL ESTUDIANTE
     window.mostrarFichaEstudiante = async (id) => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         const estudiantes = await getDocs(collection(db, DB_MAIN));
         
         estudiantes.forEach(d => {
@@ -907,11 +1127,21 @@
     window.guardarCambiosEstudiante = async () => {
         if(!estudianteActual) return;
         
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         try {
             await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
                 rep: document.getElementById('edit-representante').value,
                 tel: document.getElementById('edit-telefono').value,
-                mail: document.getElementById('edit-correo').value
+                mail: document.getElementById('edit-correo').value,
+                // Auditoría: quién modificó
+                modificadoPor: usuarioActivo,
+                fechaModificacion: new Date()
             });
             
             alert("✅ Cambios guardados exitosamente");
@@ -929,8 +1159,26 @@
     window.eliminarEstudiante = async () => {
         if(!estudianteActual) return;
         
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         if(confirm(`¿Está seguro de eliminar a ${estudianteActual.nombre}? Esta acción no se puede deshacer.`)) {
             try {
+                // Registrar auditoría antes de eliminar
+                await addDoc(collection(db, "auditoria_eliminaciones"), {
+                    estudiante: estudianteActual.nombre,
+                    representante: estudianteActual.rep,
+                    cedula: estudianteActual.cedula,
+                    eliminadoPor: usuarioActivo,
+                    fechaEliminacion: new Date(),
+                    grado: estudianteActual.grado,
+                    seccion: estudianteActual.seccion
+                });
+                
                 await deleteDoc(doc(db, DB_MAIN, estudianteActual.id));
                 alert("✅ Estudiante eliminado");
                 volverALista();
@@ -1060,11 +1308,25 @@
 
     // 3. MÓDULO DE COBRANZA MEJORADO
     window.enviarWhatsApp = (telefono, nombre, meses, monto) => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         const mensaje = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${nombre} debe ${meses} para un total de $${monto}.`;
         window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
     };
 
     window.enviarGmailIndividual = (email, nombre, representante, monto, meses) => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         const asunto = "Recordatorio de Pago - Colegio Santiago de Jesús";
         const cuerpo = `Estimado Sr(a) ${representante},
 
@@ -1084,6 +1346,13 @@ Colegio Santiago de Jesús`;
     };
 
     window.enviarAvisoCritico = () => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         const dia = new Date().getDate();
         if (dia < 10) {
             alert("El aviso crítico solo se puede enviar a partir del día 10 del mes.");
@@ -1124,6 +1393,13 @@ Colegio Santiago de Jesús`;
     };
 
     window.notifyAll = () => {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         if(cachePendientes.length === 0) {
             alert("No hay deudores para enviar recordatorios.");
             return;
@@ -1140,8 +1416,18 @@ Colegio Santiago de Jesús`;
         }
     };
 
-    // FUNCIONES DE VALIDACIÓN Y RECHAZO
+    // ============================================
+    // FUNCIONES MODIFICADAS PARA AUDITORÍA
+    // ============================================
+
     window.validarPago = async function(id) {
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
         const docRef = doc(db, DB_PAGOS, id);
         const docSnap = await getDoc(docRef);
         
@@ -1152,7 +1438,7 @@ Colegio Santiago de Jesús`;
         
         const pagoData = docSnap.data();
         
-        const confirmacion = confirm(`¿Verificar el pago de ${pagoData.nombreEst}?\n\nMétodo: ${pagoData.metodo}\nReferencia: ${pagoData.referencia || 'N/A'}\nMonto: $${pagoData.montoDivisas || pagoData.monto || '0'}`);
+        const confirmacion = confirm(`¿Verificar el pago de ${pagoData.nombreEst}?\n\nMétodo: ${pagoData.metodo}\nReferencia: ${pagoData.referencia || 'N/A'}\nMonto: $${pagoData.montoDivisas || pagoData.monto || '0'}\n\nVerificado por: ${usuarioActivo}`);
         
         if(confirmacion) {
             try {
@@ -1172,7 +1458,10 @@ Colegio Santiago de Jesús`;
                             banco: pagoData.banco || '',
                             cuenta: pagoData.cuenta || '',
                             mesesPagados: pagoData.mesesPagados || [],
-                            descripcion: `Pago verificado - ${pagoData.metodo || ''}`
+                            descripcion: `Pago verificado - ${pagoData.metodo || ''}`,
+                            // AUDITORÍA: quién procesó el pago
+                            procesadoPor: usuarioActivo,
+                            fechaProcesamiento: new Date()
                         };
                         
                         const historialActual = estudianteData.historial || [];
@@ -1190,9 +1479,13 @@ Colegio Santiago de Jesús`;
                         await updateDoc(doc(db, DB_MAIN, estDoc.id), {
                             historial: historialActual,
                             meses: nuevosMeses,
-                            total: nuevoTotal
+                            total: nuevoTotal,
+                            // Auditoría en el estudiante también
+                            ultimaModificacion: new Date(),
+                            modificadoPor: usuarioActivo
                         });
                         
+                        // GUARDAR EN HISTORIAL CON AUDITORÍA
                         await addDoc(collection(db, DB_HISTORIAL), {
                             ...registroHistorial,
                             estudianteId: estDoc.id,
@@ -1200,13 +1493,24 @@ Colegio Santiago de Jesús`;
                             representanteNombre: pagoData.nombreRep,
                             cedulaRepresentante: pagoData.cedulaRep,
                             reporteId: id,
-                            timestamp: new Date()
+                            timestamp: new Date(),
+                            procesadoPor: usuarioActivo  // Campo de auditoría
                         });
                     });
                 }
                 
+                // Actualizar el pago con auditoría antes de eliminarlo
+                await updateDoc(docRef, {
+                    procesadoPor: usuarioActivo,
+                    fechaProcesamiento: new Date(),
+                    estado: `Verificado por ${usuarioActivo}`
+                });
+                
+                // Esperar un momento para que se registre la auditoría
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 await deleteDoc(docRef);
-                alert("✅ Pago verificado exitosamente");
+                alert(`✅ Pago verificado exitosamente\nProcesado por: ${usuarioActivo}`);
                 
             } catch (error) {
                 console.error("Error al verificar pago:", error);
@@ -1216,29 +1520,146 @@ Colegio Santiago de Jesús`;
     };
 
     window.rechazar = async(id, ref) => {
-        const motivo = prompt("Ingrese el motivo del rechazo (opcional):");
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
         
-        if(motivo !== null) {
-            try {
-                await updateDoc(doc(db, DB_PAGOS, id), {
-                    estado: `Rechazado - ${motivo || 'Sin motivo especificado'}`
+        const motivo = prompt("Ingrese el motivo del rechazo (obligatorio):");
+        
+        if(motivo === null || motivo.trim() === "") {
+            alert("Debe ingresar un motivo para rechazar el pago.");
+            return;
+        }
+        
+        try {
+            // Obtener datos del pago para encontrar el correo
+            const docRef = doc(db, DB_PAGOS, id);
+            const docSnap = await getDoc(docRef);
+            
+            if(!docSnap.exists()) {
+                alert("El pago no existe");
+                return;
+            }
+            
+            const pagoData = docSnap.data();
+            let correoRepresentante = null;
+            
+            // Buscar el correo del representante en DB_MAIN
+            if(pagoData.nombreEst) {
+                const estudiantesQuery = query(
+                    collection(db, DB_MAIN), 
+                    where("nombre", "==", pagoData.nombreEst)
+                );
+                const estudiantesSnap = await getDocs(estudiantesQuery);
+                
+                if(!estudiantesSnap.empty) {
+                    estudiantesSnap.forEach(estDoc => {
+                        const estudianteData = estDoc.data();
+                        if(estudianteData.mail) {
+                            correoRepresentante = estudianteData.mail;
+                        }
+                    });
+                }
+            }
+            
+            // Si no se encuentra en DB_MAIN, usar el correo del pago si existe
+            if(!correoRepresentante && pagoData.correoRep) {
+                correoRepresentante = pagoData.correoRep;
+            }
+            
+            // Actualizar el pago con auditoría
+            await updateDoc(docRef, {
+                estado: `Rechazado - ${motivo}`,
+                rechazadoPor: usuarioActivo,  // Campo de auditoría
+                fechaRechazo: new Date(),
+                motivoRechazo: motivo
+            });
+            
+            alert(`✅ Pago marcado como rechazado\nRechazado por: ${usuarioActivo}`);
+            
+            // ENVÍO AUTOMÁTICO DE CORREO
+            if(correoRepresentante) {
+                const asunto = `Rechazo de pago - Referencia ${ref}`;
+                const cuerpo = `Estimado representante,
+
+Su pago con referencia ${ref} ha sido rechazado por el siguiente motivo:
+
+${motivo}
+
+Por favor contacte a la administración del Colegio Santiago de Jesús para más información.
+
+Atentamente,
+Administración
+Colegio Santiago de Jesús
+
+-- 
+Este mensaje fue generado automáticamente por el sistema de administración SDJ V16.`;
+                
+                window.open(`mailto:${correoRepresentante}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`, '_blank');
+                
+                // Registrar en auditoría de correos enviados
+                await addDoc(collection(db, "auditoria_correos"), {
+                    tipo: "rechazo_pago",
+                    referencia: ref,
+                    estudiante: pagoData.nombreEst || 'No especificado',
+                    correoDestino: correoRepresentante,
+                    enviadoPor: usuarioActivo,
+                    fechaEnvio: new Date(),
+                    motivo: motivo
                 });
                 
-                alert("✅ Pago marcado como rechazado");
+            } else {
+                alert("⚠️ No se encontró correo del representante.\nEl pago fue rechazado pero no se pudo enviar el correo automático.");
                 
-                if(confirm("¿Enviar correo al representante informando el rechazo?")) {
-                    window.location.href = `mailto:?subject=Rechazo de pago SDJ&body=La referencia ${ref} fue rechazada. Motivo: ${motivo || 'No especificado'}`;
+                // Ofrecer enviar correo manualmente
+                if(confirm("¿Desea abrir su cliente de correo para enviar el mensaje manualmente?")) {
+                    const asunto = `Rechazo de pago - Referencia ${ref}`;
+                    const cuerpo = `Su pago con referencia ${ref} ha sido rechazado por el siguiente motivo: ${motivo}`;
+                    window.location.href = `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
                 }
-                
-            } catch (error) {
-                console.error("Error al rechazar pago:", error);
-                alert("Error al rechazar el pago");
             }
+            
+        } catch (error) {
+            console.error("Error al rechazar pago:", error);
+            alert("Error al rechazar el pago: " + error.message);
         }
     };
 
     window.del = async(id) => { 
-        if(confirm("¿Eliminar Alumno?")) await deleteDoc(doc(db, DB_MAIN, id)); 
+        // Verificar que haya un usuario activo
+        if (!usuarioActivo) {
+            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
+            document.getElementById('securityOverlay').style.display = 'flex';
+            return;
+        }
+        
+        if(confirm("¿Eliminar Alumno?")) {
+            // Obtener datos del estudiante antes de eliminar
+            const docRef = doc(db, DB_MAIN, id);
+            const docSnap = await getDoc(docRef);
+            
+            if(docSnap.exists()) {
+                const estudianteData = docSnap.data();
+                
+                // Registrar en auditoría
+                await addDoc(collection(db, "auditoria_eliminaciones"), {
+                    estudiante: estudianteData.nombre,
+                    representante: estudianteData.rep,
+                    cedula: estudianteData.cedula,
+                    eliminadoPor: usuarioActivo,
+                    fechaEliminacion: new Date(),
+                    grado: estudianteData.grado,
+                    seccion: estudianteData.seccion,
+                    deudaEliminada: (estudianteData.montoMensual || 0) * (estudianteData.meses ? estudianteData.meses.length : 0)
+                });
+            }
+            
+            await deleteDoc(docRef);
+            alert(`✅ Alumno eliminado\nAcción realizada por: ${usuarioActivo}`);
+        }
     };
 
     // Inicializar cálculo de total
@@ -1246,5 +1667,6 @@ Colegio Santiago de Jesús`;
 </script>
 </body>
 </html>
+
 
 
