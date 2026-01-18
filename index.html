@@ -14,7 +14,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -56,11 +56,13 @@
             font-size: 16px;
             text-align: center;
             margin-bottom: 20px;
+            letter-spacing: 1px;
         }
         
         #securityOverlay input:focus {
             outline: none;
             border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
         
         #securityOverlay button {
@@ -93,6 +95,16 @@
             background: #1e40af;
             border-radius: 6px;
             display: none;
+        }
+        
+        #securityOverlay .security-note {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            border-radius: 6px;
+            font-size: 11px;
+            color: #fca5a5;
         }
     </style>
     
@@ -267,9 +279,9 @@
 <div id="securityOverlay">
     <div class="login-box">
         <h2>🔒 ACCESO RESTRINGIDO</h2>
-        <p>Sistema Administrativo SDJ V16<br>Ingrese su cédula para continuar</p>
+        <p>Sistema Administrativo SDJ V16<br>Ingrese sus credenciales para continuar</p>
         
-        <input type="text" id="cedulaInput" placeholder="Ej: 34.861.896 o 22.943.126" autocomplete="off">
+        <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
         <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
         
         <div class="error" id="loginError"></div>
@@ -278,10 +290,9 @@
             Usuario autorizado: <strong id="userName"></strong>
         </div>
         
-        <p style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
-            Usuarios autorizados:<br>
-            Genesis (34.861.896) | Edward (22.943.126)
-        </p>
+        <div class="security-note">
+            ⚠️ Este sistema es de acceso exclusivo para personal autorizado.
+        </div>
     </div>
 </div>
 
@@ -524,9 +535,9 @@
     // Variable global para rastrear usuario activo
     let usuarioActivo = null;
     
-    // Función para verificar cédula
+    // Función para verificar credenciales (manteniendo las mismas cédulas pero sin mostrarlas)
     function verificarCedula() {
-        const cedulaInput = document.getElementById('cedulaInput').value;
+        const credencialInput = document.getElementById('cedulaInput').value;
         const errorDiv = document.getElementById('loginError');
         const userInfo = document.getElementById('userInfo');
         const userName = document.getElementById('userName');
@@ -535,38 +546,46 @@
         errorDiv.textContent = '';
         userInfo.style.display = 'none';
         
-        // Normalizar cédula (quitar puntos y espacios)
-        const cedulaNormalizada = cedulaInput.replace(/[.\s]/g, '');
+        // Normalizar la entrada (quitar puntos, espacios y guiones)
+        const credencialNormalizada = credencialInput.replace(/[.\s-]/g, '');
         
-        // Base de datos de usuarios autorizados
+        // Base de datos interna de usuarios autorizados (NO VISIBLE EN EL HTML)
         const usuariosAutorizados = {
             '34861896': { nombre: 'Genesis', cedula: '34.861.896' },
             '22943126': { nombre: 'Edward', cedula: '22.943.126' }
         };
         
-        // Verificar si la cédula está autorizada
-        if (usuariosAutorizados[cedulaNormalizada]) {
-            const usuario = usuariosAutorizados[cedulaNormalizada];
+        // Verificar si la credencial está autorizada
+        if (usuariosAutorizados[credencialNormalizada]) {
+            const usuario = usuariosAutorizados[credencialNormalizada];
             usuarioActivo = usuario.nombre;
             
             // Mostrar mensaje de bienvenida
             userName.textContent = usuario.nombre;
             userInfo.style.display = 'block';
             
+            // Limpiar el campo de entrada
+            document.getElementById('cedulaInput').value = '';
+            
             // Ocultar overlay después de 1.5 segundos
             setTimeout(() => {
                 document.getElementById('securityOverlay').style.display = 'none';
                 document.title = `SDJ V16 | ${usuario.nombre}`;
                 
-                // Mostrar notificación de acceso
-                alert(`✅ Acceso concedido\nBienvenido(a), ${usuario.nombre}\nCédula: ${usuario.cedula}`);
+                // Mostrar notificación de acceso discreta
+                console.log(`✅ Acceso concedido: ${usuario.nombre}`);
             }, 1500);
             
         } else {
-            // Mostrar error
-            errorDiv.textContent = '❌ Cédula no autorizada. Intente nuevamente.';
+            // Mostrar error genérico sin revelar información
+            errorDiv.textContent = '❌ Credencial incorrecta. Intente nuevamente.';
             document.getElementById('cedulaInput').value = '';
             document.getElementById('cedulaInput').focus();
+            
+            // Pequeña pausa para evitar fuerza bruta
+            setTimeout(() => {
+                errorDiv.textContent = '';
+            }, 2000);
         }
     }
     
@@ -575,6 +594,22 @@
         if (e.key === 'Enter') {
             verificarCedula();
         }
+    });
+    
+    // Enfocar automáticamente el campo al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            document.getElementById('cedulaInput').focus();
+        }, 100);
+    });
+    
+    // Prevenir copiar/pegar en el campo de credencial (opcional)
+    document.getElementById('cedulaInput').addEventListener('paste', function(e) {
+        e.preventDefault();
+        document.getElementById('loginError').textContent = '❌ Operación no permitida';
+        setTimeout(() => {
+            document.getElementById('loginError').textContent = '';
+        }, 1500);
     });
 </script>
 
@@ -1667,6 +1702,3 @@ Este mensaje fue generado automáticamente por el sistema de administración SDJ
 </script>
 </body>
 </html>
-
-
-
