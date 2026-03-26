@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SISTEMA SDJ - CONTROL V16</title>
-    
-    <!-- ESTILOS PARA EL OVERLAY DE LOGIN (INYECTADO SIN MODIFICAR CSS EXISTENTE) -->
     <style>
-        /* OVERLAY DE SEGURIDAD - NO MODIFICA LOS ESTILOS EXISTENTES */
+        /* OVERLAY DE SEGURIDAD */
         #securityOverlay {
             position: fixed;
             top: 0;
@@ -31,21 +29,12 @@
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             border: 1px solid #334155;
         }
         
-        #securityOverlay h2 {
-            margin-bottom: 10px;
-            color: #f8fafc;
-        }
-        
-        #securityOverlay p {
-            color: #cbd5e1;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-        
+        #securityOverlay h2 { margin-bottom: 10px; color: #f8fafc; }
+        #securityOverlay p { color: #cbd5e1; margin-bottom: 25px; font-size: 14px; }
         #securityOverlay input {
             width: 100%;
             padding: 14px;
@@ -55,16 +44,9 @@
             color: white;
             font-size: 16px;
             text-align: center;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
-        
-        #securityOverlay input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-        
+        #securityOverlay input:focus { outline: none; border-color: #3b82f6; }
         #securityOverlay button {
             background: #3b82f6;
             color: white;
@@ -75,37 +57,34 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
-            transition: background 0.2s;
         }
+        #securityOverlay button:hover { background: #2563eb; }
+        #securityOverlay .error { color: #ef4444; margin-top: 10px; font-size: 13px; }
+        #securityOverlay .attempts { color: #fbbf24; font-size: 12px; margin-top: 10px; }
+        #securityOverlay .user-info { margin-top: 15px; padding: 10px; background: #1e40af; border-radius: 6px; display: none; }
+        #securityOverlay .security-note { margin-top: 20px; padding: 10px; background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); border-radius: 6px; font-size: 11px; color: #fca5a5; }
         
-        #securityOverlay button:hover {
-            background: #2563eb;
+        .logout-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            z-index: 1001;
         }
+        .logout-btn:hover { background: #dc2626; }
         
-        #securityOverlay .error {
-            color: #ef4444;
-            margin-top: 10px;
-            font-size: 13px;
-            min-height: 18px;
-        }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        #securityOverlay .user-info {
-            margin-top: 15px;
-            padding: 10px;
-            background: #1e40af;
-            border-radius: 6px;
-            display: none;
-        }
-        
-        #securityOverlay .security-note {
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(220, 38, 38, 0.1);
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            border-radius: 6px;
-            font-size: 11px;
-            color: #fca5a5;
-        }
+        .btn-export { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-left: 10px; font-size: 12px; }
+        .btn-export:hover { background: #059669; }
     </style>
     
     <style>
@@ -117,186 +96,95 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
-        header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; position: relative; }
         
-        /* NAV */
         nav { display: flex; background: white; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
-        .nav-btn { flex: 1; min-width: 100px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; transition: 0.2s; }
+        .nav-btn { flex: 1; min-width: 100px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 11px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; }
         .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .modulo { display: none; }
         .modulo.active { display: block; animation: fadeIn 0.4s; }
 
-        /* CARDS & FORMS */
         .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
         input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; font-size: 14px; }
         .btn-main { background: var(--primary); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
         
-        /* ALERTAS & PENDIENTES */
-        .btn-alert-all { background: #4f46e5; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
-        .btn-critico { background: #dc2626; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); }
+        .btn-alert-all { background: #4f46e5; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
+        .btn-critico { background: #dc2626; color: white; width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
 
-        .grado-header { background: #1e293b; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 13px; margin: 25px 0 10px 0; letter-spacing: 0.5px; }
+        .grado-header { background: #1e293b; color: white; padding: 10px 15px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 13px; margin: 25px 0 10px 0; }
 
-        .student-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; position: relative; }
-        
-        /* BORDES DE ALERTA */
+        .student-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 8px; }
         .alert-previa { border-left: 6px solid var(--green); }
         .alert-normal { border-left: 6px solid var(--yellow); }
         .alert-urgente { border-left: 6px solid var(--red); }
 
-        /* BADGES (ETIQUETAS) */
-        .badge { font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 4px; }
+        .badge { font-size: 9px; padding: 3px 8px; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 4px; }
         .bg-previa { background: #dcfce7; color: #15803d; }
         .bg-normal { background: #fef9c3; color: #a16207; }
         .bg-urgente { background: #fee2e2; color: #b91c1c; }
 
         .info b { display: block; font-size: 15px; color: var(--primary); }
         .info small { color: #64748b; font-size: 12px; display: block; }
-        .tag-mes { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin: 4px 2px 0 0; color: #475569; }
+        .tag-mes { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin: 4px 2px 0 0; }
 
-        /* ARCHIVOS */
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
         .folder { background: white; border: 1px solid #e2e8f0; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.2s; }
         .folder:hover { background: #f8fafc; border-color: var(--primary); }
-        .icon { font-size: 30px; display: block; margin-bottom: 5px; }
 
-        /* TABLA REPORTES */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 700px; font-size: 12px; }
         th { background: #f1f5f9; padding: 10px; text-align: left; border-bottom: 2px solid #e2e8f0; }
         td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         
-        /* FILA CLICKABLE */
-        .clickable-row { cursor: pointer; transition: background 0.2s; }
+        .clickable-row { cursor: pointer; }
         .clickable-row:hover { background: #f8fafc; }
         
         .btn-check { background: var(--green); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-right: 5px; font-weight: bold; }
         .btn-reject { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-edit-pago { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         
         .btn-ws { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--whatsapp); margin-right: 10px; }
         .btn-email { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--gmail); margin-right: 10px; }
         .btn-print { background: #64748b; color: white; border:none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; font-size: 12px;}
 
-        /* FICHA ESTUDIANTE */
         .ficha-container { margin-top: 20px; }
         .ficha-actions { display: flex; gap: 10px; margin-top: 15px; }
         .btn-edit { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-delete { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-        /* PORTAL PADRES */
         .parent-portal { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .parent-results { margin-top: 20px; }
-        .family-total { background: #0f172a; color: white; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; font-weight: bold; font-size: 18px; }
+        .family-total { background: #0f172a; color: white; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; font-weight: bold; }
 
-        /* MODAL DETALLES PAGO */
-        .modal-overlay { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.5); 
-            z-index: 2000; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px;
-        }
-        .modal { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 25px; 
-            width: 90%; 
-            max-width: 500px; 
-            max-height: 80vh; 
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 15px;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal { background: white; border-radius: 12px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; }
         .modal-header h3 { color: var(--primary); margin: 0; }
-        .close-modal { 
-            background: none; 
-            border: none; 
-            font-size: 28px; 
-            cursor: pointer; 
-            color: #64748b;
-            line-height: 1;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: #64748b; }
         .close-modal:hover { color: var(--red); }
         
-        .modal-details { margin: 20px 0; }
-        .detail-row { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f1f5f9;
-        }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
         .detail-label { color: #64748b; font-size: 14px; font-weight: 600; }
         .detail-value { color: var(--text); font-size: 14px; text-align: right; }
-        .detail-value.amount { font-weight: bold; font-size: 16px; }
-        .detail-value.amount.bs { color: #1e40af; }
-        .detail-value.amount.usd { color: #059669; }
         
-        .modal-actions { 
-            display: flex; 
-            gap: 10px; 
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px solid #f1f5f9;
-        }
+        .modal-actions { display: flex; gap: 10px; margin-top: 25px; padding-top: 20px; border-top: 2px solid #f1f5f9; }
         .modal-actions button { flex: 1; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ESTILOS DE IMPRESIÓN */
-        @media print {
-            nav, header, .btn-print, button, input { display: none !important; }
-            body, .container, .modulo { background: white; margin: 0; padding: 0; }
-            .student-row { border: 1px solid #000; break-inside: avoid; }
-            #mod-arch, #view-list, #final-list { display: block !important; }
-        }
+        @media print { nav, header, .btn-print, button, input, .logout-btn { display: none !important; } body, .container, .modulo { background: white; } }
+        
+        .loading-text { text-align: center; padding: 40px; color: #64748b; }
     </style>
 </head>
 <body>
 
-<!-- OVERLAY DE SEGURIDAD - INYECTADO -->
-<div id="securityOverlay">
-    <div class="login-box">
-        <h2>🔒 ACCESO RESTRINGIDO</h2>
-        <p>Sistema Administrativo SDJ V16<br>Ingrese sus credenciales para continuar</p>
-        
-        <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
-        <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
-        
-        <div class="error" id="loginError"></div>
-        
-        <div class="user-info" id="userInfo">
-            Usuario autorizado: <strong id="userName"></strong>
-        </div>
-        
-        <div class="security-note">
-            ⚠️ Este sistema es de acceso exclusivo para personal autorizado.
-        </div>
-    </div>
-</div>
-
-<header>SISTEMA ADMINISTRATIVO SDJ (V16)</header>
+<header>
+    SISTEMA ADMINISTRATIVO SDJ (V16)
+    <button id="logoutBtn" class="logout-btn" style="display: none;">🚪 Cerrar Sesión</button>
+</header>
 
 <nav>
     <div class="nav-btn active" onclick="go('reg')">1. Registro</div>
@@ -308,19 +196,15 @@
 </nav>
 
 <div class="container">
-
-    <!-- MÓDULO REGISTRO -->
     <section id="mod-reg" class="modulo active">
         <div class="card">
             <h3>Registrar Alumno / Deuda</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">* V16: Ahora incluye cédula del representante y cálculo automático.</p>
-            
+            <p style="font-size:12px; color:gray; margin-bottom:10px">* Año escolar actual: <span id="currentYearLabel"></span></p>
             <input type="text" id="rNom" placeholder="Nombre del Alumno *">
             <input type="text" id="rRep" placeholder="Nombre del Representante *">
-            <input type="text" id="rCedula" placeholder="Cédula del Representante *" pattern="[0-9]+" maxlength="10">
+            <input type="text" id="rCedula" placeholder="Cédula del Representante *">
             <input type="email" id="rMail" placeholder="Correo (Opcional)">
             <input type="tel" id="rTel" placeholder="Teléfono (Ej: 584120000000)">
-            
             <div style="display:flex; gap:10px">
                 <select id="rGra">
                     <option>5to Año</option><option>4to Año</option><option>3er Año</option><option>2do Año</option><option>1er Año</option>
@@ -329,147 +213,61 @@
                 </select>
                 <select id="rSec" style="width:100px"><option>A</option><option>B</option></select>
             </div>
-
             <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block">Meses Pendientes:</label>
-            <select id="rMes" multiple style="height:120px">
+            <select id="rMes" multiple style="height:150px">
                 <option value="Inscripción">Inscripción</option>
-                <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
-                <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option>
-                <option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option>
+                <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option>
+                <option value="Diciembre">Diciembre</option><option value="Enero">Enero</option><option value="Febrero">Febrero</option>
+                <option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option>
+                <option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option>
             </select>
-            
             <input type="number" id="rMon" placeholder="Monto Mensual ($)">
-            
             <div style="margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px;">
                 <small>Total calculado: <span id="totalPreview" style="font-weight:bold; color:#1e40af">$0</span></small>
             </div>
-            
             <button class="btn-main" onclick="guardar()">GUARDAR REGISTRO V16</button>
         </div>
     </section>
 
-    <!-- MÓDULO ARCHIVOS -->
     <section id="mod-arch" class="modulo">
         <div id="view-level">
             <h3>Explorador de Archivos</h3>
-            <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; margin-top:10px; text-align: center;">
+            <div class="card" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; text-align: center;">
                 <small>DEUDA TOTAL DEL COLEGIO</small>
                 <h2 id="global-debt" style="font-size: 28px;">Calculando...</h2>
             </div>
-
             <div class="folder-grid">
                 <div class="folder" onclick="loadLevel('INICIAL')"><span class="icon">📂</span>INICIAL</div>
                 <div class="folder" onclick="loadLevel('PRIMARIA')"><span class="icon">📂</span>PRIMARIA</div>
                 <div class="folder" onclick="loadLevel('BACHILLERATO')"><span class="icon">📂</span>BACHILLERATO</div>
             </div>
         </div>
-        
-        <div id="view-grade" style="display:none">
-            <button onclick="resetArch()" style="margin-bottom:10px">⬅ Atrás</button>
-            <h3 id="tit-grade"></h3>
-            <div id="grid-grade" class="folder-grid"></div>
-        </div>
-        
-        <div id="view-sec" style="display:none">
-            <button onclick="backToGrade()" style="margin-bottom:10px">⬅ Atrás</button>
-            <h3 id="tit-sec"></h3>
-            <div class="folder-grid">
-                <div class="folder" onclick="loadFinal('A')"><span class="icon">📁</span>Sección A</div>
-                <div class="folder" onclick="loadFinal('B')"><span class="icon">📁</span>Sección B</div>
-            </div>
-        </div>
-        
+        <div id="view-grade" style="display:none"><button onclick="resetArch()">⬅ Atrás</button><h3 id="tit-grade"></h3><div id="grid-grade" class="folder-grid"></div></div>
+        <div id="view-sec" style="display:none"><button onclick="backToGrade()">⬅ Atrás</button><h3 id="tit-sec"></h3><div class="folder-grid"><div class="folder" onclick="loadFinal('A')">📁 Sección A</div><div class="folder" onclick="loadFinal('B')">📁 Sección B</div></div></div>
         <div id="view-list" style="display:none">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <button onclick="backToSec()" style="margin-bottom:10px">⬅ Atrás</button>
-                <button class="btn-print" onclick="window.print()">🖨 Imprimir Lista</button>
-            </div>
-            
+            <div style="display:flex; justify-content:space-between;"><button onclick="backToSec()">⬅ Atrás</button><button class="btn-print" onclick="window.print()">🖨 Imprimir</button></div>
             <h3 id="tit-list"></h3>
-            
-            <div class="card" style="background:#fff7ed; border-color:#fed7aa; margin-top:10px; padding:15px;">
-                <div style="text-align:right; margin-bottom:10px;">
-                    <span id="sec-total-label" style="font-size:13px; color:#9a3412; font-weight:bold;">CALCULANDO DEUDA...</span>
-                </div>
-                <input type="text" id="search-filter" placeholder="🔍 Buscar estudiante en esta sección..." onkeyup="filterList()" style="margin-top:0;">
-            </div>
-
-            <div class="card" style="margin-top:15px">
-                <div id="final-list"></div>
-            </div>
-            
-            <!-- FICHA DEL ESTUDIANTE (EDITABLE) -->
-            <div id="ficha-estudiante" class="ficha-container" style="display:none;">
-                <div class="card">
-                    <h3>📋 Ficha del Estudiante</h3>
-                    <div id="ficha-content">
-                        <div style="margin-bottom: 15px;">
-                            <label>Nombre del Alumno:</label>
-                            <input type="text" id="edit-nombre" class="ficha-input">
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Nombre del Representante:</label>
-                            <input type="text" id="edit-representante" class="ficha-input">
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Cédula del Representante:</label>
-                            <input type="text" id="edit-cedula" class="ficha-input" readonly>
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Teléfono:</label>
-                            <input type="tel" id="edit-telefono" class="ficha-input">
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Correo:</label>
-                            <input type="email" id="edit-correo" class="ficha-input">
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Grado y Sección:</label>
-                            <input type="text" id="edit-grado" class="ficha-input" readonly>
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Meses Pendientes:</label>
-                            <div id="edit-meses" style="padding: 10px; background: #f8fafc; border-radius: 6px;"></div>
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <label>Total Deuda:</label>
-                            <h3 id="edit-total" style="color: #ef4444;"></h3>
-                        </div>
-                        <div class="ficha-actions">
-                            <button class="btn-edit" onclick="guardarCambiosEstudiante()">💾 Guardar Cambios</button>
-                            <button class="btn-edit" onclick="volverALista()">⬅ Volver a la Lista</button>
-                            <button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar Alumno</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="card"><div style="text-align:right;"><span id="sec-total-label"></span></div><input type="text" id="search-filter" placeholder="🔍 Buscar..." onkeyup="filterList()"></div>
+            <div class="card"><div id="final-list"></div></div>
+            <div id="ficha-estudiante" class="ficha-container" style="display:none;"><div class="card"><h3>📋 Ficha del Estudiante</h3><div><div><label>Nombre:</label><input type="text" id="edit-nombre"></div><div><label>Representante:</label><input type="text" id="edit-representante"></div><div><label>Cédula:</label><input type="text" id="edit-cedula" readonly></div><div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div><div><label>Correo:</label><input type="email" id="edit-correo"></div><div><label>Grado:</label><input type="text" id="edit-grado" readonly></div><div><label>Meses Pendientes:</label><div id="edit-meses"></div></div><div><label>Total Deuda:</label><h3 id="edit-total"></h3></div><div class="ficha-actions"><button class="btn-edit" onclick="guardarCambiosEstudiante()">💾 Guardar</button><button class="btn-edit" onclick="volverALista()">⬅ Volver</button><button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button></div></div></div></div>
         </div>
     </section>
 
-    <!-- MÓDULO PENDIENTES -->
     <section id="mod-pend" class="modulo">
-        <button class="btn-critico" onclick="enviarAvisoCritico()">
-            ⚠️ AVISO CRÍTICO (Día 10) - Email Masivo
-        </button>
-        <button class="btn-alert-all" onclick="notifyAll()">
-            📢 ENVIAR RECORDATORIOS (Email Individual)
-        </button>
-        
-        <div class="card">
-            <div id="list-pend">Cargando deudores...</div>
-        </div>
+        <button class="btn-critico" onclick="enviarAvisoCritico()">⚠️ AVISO CRÍTICO (Día 10) - Email Masivo</button>
+        <button class="btn-alert-all" onclick="notifyAll()">📢 ENVIAR RECORDATORIOS (Email Individual)</button>
+        <div class="card"><div id="list-pend">Cargando deudores...</div></div>
     </section>
 
-    <!-- MÓDULO SOLVENTES -->
-    <section id="mod-solv" class="modulo">
-        <div class="card"><h3>Estudiantes al Día</h3><div id="list-solv"></div></div>
-    </section>
+    <section id="mod-solv" class="modulo"><div class="card"><h3>Estudiantes al Día</h3><div id="list-solv">Cargando...</div></div></section>
 
-    <!-- MÓDULO REPORTES - ACTUALIZADO -->
     <section id="mod-rep" class="modulo">
         <div class="card">
             <h3>📊 Pagos Reportados (V16)</h3>
-            <p style="font-size:12px; color:gray; margin-bottom:10px">Haga clic en cualquier fila para ver todos los detalles del pago.</p>
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <p style="font-size:12px; color:gray;">Haga clic en cualquier fila para ver detalles | <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">✏️ Editar solo admin</span></p>
+                <button class="btn-export" onclick="exportarDatos()">📥 Exportar Datos (Backup)</button>
+            </div>
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -487,135 +285,175 @@
         </div>
     </section>
 
-    <!-- PORTAL PADRES -->
     <section id="mod-padres" class="modulo">
         <div class="parent-portal">
-            <h3 style="color:white; margin-bottom:15px;">👨‍👩‍👧‍👦 Portal para Padres</h3>
-            <p style="font-size:14px; opacity:0.9;">Ingrese su cédula para consultar la situación de todos sus hijos.</p>
+            <h3>👨‍👩‍👧‍👦 Portal para Padres</h3>
+            <p>Ingrese su cédula para consultar la situación de todos sus hijos.</p>
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <input type="text" id="cedula-consulta" placeholder="Cédula del Representante" style="flex:1;">
-                <button class="btn-main" onclick="consultarFamilia()" style="width:auto; padding:12px 25px;">🔍 Consultar</button>
+                <input type="text" id="cedula-consulta" placeholder="Cédula del Representante">
+                <button class="btn-main" onclick="consultarFamilia()" style="width:auto;">🔍 Consultar</button>
             </div>
         </div>
-        
-        <div id="resultados-familia" class="parent-results" style="display:none;">
-            <div class="card">
-                <h3>👨‍👩‍👧‍👦 Resultados de la Consulta</h3>
-                <div id="lista-hijos"></div>
-                <div class="family-total" id="total-familiar"></div>
-            </div>
-        </div>
+        <div id="resultados-familia" style="display:none;"><div class="card"><h3>Resultados</h3><div id="lista-hijos"></div><div class="family-total" id="total-familiar"></div></div></div>
     </section>
-
 </div>
 
-<!-- MODAL PARA VER DETALLES DEL PAGO -->
-<div id="modal-detalles-pago" class="modal-overlay" onclick="cerrarModalDetalles(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <h3>📋 Detalles del Pago Reportado</h3>
-            <button class="close-modal" onclick="cerrarModalDetalles()">×</button>
-        </div>
-        <div class="modal-details" id="detalles-pago-content">
-            <!-- Contenido dinámico -->
-        </div>
-        <div class="modal-actions">
-            <button class="btn-check" onclick="validarPagoDesdeModal()">✅ Verificar Pago</button>
-            <button class="btn-reject" onclick="rechazarPagoDesdeModal()">✖ Rechazar</button>
-        </div>
+<div id="modal-detalles-pago" class="modal-overlay" onclick="cerrarModalDetalles(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h3>📋 Detalles del Pago</h3><button class="close-modal" onclick="cerrarModalDetalles()">×</button></div><div class="modal-details" id="detalles-pago-content"></div><div class="modal-actions"><button class="btn-check" onclick="validarPagoDesdeModal()">✅ Verificar</button><button class="btn-reject" onclick="rechazarPagoDesdeModal()">✖ Rechazar</button></div></div></div>
+
+<div id="modal-editar-pago" class="modal-overlay" onclick="cerrarModalEditar(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h3>✏️ Editar Pago</h3><button class="close-modal" onclick="cerrarModalEditar()">×</button></div><div class="modal-details"><div class="detail-row"><span class="detail-label">Estudiante:</span><span id="edit-nombreEst"></span></div><div class="detail-row"><span class="detail-label">Representante:</span><span id="edit-nombreRep"></span></div><label>Método:</label><select id="edit-metodo"><option>Pago Móvil</option><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Zelle</option></select><label>Banco:</label><input type="text" id="edit-banco"><label>Referencia:</label><input type="text" id="edit-referencia"><label>Monto Bs.:</label><input type="number" id="edit-montoBs" step="0.01"><label>Monto USD:</label><input type="number" id="edit-montoUsd" step="0.01"><label>Meses Pagados:</label><select id="edit-mesesPagados" multiple style="height:140px"><option value="Inscripción">Inscripción</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option><option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option></select><label>Observaciones:</label><input type="text" id="edit-observaciones"></div><div class="modal-actions"><button class="btn-check" onclick="guardarEdicionPago()">💾 Guardar</button><button class="btn-reject" onclick="cerrarModalEditar()">Cancelar</button></div></div></div>
+
+<!-- OVERLAY DE LOGIN -->
+<div id="securityOverlay">
+    <div class="login-box">
+        <h2>🔒 ACCESO RESTRINGIDO</h2>
+        <p>Sistema Administrativo SDJ V16<br>Ingrese sus credenciales para continuar</p>
+        <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
+        <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
+        <div class="error" id="loginError"></div>
+        <div class="attempts" id="attemptsSpan"></div>
+        <div class="user-info" id="userInfo">Usuario autorizado: <strong id="userName"></strong></div>
+        <div class="security-note">⚠️ Este sistema es de acceso exclusivo para personal autorizado.</div>
     </div>
 </div>
 
-<!-- SCRIPT DE SEGURIDAD Y AUDITORÍA INYECTADO -->
 <script>
     // ============================================
-    // SISTEMA DE SEGURIDAD Y AUDITORÍA
+    // SISTEMA DE SEGURIDAD Y AUDITORÍA - CORREGIDO
     // ============================================
     
-    // Variable global para rastrear usuario activo
     let usuarioActivo = null;
+    let intentosFallidos = 0;
+    let bloqueoHasta = null;
     
-    // Función para verificar credenciales (manteniendo las mismas cédulas pero sin mostrarlas)
+    // Credenciales válidas (no se muestran en la interfaz)
+    const USUARIOS_VALIDOS = {
+        '34861896': 'Genesis',
+        '22943126': 'Edward'
+    };
+    
     function verificarCedula() {
-        const credencialInput = document.getElementById('cedulaInput').value;
+        const input = document.getElementById('cedulaInput').value;
         const errorDiv = document.getElementById('loginError');
-        const userInfo = document.getElementById('userInfo');
-        const userName = document.getElementById('userName');
+        const attemptsSpan = document.getElementById('attemptsSpan');
         
-        // Limpiar mensajes anteriores
-        errorDiv.textContent = '';
-        userInfo.style.display = 'none';
+        if (bloqueoHasta && new Date() < bloqueoHasta) {
+            const minutosRestantes = Math.ceil((bloqueoHasta - new Date()) / 60000);
+            errorDiv.textContent = `🔒 Demasiados intentos. Espere ${minutosRestantes} minutos.`;
+            return;
+        }
         
-        // Normalizar la entrada (quitar puntos, espacios y guiones)
-        const credencialNormalizada = credencialInput.replace(/[.\s-]/g, '');
+        const cedulaNormalizada = input.replace(/[.\s-]/g, '');
         
-        // Base de datos interna de usuarios autorizados (NO VISIBLE EN EL HTML)
-        const usuariosAutorizados = {
-            '34861896': { nombre: 'Genesis', cedula: '34.861.896' },
-            '22943126': { nombre: 'Edward', cedula: '22.943.126' }
-        };
-        
-        // Verificar si la credencial está autorizada
-        if (usuariosAutorizados[credencialNormalizada]) {
-            const usuario = usuariosAutorizados[credencialNormalizada];
-            usuarioActivo = usuario.nombre;
+        if (USUARIOS_VALIDOS[cedulaNormalizada]) {
+            usuarioActivo = USUARIOS_VALIDOS[cedulaNormalizada];
+            intentosFallidos = 0;
+            bloqueoHasta = null;
             
-            // Mostrar mensaje de bienvenida
-            userName.textContent = usuario.nombre;
-            userInfo.style.display = 'block';
+            const sesion = { usuario: usuarioActivo, expira: Date.now() + (60 * 60 * 1000) };
+            localStorage.setItem('sdj_sesion', JSON.stringify(sesion));
             
-            // Limpiar el campo de entrada
+            document.getElementById('userName').textContent = usuarioActivo;
+            document.getElementById('userInfo').style.display = 'block';
             document.getElementById('cedulaInput').value = '';
             
-            // Ocultar overlay después de 1.5 segundos
             setTimeout(() => {
                 document.getElementById('securityOverlay').style.display = 'none';
-                document.title = `SDJ V16 | ${usuario.nombre}`;
-                
-                // Mostrar notificación de acceso discreta
-                console.log(`✅ Acceso concedido: ${usuario.nombre}`);
+                document.title = `SDJ V16 | ${usuarioActivo}`;
+                document.getElementById('logoutBtn').style.display = 'block';
             }, 1500);
-            
         } else {
-            // Mostrar error genérico sin revelar información
-            errorDiv.textContent = '❌ Credencial incorrecta. Intente nuevamente.';
+            intentosFallidos++;
+            const restantes = 3 - intentosFallidos;
+            
+            if (intentosFallidos >= 3) {
+                bloqueoHasta = new Date(Date.now() + (5 * 60 * 1000));
+                errorDiv.textContent = '🔒 Demasiados intentos. Sistema bloqueado por 5 minutos.';
+                if (attemptsSpan) attemptsSpan.textContent = 'BLOQUEADO';
+                setTimeout(() => {
+                    if (document.getElementById('securityOverlay').style.display !== 'none') {
+                        intentosFallidos = 0;
+                        errorDiv.textContent = '';
+                        if (attemptsSpan) attemptsSpan.textContent = '';
+                    }
+                }, 300000);
+            } else {
+                errorDiv.textContent = `❌ Credencial incorrecta. Intentos restantes: ${restantes}`;
+                if (attemptsSpan) attemptsSpan.textContent = `Intentos: ${intentosFallidos}/3`;
+            }
             document.getElementById('cedulaInput').value = '';
             document.getElementById('cedulaInput').focus();
-            
-            // Pequeña pausa para evitar fuerza bruta
-            setTimeout(() => {
-                errorDiv.textContent = '';
-            }, 2000);
         }
     }
     
-    // Permitir acceso con Enter
-    document.getElementById('cedulaInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            verificarCedula();
+    function verificarSesionGuardada() {
+        const sesionGuardada = localStorage.getItem('sdj_sesion');
+        if (sesionGuardada) {
+            try {
+                const sesion = JSON.parse(sesionGuardada);
+                if (sesion.expira > Date.now()) {
+                    usuarioActivo = sesion.usuario;
+                    document.getElementById('securityOverlay').style.display = 'none';
+                    document.getElementById('logoutBtn').style.display = 'block';
+                    document.title = `SDJ V16 | ${usuarioActivo}`;
+                    return true;
+                } else {
+                    localStorage.removeItem('sdj_sesion');
+                }
+            } catch(e) {}
         }
+        return false;
+    }
+    
+    function cerrarSesion() {
+        usuarioActivo = null;
+        localStorage.removeItem('sdj_sesion');
+        document.getElementById('securityOverlay').style.display = 'flex';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('cedulaInput').value = '';
+        document.getElementById('cedulaInput').focus();
+        intentosFallidos = 0;
+        bloqueoHasta = null;
+    }
+    
+    document.getElementById('cedulaInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') verificarCedula();
     });
     
-    // Enfocar automáticamente el campo al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
+    function showModal(message, isConfirm = false) {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal" style="max-width:400px; text-align:center;">
+                    <div class="modal-header"><h3>📢 Sistema SDJ</h3><button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button></div>
+                    <p style="margin:20px 0">${message}</p>
+                    <div class="modal-actions">
+                        <button class="btn-check" id="modalConfirm">Aceptar</button>
+                        ${isConfirm ? '<button class="btn-reject" id="modalCancel">Cancelar</button>' : ''}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('modalConfirm').onclick = () => { modal.remove(); resolve(true); };
+            if (isConfirm) document.getElementById('modalCancel').onclick = () => { modal.remove(); resolve(false); };
+        });
+    }
+    
+    window.showModal = showModal;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!verificarSesionGuardada()) {
+            document.getElementById('securityOverlay').style.display = 'flex';
             document.getElementById('cedulaInput').focus();
-        }, 100);
-    });
-    
-    // Prevenir copiar/pegar en el campo de credencial (opcional)
-    document.getElementById('cedulaInput').addEventListener('paste', function(e) {
-        e.preventDefault();
-        document.getElementById('loginError').textContent = '❌ Operación no permitida';
-        setTimeout(() => {
-            document.getElementById('loginError').textContent = '';
-        }, 1500);
+        }
+        document.getElementById('logoutBtn').onclick = cerrarSesion;
     });
 </script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_m1k2Vlu5QTokgjNZ6czlI2XH1YTC3U8",
@@ -632,79 +470,113 @@
     const DB_MAIN = "sdj_final_v16"; 
     const DB_PAGOS = "pagos_reportados";
     const DB_HISTORIAL = "historial_pagos";
-
-    const ORDEN_GRADOS = [
-        "5to Año", "4to Año", "3er Año", "2do Año", "1er Año",
-        "6to Grado", "5to Grado", "4to Grado", "3er Grado", "2do Grado", "1er Grado",
-        "Preescolar 3", "Preescolar 2", "Preescolar 1", "Maternal"
-    ];
-
-    // Variables globales
-    let cachePendientes = [];
-    let cacheTodosEstudiantes = [];
-    let estudianteActual = null;
-    let pagoSeleccionado = null;
-    let curLvl = "", curGra = "", curSec = "";
     
-    const struct = {
-        'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'],
-        'PRIMARIA': ['1er Grado','2do Grado','3er Grado','4to Grado','5to Grado','6to Grado'],
-        'BACHILLERATO': ['1er Año','2do Año','3er Año','4to Año','5to Año']
-    };
-
-    // 1. CORRECCIÓN DEL ERROR DE DEUDA $0
-    document.getElementById('rMes').addEventListener('change', calcularTotal);
-    document.getElementById('rMon').addEventListener('input', calcularTotal);
-
-    function calcularTotal() {
-        const mesesSeleccionados = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
-        const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
-        const total = mesesSeleccionados.length * montoMensual;
-        document.getElementById('totalPreview').innerText = `$${total}`;
+    // Orden de meses (incluye Agosto)
+    const MESES_ORDEN = ["Inscripción", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"];
+    
+    let mesActualIndex = 6; // Default Marzo
+    let currentYear = new Date().getFullYear();
+    let cachePendientes = [];
+    
+    async function actualizarMesDesdeServidor() {
+        const fecha = new Date();
+        const mes = fecha.toLocaleString('es-ES', { month: 'long' });
+        mesActualIndex = MESES_ORDEN.indexOf(mes);
+        if (mesActualIndex === -1) mesActualIndex = 6;
+        document.getElementById('currentYearLabel').textContent = currentYear;
+        return mesActualIndex;
     }
-
-    window.go = (id) => {
-        document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('mod-'+id).classList.add('active');
-        event.currentTarget.classList.add('active');
-    };
-
+    
+    function calcularMesesReales(mesesRegistrados) {
+        if (!mesesRegistrados) return [];
+        return mesesRegistrados.filter(mes => {
+            const idx = MESES_ORDEN.indexOf(mes);
+            return idx !== -1 && idx <= mesActualIndex;
+        });
+    }
+    
+    function isSolvente(mesesRegistrados) {
+        return calcularMesesReales(mesesRegistrados || []).length === 0;
+    }
+    
+    function calcularTotalReal(montoMensual, mesesRegistrados) {
+        return (montoMensual || 0) * calcularMesesReales(mesesRegistrados || []).length;
+    }
+    
+    function getNivelAlerta(meses) {
+        const dia = new Date().getDate();
+        if (meses >= 3 || (meses >= 1 && dia > 10)) return { texto: "ALERTA URGENTE", clase: "urgente" };
+        if (meses === 2) return { texto: "ALERTA NORMAL", clase: "normal" };
+        return { texto: "ALERTA PREVIA", clase: "previa" };
+    }
+    
+    async function validarCedulaUnica(cedula) {
+        if (!cedula) return true;
+        const q = query(collection(db, DB_MAIN), where("cedula", "==", cedula));
+        const snap = await getDocs(q);
+        return snap.empty;
+    }
+    
+    async function exportarDatos() {
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        showModal("📥 Generando backup...");
+        try {
+            const estudiantesSnap = await getDocs(collection(db, DB_MAIN));
+            const pagosSnap = await getDocs(collection(db, DB_PAGOS));
+            const backup = {
+                fecha: new Date().toISOString(),
+                generadoPor: usuarioActivo,
+                estudiantes: estudiantesSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+                pagos: pagosSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sdj_backup_${new Date().toISOString().slice(0,19)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showModal("✅ Backup generado");
+        } catch (error) {
+            showModal("❌ Error: " + error.message);
+        }
+    }
+    
+    window.exportarDatos = exportarDatos;
+    
+    // Funciones del sistema
     window.guardar = async () => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Sistema bloqueado\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
+        if (!usuarioActivo) { showModal("⚠️ Sistema bloqueado"); document.getElementById('securityOverlay').style.display = 'flex'; return; }
+        
+        const cedula = document.getElementById('rCedula').value;
+        if (!cedula) { showModal("Ingrese la cédula del representante"); return; }
+        
+        if (!await validarCedulaUnica(cedula)) {
+            showModal("❌ Esta cédula ya está registrada.");
             return;
         }
         
         const meses = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
         const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
-        const total = meses.length * montoMensual;
-        
-        if (!document.getElementById('rCedula').value) {
-            alert("Por favor ingrese la cédula del representante");
-            return;
-        }
         
         await addDoc(collection(db, DB_MAIN), {
             nombre: document.getElementById('rNom').value,
             rep: document.getElementById('rRep').value,
-            cedula: document.getElementById('rCedula').value,
+            cedula: cedula,
             mail: document.getElementById('rMail').value,
             tel: document.getElementById('rTel').value,
             grado: document.getElementById('rGra').value,
             seccion: document.getElementById('rSec').value,
             meses: meses,
             montoMensual: montoMensual,
-            total: total,
+            total: calcularTotalReal(montoMensual, meses),
             historial: [],
-            timestamp: new Date(),
-            // Auditoría: quién creó el registro
-            creadoPor: usuarioActivo,
-            fechaCreacion: new Date()
+            timestamp: serverTimestamp(),
+            añoEscolar: currentYear,
+            creadoPor: usuarioActivo
         });
-        alert("¡Registro Exitoso V16!");
+        
+        showModal("✅ Registro exitoso");
         document.getElementById('rNom').value = '';
         document.getElementById('rRep').value = '';
         document.getElementById('rCedula').value = '';
@@ -712,342 +584,26 @@
         document.getElementById('rTel').value = '';
         document.getElementById('rMon').value = '';
         document.getElementById('rMes').selectedIndex = -1;
-        document.getElementById('totalPreview').innerText = '$0';
     };
-
-    // SNAPSHOT PRINCIPAL para pendientes y solventes
-    onSnapshot(collection(db, DB_MAIN), (snap) => {
-        const lp = document.getElementById('list-pend');
-        const ls = document.getElementById('list-solv');
-        const globalDebt = document.getElementById('global-debt');
-        
-        lp.innerHTML = ""; 
-        ls.innerHTML = "";
-        cachePendientes = [];
-        cacheTodosEstudiantes = [];
-        let totalColegio = 0;
-
-        let allData = [];
-        snap.forEach(d => {
-            const data = d.data();
-            allData.push({ ...data, id: d.id });
-            cacheTodosEstudiantes.push({ ...data, id: d.id });
-        });
-
-        // PENDIENTES
-        ORDEN_GRADOS.forEach(grado => {
-            const grupo = allData.filter(x => x.grado === grado && x.meses && x.meses.length > 0);
-            if(grupo.length > 0) {
-                lp.innerHTML += `<div class="grado-header">${grado}</div>`;
-                grupo.forEach(a => {
-                    const totalDeuda = (a.montoMensual || 0) * (a.meses ? a.meses.length : 0);
-                    const alerta = getNivelAlerta(a.meses.length);
-                    cachePendientes.push({ ...a, tipoAlerta: alerta.tipo, total: totalDeuda });
-                    totalColegio += totalDeuda;
-
-                    let wsBtn = "";
-                    let emailBtn = "";
-                    
-                    if(a.tel) {
-                        const mesesTexto = a.meses.join(', ');
-                        const msg = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${a.nombre} debe ${mesesTexto} para un total de $${totalDeuda}.`;
-                        wsBtn = `<button class="btn-ws" onclick="enviarWhatsApp('${a.tel}', '${a.nombre}', '${mesesTexto}', ${totalDeuda})">📱</button>`;
-                    }
-                    
-                    if(a.mail) {
-                        emailBtn = `<button class="btn-email" onclick="enviarGmailIndividual('${a.mail}', '${a.nombre}', '${a.rep}', ${totalDeuda}, '${a.meses.join(', ')}')">✉️</button>`;
-                    }
-
-                    lp.innerHTML += `
-                        <div class="student-row alert-${alerta.clase}">
-                            <div class="info">
-                                <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
-                                <b>${a.nombre} (${a.seccion})</b>
-                                <small>${a.rep} - C.I. ${a.cedula || 'No registrada'}</small>
-                                <div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
-                            </div>
-                            <div style="text-align:right">
-                                <b style="color:#ef4444">$${totalDeuda}</b><br>
-                                <div style="margin-top:5px">
-                                    ${wsBtn}
-                                    ${emailBtn}
-                                </div>
-                                <button onclick="del('${a.id}')" style="font-size:10px; color:gray; border:none; background:none; cursor:pointer; margin-top:5px">Eliminar</button>
-                            </div>
-                        </div>`;
-                });
-            }
-        });
-
-        // SOLVENTES
-        const solventes = allData.filter(x => !x.meses || x.meses.length === 0);
-        solventes.forEach(a => {
-            ls.innerHTML += `
-                <div class="student-row" style="border-left:5px solid var(--green)">
-                    <div class="info">
-                        <b>${a.nombre}</b>
-                        <small>${a.grado} (${a.seccion}) - ${a.rep}</small>
-                    </div>
-                    <b style="color:var(--green)">SOLVENTE</b>
-                </div>`;
-        });
-
-        if(solventes.length === 0) {
-            ls.innerHTML = '<p style="text-align:center; padding:20px; color:gray">No hay estudiantes solventes</p>';
-        }
-
-        if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString()}`;
-    });
-
-    // SNAPSHOT PARA REPORTES - ACTUALIZADO CON MODAL
-    onSnapshot(collection(db, DB_PAGOS), (snap) => {
-        const tb = document.getElementById('table-rep'); 
-        tb.innerHTML = "";
-        
-        if(snap.empty) {
-            tb.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align:center; padding:40px; color:#64748b;">
-                        <div style="font-size:50px;">📭</div>
-                        <h4>No hay pagos reportados</h4>
-                        <small>Los padres aún no han reportado ningún pago.</small>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        let contador = 0;
-        snap.forEach(d => {
-            const p = d.data();
-            contador++;
-            
-            // Determinar color del estado
-            let estadoColor = '#64748b';
-            let estadoTexto = p.estado || 'Pendiente';
-            
-            if(estadoTexto.includes('Pendiente')) estadoColor = '#eab308';
-            if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
-            if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
-            
-            // Formatear fecha
-            let fechaFormateada = 'Sin fecha';
-            if(p.fechaPago) {
-                const fecha = new Date(p.fechaPago);
-                fechaFormateada = fecha.toLocaleDateString('es-ES');
-            } else if(p.timestamp) {
-                const fecha = p.timestamp.toDate();
-                fechaFormateada = fecha.toLocaleDateString('es-ES');
-            }
-            
-            tb.innerHTML += `
-                <tr class="clickable-row" data-id="${d.id}" onclick="mostrarDetallesPago('${d.id}')">
-                    <td>
-                        <strong>${p.nombreEst || 'Sin nombre'}</strong><br>
-                        <small style="color:#64748b;">${p.nombreRep || 'Sin representante'}</small><br>
-                        <small style="font-size:10px; color:#94a3b8;">${fechaFormateada}</small>
-                    </td>
-                    <td>
-                        <strong style="color:#1e40af;">${p.metodo || 'Sin método'}</strong><br>
-                        <small>${p.referencia || 'Sin referencia'}</small><br>
-                        <small style="color:#64748b;">${p.banco || ''}</small>
-                    </td>
-                    <td>
-                        <strong style="color:#059669;">$${p.montoDivisas || p.monto || '0'}</strong><br>
-                        <small style="color:#1e40af;">Bs. ${p.montoBs || '0'}</small>
-                    </td>
-                    <td>
-                        <span style="color:${estadoColor}; font-weight:bold; font-size:11px;">
-                            ${estadoTexto}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn-check" onclick="event.stopPropagation(); validarPago('${d.id}')">✔</button>
-                        <button class="btn-reject" onclick="event.stopPropagation(); rechazar('${d.id}','${p.referencia}')">✖</button>
-                    </td>
-                </tr>
-            `;
-        });
-    });
-
-    // FUNCIÓN PARA MOSTRAR DETALLES COMPLETOS DEL PAGO (MODAL)
-    window.mostrarDetallesPago = async (idPago) => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        try {
-            const docRef = doc(db, DB_PAGOS, idPago);
-            const docSnap = await getDoc(docRef);
-            
-            if(!docSnap.exists()) {
-                alert("El pago no existe");
-                return;
-            }
-            
-            pagoSeleccionado = { id: idPago, ...docSnap.data() };
-            
-            // Formatear fecha
-            let fechaFormateada = 'No especificada';
-            if(pagoSeleccionado.fechaPago) {
-                const fecha = new Date(pagoSeleccionado.fechaPago);
-                fechaFormateada = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES');
-            } else if(pagoSeleccionado.timestamp) {
-                const fecha = pagoSeleccionado.timestamp.toDate();
-                fechaFormateada = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES');
-            }
-            
-            // Determinar estado y color
-            let estadoColor = '#64748b';
-            let estadoTexto = pagoSeleccionado.estado || 'Pendiente de verificación';
-            
-            if(estadoTexto.includes('Pendiente')) estadoColor = '#eab308';
-            if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
-            if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
-            
-            // Construir contenido del modal
-            const contenido = `
-                <div class="detail-row">
-                    <span class="detail-label">Estudiante:</span>
-                    <span class="detail-value">${pagoSeleccionado.nombreEst || 'No especificado'}</span>
-                </div>
-                
-                <div class="detail-row">
-                    <span class="detail-label">Representante:</span>
-                    <span class="detail-value">${pagoSeleccionado.nombreRep || 'No especificado'}</span>
-                </div>
-                
-                <div class="detail-row">
-                    <span class="detail-label">Cédula:</span>
-                    <span class="detail-value">${pagoSeleccionado.cedulaRep || 'No registrada'}</span>
-                </div>
-                
-                <div class="detail-row">
-                    <span class="detail-label">Método de pago:</span>
-                    <span class="detail-value"><strong>${pagoSeleccionado.metodo || 'No especificado'}</strong></span>
-                </div>
-                
-                ${pagoSeleccionado.banco ? `
-                <div class="detail-row">
-                    <span class="detail-label">Banco:</span>
-                    <span class="detail-value">${pagoSeleccionado.banco}</span>
-                </div>
-                ` : ''}
-                
-                ${pagoSeleccionado.referencia ? `
-                <div class="detail-row">
-                    <span class="detail-label">Referencia:</span>
-                    <span class="detail-value">${pagoSeleccionado.referencia}</span>
-                </div>
-                ` : ''}
-                
-                ${pagoSeleccionado.cuenta ? `
-                <div class="detail-row">
-                    <span class="detail-label">Cuenta/RIF:</span>
-                    <span class="detail-value">${pagoSeleccionado.cuenta}</span>
-                </div>
-                ` : ''}
-                
-                <div class="detail-row">
-                    <span class="detail-label">Monto en Bolívares:</span>
-                    <span class="detail-value amount bs">Bs. ${pagoSeleccionado.montoBs || '0.00'}</span>
-                </div>
-                
-                <div class="detail-row">
-                    <span class="detail-label">Monto en Dólares:</span>
-                    <span class="detail-value amount usd">$ ${pagoSeleccionado.montoDivisas || pagoSeleccionado.monto || '0.00'}</span>
-                </div>
-                
-                ${pagoSeleccionado.mesesPagados && pagoSeleccionado.mesesPagados.length > 0 ? `
-                <div class="detail-row">
-                    <span class="detail-label">Meses pagados:</span>
-                    <span class="detail-value">
-                        ${Array.isArray(pagoSeleccionado.mesesPagados) ? 
-                            pagoSeleccionado.mesesPagados.join(', ') : 
-                            pagoSeleccionado.mesesPagados}
-                    </span>
-                </div>
-                ` : ''}
-                
-                <div class="detail-row">
-                    <span class="detail-label">Fecha del pago:</span>
-                    <span class="detail-value">${fechaFormateada}</span>
-                </div>
-                
-                ${pagoSeleccionado.observaciones ? `
-                <div class="detail-row">
-                    <span class="detail-label">Observaciones:</span>
-                    <span class="detail-value">${pagoSeleccionado.observaciones}</span>
-                </div>
-                ` : ''}
-                
-                <div class="detail-row">
-                    <span class="detail-label">Estado:</span>
-                    <span class="detail-value" style="color:${estadoColor}; font-weight:bold;">
-                        ${estadoTexto}
-                    </span>
-                </div>
-                
-                <!-- INFORMACIÓN DE AUDITORÍA -->
-                ${pagoSeleccionado.procesadoPor ? `
-                <div class="detail-row" style="background:#f1f5f9; padding:8px; border-radius:6px;">
-                    <span class="detail-label">Verificado por:</span>
-                    <span class="detail-value" style="color:#1e40af; font-weight:bold;">
-                        ${pagoSeleccionado.procesadoPor}
-                    </span>
-                </div>
-                ` : ''}
-                
-                ${pagoSeleccionado.rechazadoPor ? `
-                <div class="detail-row" style="background:#fef2f2; padding:8px; border-radius:6px;">
-                    <span class="detail-label">Rechazado por:</span>
-                    <span class="detail-value" style="color:#dc2626; font-weight:bold;">
-                        ${pagoSeleccionado.rechazadoPor}
-                    </span>
-                </div>
-                ` : ''}
-            `;
-            
-            document.getElementById('detalles-pago-content').innerHTML = contenido;
-            document.getElementById('modal-detalles-pago').style.display = 'flex';
-            
-        } catch (error) {
-            console.error("Error al cargar detalles:", error);
-            alert("Error al cargar los detalles del pago");
-        }
+    
+    const ORDEN_GRADOS = ["5to Año", "4to Año", "3er Año", "2do Año", "1er Año", "6to Grado", "5to Grado", "4to Grado", "3er Grado", "2do Grado", "1er Grado", "Preescolar 3", "Preescolar 2", "Preescolar 1", "Maternal"];
+    const struct = { 'INICIAL': ['Maternal', 'Preescolar 1', 'Preescolar 2', 'Preescolar 3'], 'PRIMARIA': ['1er Grado','2do Grado','3er Grado','4to Grado','5to Grado','6to Grado'], 'BACHILLERATO': ['1er Año','2do Año','3er Año','4to Año','5to Año'] };
+    
+    let curLvl = "", curGra = "", curSec = "";
+    let estudianteActual = null;
+    let pagoSeleccionado = null;
+    let pagoEditando = null;
+    let unsubscribeGlobal = null;
+    let unsubscribePagos = null;
+    let currentListUnsubscribe = null;
+    
+    window.go = (id) => {
+        document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('mod-'+id).classList.add('active');
+        event.currentTarget.classList.add('active');
     };
-
-    // FUNCIONES DEL MODAL
-    window.cerrarModalDetalles = function(e) {
-        if(e && e.target.id === 'modal-detalles-pago') {
-            document.getElementById('modal-detalles-pago').style.display = 'none';
-        } else if(!e) {
-            document.getElementById('modal-detalles-pago').style.display = 'none';
-        }
-    };
-
-    window.validarPagoDesdeModal = async function() {
-        if(!pagoSeleccionado) return;
-        
-        if(confirm(`¿Verificar el pago de ${pagoSeleccionado.nombreEst || 'este estudiante'}?`)) {
-            await validarPago(pagoSeleccionado.id);
-            document.getElementById('modal-detalles-pago').style.display = 'none';
-        }
-    };
-
-    window.rechazarPagoDesdeModal = async function() {
-        if(!pagoSeleccionado) return;
-        
-        if(confirm(`¿Rechazar el pago de ${pagoSeleccionado.nombreEst || 'este estudiante'}?`)) {
-            await rechazar(pagoSeleccionado.id, pagoSeleccionado.referencia || '');
-            document.getElementById('modal-detalles-pago').style.display = 'none';
-        }
-    };
-
-    // FUNCIONES DE ARCHIVOS
+    
     window.loadLevel = (l) => {
         curLvl = l;
         document.getElementById('view-level').style.display='none';
@@ -1057,14 +613,9 @@
         grid.innerHTML = "";
         struct[l].forEach(g => grid.innerHTML += `<div class="folder" onclick="loadSec('${g}')">📁<br>${g}</div>`);
     };
-
-    window.loadSec = (g) => { 
-        curGra = g; 
-        document.getElementById('view-grade').style.display='none'; 
-        document.getElementById('view-sec').style.display='block'; 
-        document.getElementById('tit-sec').innerText = g; 
-    };
-
+    
+    window.loadSec = (g) => { curGra = g; document.getElementById('view-grade').style.display='none'; document.getElementById('view-sec').style.display='block'; document.getElementById('tit-sec').innerText = g; };
+    
     window.loadFinal = (s) => {
         curSec = s;
         document.getElementById('view-sec').style.display='none';
@@ -1072,633 +623,424 @@
         document.getElementById('ficha-estudiante').style.display = 'none';
         document.getElementById('tit-list').innerText = `${curGra} - SECCIÓN ${s}`;
         document.getElementById('search-filter').value = "";
+        document.getElementById('final-list').innerHTML = '<div class="loading-text"><span class="spinner"></span> Cargando...</div>';
         
-        document.getElementById('final-list').innerHTML = "Cargando...";
-        document.getElementById('sec-total-label').innerHTML = "Calculando...";
-
-        onSnapshot(collection(db, DB_MAIN), (snap) => {
-            const div = document.getElementById('final-list'); 
+        if (currentListUnsubscribe) currentListUnsubscribe();
+        currentListUnsubscribe = onSnapshot(collection(db, DB_MAIN), (snap) => {
+            const div = document.getElementById('final-list');
             const labelTotal = document.getElementById('sec-total-label');
+            if (!div) return;
             div.innerHTML = "";
+            let deudaAcumulada = 0, contador = 0;
             
-            let deudaAcumulada = 0;
-            let contador = 0;
-
             snap.forEach(d => {
                 const a = d.data();
                 if(a.grado === curGra && a.seccion === s) {
                     contador++;
-                    const total = (a.montoMensual || 0) * (a.meses ? a.meses.length : 0);
-                    const esSolvente = (!a.meses || a.meses.length === 0);
-                    
+                    const esSolvente = isSolvente(a.meses);
+                    const total = calcularTotalReal(a.montoMensual, a.meses);
+                    const mesesReales = calcularMesesReales(a.meses);
                     if(!esSolvente) deudaAcumulada += total;
-
-                    div.innerHTML += `
-                    <div class="student-row item-lista" data-id="${d.id}" data-name="${a.nombre.toLowerCase()}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; ${esSolvente ? 'border-left: 6px solid var(--green)' : 'border-left: 6px solid var(--red)'}">
-                        <div class="info">
-                            <b>${a.nombre}</b>
-                            <small>${a.rep} - ${a.cedula || 'Sin cédula'}</small>
-                            ${!esSolvente ? `<div>${a.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>` : ''}
-                        </div>
-                        <div style="text-align:right">
-                            ${esSolvente ? 
-                                `<b style="color:var(--green)">SOLVENTE</b>` : 
-                                `<b style="color:var(--red)">DEUDA</b><br><span style="font-size:11px; color:#ef4444">$${total}</span>`}
-                        </div>
-                    </div>`;
+                    div.innerHTML += `<div class="student-row item-lista" data-id="${d.id}" data-name="${a.nombre.toLowerCase()}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; ${esSolvente ? 'border-left:6px solid var(--green)' : 'border-left:6px solid var(--red)'}"><div><b>${a.nombre}</b><small>${a.rep} - ${a.cedula}</small>${!esSolvente ? `<div>${mesesReales.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>` : ''}${a.meses?.length > mesesReales.length ? `<small style="color:#f59e0b;">📅 ${a.meses.length - mesesReales.length} futuro(s)</small>` : ''}</div><div>${esSolvente ? '<b style="color:var(--green)">SOLVENTE</b>' : `<b style="color:var(--red)">DEUDA</b><br><span>$${total}</span>`}</div></div>`;
                 }
             });
-
-            if(deudaAcumulada > 0) {
-                labelTotal.innerHTML = `TOTAL PENDIENTE SECCIÓN: <span style="font-size:16px; color:#ef4444">$${deudaAcumulada}</span> (${contador} estudiantes)`;
-            } else {
-                labelTotal.innerHTML = `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador} estudiantes)`;
-            }
-
-            if(contador === 0) div.innerHTML = "<p style='text-align:center; padding:20px; color:gray'>Carpeta Vacía</p>";
+            labelTotal.innerHTML = deudaAcumulada > 0 ? `TOTAL PENDIENTE: <span style="color:#ef4444">$${deudaAcumulada}</span> (${contador})` : `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador})`;
+            if(contador === 0) div.innerHTML = "<p style='text-align:center; color:gray'>Carpeta Vacía</p>";
         });
     };
-
-    // FICHA DEL ESTUDIANTE
+    
     window.mostrarFichaEstudiante = async (id) => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); document.getElementById('securityOverlay').style.display = 'flex'; return; }
+        const docSnap = await getDoc(doc(db, DB_MAIN, id));
+        if(docSnap.exists()) {
+            estudianteActual = { id, ...docSnap.data() };
+            const mesesReales = calcularMesesReales(estudianteActual.meses);
+            document.getElementById('edit-nombre').value = estudianteActual.nombre;
+            document.getElementById('edit-representante').value = estudianteActual.rep;
+            document.getElementById('edit-cedula').value = estudianteActual.cedula || '';
+            document.getElementById('edit-telefono').value = estudianteActual.tel || '';
+            document.getElementById('edit-correo').value = estudianteActual.mail || '';
+            document.getElementById('edit-grado').value = `${estudianteActual.grado} - ${estudianteActual.seccion}`;
+            document.getElementById('edit-meses').innerHTML = mesesReales.length ? mesesReales.map(m => `<span class="tag-mes">${m}</span>`).join('') : '<span style="color:var(--green)">Sin deudas</span>';
+            document.getElementById('edit-total').innerHTML = `$${calcularTotalReal(estudianteActual.montoMensual, estudianteActual.meses)}`;
+            document.getElementById('final-list').style.display = 'none';
+            document.getElementById('ficha-estudiante').style.display = 'block';
         }
-        
-        const estudiantes = await getDocs(collection(db, DB_MAIN));
-        
-        estudiantes.forEach(d => {
-            if(d.id === id) {
-                estudianteActual = { ...d.data(), id: d.id };
-                
-                document.getElementById('edit-nombre').value = estudianteActual.nombre;
-                document.getElementById('edit-representante').value = estudianteActual.rep;
-                document.getElementById('edit-cedula').value = estudianteActual.cedula || '';
-                document.getElementById('edit-telefono').value = estudianteActual.tel || '';
-                document.getElementById('edit-correo').value = estudianteActual.mail || '';
-                document.getElementById('edit-grado').value = `${estudianteActual.grado} - ${estudianteActual.seccion}`;
-                
-                const mesesDiv = document.getElementById('edit-meses');
-                if(estudianteActual.meses && estudianteActual.meses.length > 0) {
-                    mesesDiv.innerHTML = estudianteActual.meses.map(m => 
-                        `<span class="tag-mes" style="margin:2px; display:inline-block;">${m}</span>`
-                    ).join('');
-                } else {
-                    mesesDiv.innerHTML = '<span style="color:var(--green)">Sin deudas</span>';
-                }
-                
-                const total = (estudianteActual.montoMensual || 0) * (estudianteActual.meses ? estudianteActual.meses.length : 0);
-                document.getElementById('edit-total').innerHTML = `$${total}`;
-                
-                document.getElementById('final-list').style.display = 'none';
-                document.getElementById('ficha-estudiante').style.display = 'block';
-            }
-        });
     };
-
+    
     window.guardarCambiosEstudiante = async () => {
-        if(!estudianteActual) return;
-        
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        try {
-            await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
-                rep: document.getElementById('edit-representante').value,
-                tel: document.getElementById('edit-telefono').value,
-                mail: document.getElementById('edit-correo').value,
-                // Auditoría: quién modificó
-                modificadoPor: usuarioActivo,
-                fechaModificacion: new Date()
-            });
-            
-            alert("✅ Cambios guardados exitosamente");
-            loadFinal(curSec);
-        } catch (error) {
-            alert("Error al guardar cambios: " + error.message);
-        }
+        if(!estudianteActual || !usuarioActivo) return;
+        await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
+            rep: document.getElementById('edit-representante').value,
+            tel: document.getElementById('edit-telefono').value,
+            mail: document.getElementById('edit-correo').value,
+            modificadoPor: usuarioActivo,
+            fechaModificacion: serverTimestamp()
+        });
+        showModal("✅ Cambios guardados");
+        window.loadFinal(curSec);
     };
-
-    window.volverALista = () => {
-        document.getElementById('final-list').style.display = 'block';
-        document.getElementById('ficha-estudiante').style.display = 'none';
-    };
-
+    
+    window.volverALista = () => { document.getElementById('final-list').style.display = 'block'; document.getElementById('ficha-estudiante').style.display = 'none'; };
+    
     window.eliminarEstudiante = async () => {
-        if(!estudianteActual) return;
-        
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        if(confirm(`¿Está seguro de eliminar a ${estudianteActual.nombre}? Esta acción no se puede deshacer.`)) {
-            try {
-                // Registrar auditoría antes de eliminar
-                await addDoc(collection(db, "auditoria_eliminaciones"), {
-                    estudiante: estudianteActual.nombre,
-                    representante: estudianteActual.rep,
-                    cedula: estudianteActual.cedula,
-                    eliminadoPor: usuarioActivo,
-                    fechaEliminacion: new Date(),
-                    grado: estudianteActual.grado,
-                    seccion: estudianteActual.seccion
-                });
-                
-                await deleteDoc(doc(db, DB_MAIN, estudianteActual.id));
-                alert("✅ Estudiante eliminado");
-                volverALista();
-                loadFinal(curSec);
-            } catch (error) {
-                alert("Error al eliminar: " + error.message);
-            }
+        if(!estudianteActual || !usuarioActivo) return;
+        if(await showModal(`¿Eliminar a ${estudianteActual.nombre}?`, true)) {
+            await addDoc(collection(db, "auditoria_eliminaciones"), { ...estudianteActual, eliminadoPor: usuarioActivo, fecha: serverTimestamp() });
+            await deleteDoc(doc(db, DB_MAIN, estudianteActual.id));
+            showModal("✅ Estudiante eliminado");
+            window.volverALista();
+            window.loadFinal(curSec);
         }
     };
-
+    
     window.filterList = () => {
         const term = document.getElementById('search-filter').value.toLowerCase();
-        const items = document.querySelectorAll('.item-lista');
-        items.forEach(item => {
-            const name = item.getAttribute('data-name');
-            item.style.display = name.includes(term) ? "flex" : "none";
-        });
+        document.querySelectorAll('.item-lista').forEach(item => { item.style.display = item.getAttribute('data-name').includes(term) ? "flex" : "none"; });
     };
     
-    window.resetArch = () => { 
-        document.getElementById('view-grade').style.display='none'; 
-        document.getElementById('view-level').style.display='block'; 
-    };
+    window.resetArch = () => { document.getElementById('view-grade').style.display='none'; document.getElementById('view-level').style.display='block'; };
+    window.backToGrade = () => { document.getElementById('view-sec').style.display='none'; document.getElementById('view-grade').style.display='block'; };
+    window.backToSec = () => { document.getElementById('view-list').style.display='none'; document.getElementById('ficha-estudiante').style.display='none'; document.getElementById('view-sec').style.display='block'; };
     
-    window.backToGrade = () => { 
-        document.getElementById('view-sec').style.display='none'; 
-        document.getElementById('view-grade').style.display='block'; 
-    };
-    
-    window.backToSec = () => { 
-        document.getElementById('view-list').style.display='none'; 
-        document.getElementById('ficha-estudiante').style.display = 'none';
-        document.getElementById('view-sec').style.display='block'; 
-    };
-
-    // PORTAL DE PADRES
     window.consultarFamilia = async () => {
         const cedula = document.getElementById('cedula-consulta').value.trim();
-        if(!cedula) {
-            alert("Por favor ingrese su cédula");
-            return;
-        }
-        
+        if(!cedula) { showModal("Ingrese su cédula"); return; }
         const estudiantes = await getDocs(collection(db, DB_MAIN));
-        const hijos = [];
-        let totalFamiliar = 0;
-        let representanteNombre = '';
-        
+        let hijos = [], totalFamiliar = 0, repNombre = '';
         estudiantes.forEach(d => {
             const data = d.data();
             if(data.cedula === cedula) {
-                if(!representanteNombre && data.rep) {
-                    representanteNombre = data.rep;
-                }
-                
-                const total = (data.montoMensual || 0) * (data.meses ? data.meses.length : 0);
-                hijos.push({
-                    nombre: data.nombre,
-                    grado: data.grado,
-                    seccion: data.seccion,
-                    meses: data.meses || [],
-                    total: total,
-                    solvente: (!data.meses || data.meses.length === 0)
-                });
-                
-                if(!data.meses || data.meses.length > 0) {
-                    totalFamiliar += total;
-                }
+                if(!repNombre) repNombre = data.rep;
+                const solvente = isSolvente(data.meses);
+                const total = calcularTotalReal(data.montoMensual, data.meses);
+                hijos.push({ nombre: data.nombre, grado: data.grado, seccion: data.seccion, meses: calcularMesesReales(data.meses), total, solvente });
+                if(!solvente) totalFamiliar += total;
             }
         });
-        
-        const resultadosDiv = document.getElementById('resultados-familia');
-        const listaHijosDiv = document.getElementById('lista-hijos');
-        const totalFamiliarDiv = document.getElementById('total-familiar');
-        
-        if(hijos.length === 0) {
-            listaHijosDiv.innerHTML = `
-                <div style="text-align:center; padding:20px; color:gray">
-                    <p>No se encontraron estudiantes asociados a esta cédula.</p>
-                    <p>Cédula consultada: ${cedula}</p>
-                </div>
-            `;
-        } else {
-            listaHijosDiv.innerHTML = `
-                <h4>👨‍👩‍👧‍👦 Representante: ${representanteNombre || 'No registrado'}</h4>
-                <p style="font-size:12px; color:#64748b; margin-bottom:15px;">Cédula: ${cedula} - ${hijos.length} hijo(s) registrado(s)</p>
-                <div style="margin-top:15px;">
-                    ${hijos.map((hijo, index) => `
-                        <div class="student-row" style="margin-bottom:10px; ${hijo.solvente ? 'border-left: 5px solid var(--green)' : 'border-left: 5px solid var(--red)'}">
-                            <div class="info">
-                                <b>${hijo.nombre}</b>
-                                <small>${hijo.grado} - Sección ${hijo.seccion}</small>
-                                ${!hijo.solvente ? `
-                                    <div style="margin-top:5px;">
-                                        ${hijo.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}
-                                    </div>
-                                ` : ''}
-                            </div>
-                            <div style="text-align:right">
-                                ${hijo.solvente ? 
-                                    '<b style="color:var(--green)">AL DÍA</b>' : 
-                                    `<b style="color:var(--red)">$${hijo.total}</b>`}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-        
-        totalFamiliarDiv.innerHTML = totalFamiliar > 0 ? 
-            `TOTAL DEUDA FAMILIAR: $${totalFamiliar}` : 
-            '🎉 FAMILIA COMPLETAMENTE SOLVENTE';
-        
-        resultadosDiv.style.display = 'block';
+        const div = document.getElementById('resultados-familia');
+        const lista = document.getElementById('lista-hijos');
+        if(hijos.length === 0) lista.innerHTML = `<p>No se encontraron estudiantes para cédula: ${cedula}</p>`;
+        else lista.innerHTML = `<h4>Representante: ${repNombre}</h4><p>Cédula: ${cedula} - ${hijos.length} hijo(s)</p>${hijos.map(h => `<div class="student-row" style="${h.solvente ? 'border-left:5px solid var(--green)' : 'border-left:5px solid var(--red)'}"><div><b>${h.nombre}</b><small>${h.grado} - ${h.seccion}</small>${!h.solvente ? `<div>${h.meses.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>` : ''}</div><div>${h.solvente ? '<b style="color:var(--green)">AL DÍA</b>' : `<b style="color:var(--red)">$${h.total}</b>`}</div></div>`).join('')}`;
+        document.getElementById('total-familiar').innerHTML = totalFamiliar > 0 ? `TOTAL DEUDA FAMILIAR: $${totalFamiliar}` : '🎉 FAMILIA COMPLETAMENTE SOLVENTE';
+        div.style.display = 'block';
     };
-
-    function getNivelAlerta(meses) {
-        const dia = new Date().getDate();
-        if (meses >= 3 || (meses >= 1 && dia > 10)) {
-            return { texto: "ALERTA URGENTE", clase: "urgente", tipo: "urgente" };
-        } else if (meses === 2) {
-            return { texto: "ALERTA NORMAL", clase: "normal", tipo: "normal" };
-        } else {
-            return { texto: "ALERTA PREVIA", clase: "previa", tipo: "previa" };
-        }
-    }
-
-    // 3. MÓDULO DE COBRANZA MEJORADO
-    window.enviarWhatsApp = (telefono, nombre, meses, monto) => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        const mensaje = `Buenas tardes de parte del colegio Santiago de Jesús se le informa que su representado ${nombre} debe ${meses} para un total de $${monto}.`;
-        window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    
+    window.enviarWhatsApp = (tel, nom, meses, monto) => {
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        if(tel) window.open(`https://wa.me/${tel}?text=${encodeURIComponent(`Buenas tardes, su representado ${nom} debe ${meses} total $${monto}.`)}`, '_blank');
     };
-
-    window.enviarGmailIndividual = (email, nombre, representante, monto, meses) => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        const asunto = "Recordatorio de Pago - Colegio Santiago de Jesús";
-        const cuerpo = `Estimado Sr(a) ${representante},
-
-Le escribimos del Colegio Santiago de Jesús para recordarle el pago pendiente:
-
-Estudiante: ${nombre}
-Meses pendientes: ${meses}
-Total adeudado: $${monto}
-
-Por favor regularizar su situación lo antes posible.
-
-Atentamente,
-Administración
-Colegio Santiago de Jesús`;
-        
-        window.location.href = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    
+    window.enviarGmailIndividual = (email, nom, rep, monto, meses) => {
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        if(email) window.location.href = `mailto:${email}?subject=Recordatorio de Pago&body=Estimado ${rep}, ${nom} debe ${meses} total $${monto}.`;
     };
-
+    
     window.enviarAvisoCritico = () => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        const dia = new Date().getDate();
-        if (dia < 10) {
-            alert("El aviso crítico solo se puede enviar a partir del día 10 del mes.");
-            return;
-        }
-
-        if(cachePendientes.length === 0) {
-            alert("No hay deudores para enviar aviso crítico.");
-            return;
-        }
-
-        const correos = cachePendientes
-            .filter(a => a.mail)
-            .map(a => a.mail)
-            .join(',');
-        
-        if(!correos) {
-            alert("No hay correos registrados para enviar aviso masivo.");
-            return;
-        }
-
-        const asunto = "AVISO CRÍTICO - Colegio Santiago de Jesús (Día " + dia + ")";
-        const cuerpo = `Estimados representantes,
-
-ESTE ES UN AVISO CRÍTICO DE COBRANZA
-
-A la fecha (día ${dia} del mes), su(s) representado(s) presenta(n) deuda pendiente en nuestra institución.
-
-Por favor acercarse a la administración a la mayor brevedad posible para regularizar su situación y evitar consecuencias académicas.
-
-Total de deudores en esta lista: ${cachePendientes.length}
-
-Atentamente,
-Administración
-Colegio Santiago de Jesús`;
-
-        window.location.href = `mailto:${correos}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        if(new Date().getDate() < 10) { showModal("El aviso crítico solo se puede enviar a partir del día 10."); return; }
+        const correos = cachePendientes?.filter(a=>a.mail).map(a=>a.mail).join(',');
+        if(correos) window.location.href = `mailto:${correos}?subject=AVISO CRÍTICO&body=Deuda pendiente.`;
+        else showModal("No hay correos registrados");
     };
-
+    
     window.notifyAll = () => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        if(cachePendientes.length === 0) {
-            alert("No hay deudores para enviar recordatorios.");
-            return;
-        }
-
-        if(confirm(`¿Enviar correos individuales a ${cachePendientes.length} representantes?`)) {
-            cachePendientes.forEach((a, i) => { 
-                setTimeout(() => {
-                    if(a.mail) {
-                        enviarGmailIndividual(a.mail, a.nombre, a.rep, a.total, a.meses.join(', '));
-                    }
-                }, i * 1000);
-            });
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        if(cachePendientes?.length) {
+            showModal(`Enviando correos a ${cachePendientes.length} representantes...`);
+            cachePendientes.forEach((a,i)=>setTimeout(()=>a.mail&&window.enviarGmailIndividual(a.mail,a.nombre,a.rep,a.total,a.meses?.join(',')),i*1000));
+        } else showModal("No hay deudores");
+    };
+    
+    window.mostrarDetallesPago = async (id) => {
+        if (!usuarioActivo) return;
+        const docSnap = await getDoc(doc(db, DB_PAGOS, id));
+        if(docSnap.exists()) {
+            pagoSeleccionado = { id, ...docSnap.data() };
+            document.getElementById('detalles-pago-content').innerHTML = `
+                <div class="detail-row"><span class="detail-label">Estudiante:</span><span class="detail-value">${pagoSeleccionado.nombreEst}</span></div>
+                <div class="detail-row"><span class="detail-label">Representante:</span><span class="detail-value">${pagoSeleccionado.nombreRep}</span></div>
+                <div class="detail-row"><span class="detail-label">Método:</span><span class="detail-value">${pagoSeleccionado.metodo}</span></div>
+                <div class="detail-row"><span class="detail-label">Referencia:</span><span class="detail-value">${pagoSeleccionado.referencia}</span></div>
+                <div class="detail-row"><span class="detail-label">Monto USD:</span><span class="detail-value">$${pagoSeleccionado.montoDivisas || pagoSeleccionado.monto}</span></div>
+                <div class="detail-row"><span class="detail-label">Meses pagados:</span><span class="detail-value">${pagoSeleccionado.mesesPagados?.join(', ')}</span></div>
+                ${pagoSeleccionado.editadoPor ? `<div class="detail-row" style="background:#fef3c7;"><span class="detail-label">Editado por:</span><span class="detail-value">${pagoSeleccionado.editadoPor}</span></div>` : ''}
+                ${pagoSeleccionado.procesadoPor ? `<div class="detail-row"><span class="detail-label">Verificado por:</span><span class="detail-value">${pagoSeleccionado.procesadoPor}</span></div>` : ''}
+                ${pagoSeleccionado.rechazadoPor ? `<div class="detail-row"><span class="detail-label">Rechazado por:</span><span class="detail-value">${pagoSeleccionado.rechazadoPor}</span></div>` : ''}`;
+            document.getElementById('modal-detalles-pago').style.display = 'flex';
         }
     };
-
-    // ============================================
-    // FUNCIONES MODIFICADAS PARA AUDITORÍA
-    // ============================================
-
-    window.validarPago = async function(id) {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        const docRef = doc(db, DB_PAGOS, id);
-        const docSnap = await getDoc(docRef);
-        
-        if(!docSnap.exists()) {
-            alert("El pago no existe");
-            return;
-        }
-        
-        const pagoData = docSnap.data();
-        
-        const confirmacion = confirm(`¿Verificar el pago de ${pagoData.nombreEst}?\n\nMétodo: ${pagoData.metodo}\nReferencia: ${pagoData.referencia || 'N/A'}\nMonto: $${pagoData.montoDivisas || pagoData.monto || '0'}\n\nVerificado por: ${usuarioActivo}`);
-        
-        if(confirmacion) {
-            try {
-                const estudiantesQuery = query(collection(db, DB_MAIN), where("nombre", "==", pagoData.nombreEst));
-                const estudiantesSnap = await getDocs(estudiantesQuery);
-                
-                if(!estudiantesSnap.empty) {
-                    estudiantesSnap.forEach(async (estDoc) => {
-                        const estudianteData = estDoc.data();
-                        
-                        const registroHistorial = {
-                            fecha: new Date(),
-                            montoBs: pagoData.montoBs || 0,
-                            montoDolares: pagoData.montoDivisas || pagoData.monto || 0,
-                            metodoPago: pagoData.metodo || '',
-                            referencia: pagoData.referencia || '',
-                            banco: pagoData.banco || '',
-                            cuenta: pagoData.cuenta || '',
-                            mesesPagados: pagoData.mesesPagados || [],
-                            descripcion: `Pago verificado - ${pagoData.metodo || ''}`,
-                            // AUDITORÍA: quién procesó el pago
-                            procesadoPor: usuarioActivo,
-                            fechaProcesamiento: new Date()
-                        };
-                        
-                        const historialActual = estudianteData.historial || [];
-                        historialActual.push(registroHistorial);
-                        
-                        let nuevosMeses = estudianteData.meses || [];
-                        if(pagoData.mesesPagados && pagoData.mesesPagados.length > 0) {
-                            if(Array.isArray(pagoData.mesesPagados)) {
-                                nuevosMeses = nuevosMeses.filter(mes => !pagoData.mesesPagados.includes(mes));
-                            }
-                        }
-                        
-                        const nuevoTotal = (estudianteData.montoMensual || 0) * nuevosMeses.length;
-                        
-                        await updateDoc(doc(db, DB_MAIN, estDoc.id), {
-                            historial: historialActual,
-                            meses: nuevosMeses,
-                            total: nuevoTotal,
-                            // Auditoría en el estudiante también
-                            ultimaModificacion: new Date(),
-                            modificadoPor: usuarioActivo
-                        });
-                        
-                        // GUARDAR EN HISTORIAL CON AUDITORÍA
-                        await addDoc(collection(db, DB_HISTORIAL), {
-                            ...registroHistorial,
-                            estudianteId: estDoc.id,
-                            estudianteNombre: pagoData.nombreEst,
-                            representanteNombre: pagoData.nombreRep,
-                            cedulaRepresentante: pagoData.cedulaRep,
-                            reporteId: id,
-                            timestamp: new Date(),
-                            procesadoPor: usuarioActivo  // Campo de auditoría
-                        });
-                    });
-                }
-                
-                // Actualizar el pago con auditoría antes de eliminarlo
-                await updateDoc(docRef, {
-                    procesadoPor: usuarioActivo,
-                    fechaProcesamiento: new Date(),
-                    estado: `Verificado por ${usuarioActivo}`
-                });
-                
-                // Esperar un momento para que se registre la auditoría
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                await deleteDoc(docRef);
-                alert(`✅ Pago verificado exitosamente\nProcesado por: ${usuarioActivo}`);
-                
-            } catch (error) {
-                console.error("Error al verificar pago:", error);
-                alert("Error al verificar el pago: " + error.message);
-            }
-        }
-    };
-
-    window.rechazar = async(id, ref) => {
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
-        
-        const motivo = prompt("Ingrese el motivo del rechazo (obligatorio):");
-        
-        if(motivo === null || motivo.trim() === "") {
-            alert("Debe ingresar un motivo para rechazar el pago.");
-            return;
-        }
-        
+    
+    window.cerrarModalDetalles = (e) => { if(!e || e.target.id === 'modal-detalles-pago') document.getElementById('modal-detalles-pago').style.display = 'none'; };
+    window.validarPagoDesdeModal = async () => { if(pagoSeleccionado) await window.validarPago(pagoSeleccionado.id); document.getElementById('modal-detalles-pago').style.display = 'none'; };
+    window.rechazarPagoDesdeModal = async () => { if(pagoSeleccionado) await window.rechazar(pagoSeleccionado.id, pagoSeleccionado.referencia); document.getElementById('modal-detalles-pago').style.display = 'none'; };
+    
+    window.abrirModalEditar = async (id) => {
+        console.log("abrirModalEditar llamado con id:", id);
+        if (!usuarioActivo) { showModal("⚠️ Solo administradores"); return; }
         try {
-            // Obtener datos del pago para encontrar el correo
             const docRef = doc(db, DB_PAGOS, id);
             const docSnap = await getDoc(docRef);
-            
-            if(!docSnap.exists()) {
-                alert("El pago no existe");
-                return;
+            if(docSnap.exists()) {
+                pagoEditando = { id, ...docSnap.data() };
+                document.getElementById('edit-nombreEst').textContent = pagoEditando.nombreEst || '';
+                document.getElementById('edit-nombreRep').textContent = pagoEditando.nombreRep || '';
+                document.getElementById('edit-metodo').value = pagoEditando.metodo || 'Pago Móvil';
+                document.getElementById('edit-banco').value = pagoEditando.banco || '';
+                document.getElementById('edit-referencia').value = pagoEditando.referencia || '';
+                document.getElementById('edit-montoBs').value = pagoEditando.montoBs || 0;
+                document.getElementById('edit-montoUsd').value = pagoEditando.montoDivisas || pagoEditando.monto || 0;
+                document.getElementById('edit-observaciones').value = pagoEditando.observaciones || '';
+                const mesesSel = document.getElementById('edit-mesesPagados');
+                const mesesPagados = pagoEditando.mesesPagados || [];
+                Array.from(mesesSel.options).forEach(opt => {
+                    opt.selected = mesesPagados.includes(opt.value);
+                });
+                document.getElementById('modal-editar-pago').style.display = 'flex';
+            } else {
+                showModal("El pago no existe");
             }
-            
-            const pagoData = docSnap.data();
-            let correoRepresentante = null;
-            
-            // Buscar el correo del representante en DB_MAIN
-            if(pagoData.nombreEst) {
-                const estudiantesQuery = query(
-                    collection(db, DB_MAIN), 
-                    where("nombre", "==", pagoData.nombreEst)
-                );
-                const estudiantesSnap = await getDocs(estudiantesQuery);
-                
-                if(!estudiantesSnap.empty) {
-                    estudiantesSnap.forEach(estDoc => {
-                        const estudianteData = estDoc.data();
-                        if(estudianteData.mail) {
-                            correoRepresentante = estudianteData.mail;
-                        }
-                    });
-                }
-            }
-            
-            // Si no se encuentra en DB_MAIN, usar el correo del pago si existe
-            if(!correoRepresentante && pagoData.correoRep) {
-                correoRepresentante = pagoData.correoRep;
-            }
-            
-            // Actualizar el pago con auditoría
-            await updateDoc(docRef, {
-                estado: `Rechazado - ${motivo}`,
-                rechazadoPor: usuarioActivo,  // Campo de auditoría
-                fechaRechazo: new Date(),
-                motivoRechazo: motivo
+        } catch (error) {
+            console.error("Error al abrir edición:", error);
+            showModal("Error al cargar el pago");
+        }
+    };
+    
+    window.cerrarModalEditar = (e) => {
+        if(!e || e.target.id === 'modal-editar-pago') {
+            document.getElementById('modal-editar-pago').style.display = 'none';
+            pagoEditando = null;
+        }
+    };
+    
+    window.guardarEdicionPago = async () => {
+        if(!pagoEditando) return;
+        const nuevosDatos = {
+            metodo: document.getElementById('edit-metodo').value,
+            banco: document.getElementById('edit-banco').value,
+            referencia: document.getElementById('edit-referencia').value,
+            montoBs: parseFloat(document.getElementById('edit-montoBs').value) || 0,
+            montoDivisas: parseFloat(document.getElementById('edit-montoUsd').value) || 0,
+            observaciones: document.getElementById('edit-observaciones').value,
+            mesesPagados: Array.from(document.getElementById('edit-mesesPagados').selectedOptions).map(o => o.value),
+            editadoPor: usuarioActivo,
+            fechaEdicion: serverTimestamp(),
+            estado: pagoEditando.estado || 'Pendiente'
+        };
+        
+        try {
+            await updateDoc(doc(db, DB_PAGOS, pagoEditando.id), nuevosDatos);
+            await addDoc(collection(db, "auditoria_ediciones"), { 
+                pagoId: pagoEditando.id, 
+                anteriores: {
+                    metodo: pagoEditando.metodo,
+                    banco: pagoEditando.banco,
+                    referencia: pagoEditando.referencia,
+                    montoBs: pagoEditando.montoBs,
+                    montoDivisas: pagoEditando.montoDivisas,
+                    mesesPagados: pagoEditando.mesesPagados
+                }, 
+                nuevos: nuevosDatos, 
+                editadoPor: usuarioActivo, 
+                fecha: serverTimestamp() 
             });
             
-            alert(`✅ Pago marcado como rechazado\nRechazado por: ${usuarioActivo}`);
+            const q = query(collection(db, DB_MAIN), where("nombre", "==", pagoEditando.nombreEst));
+            const snap = await getDocs(q);
+            let correo = null;
+            snap.forEach(d => { if(d.data().mail) correo = d.data().mail; });
+            if(correo) {
+                window.open(`mailto:${correo}?subject=Pago Actualizado&body=Su pago ha sido actualizado. Nuevos datos: Referencia ${nuevosDatos.referencia}, Monto $${nuevosDatos.montoDivisas}`, '_blank');
+                await addDoc(collection(db, "auditoria_correos"), {
+                    tipo: "edicion_pago",
+                    referencia: nuevosDatos.referencia,
+                    estudiante: pagoEditando.nombreEst,
+                    correoDestino: correo,
+                    enviadoPor: usuarioActivo,
+                    fechaEnvio: serverTimestamp()
+                });
+            }
             
-            // ENVÍO AUTOMÁTICO DE CORREO
-            if(correoRepresentante) {
-                const asunto = `Rechazo de pago - Referencia ${ref}`;
-                const cuerpo = `Estimado representante,
-
-Su pago con referencia ${ref} ha sido rechazado por el siguiente motivo:
-
-${motivo}
-
-Por favor contacte a la administración del Colegio Santiago de Jesús para más información.
-
-Atentamente,
-Administración
-Colegio Santiago de Jesús
-
--- 
-Este mensaje fue generado automáticamente por el sistema de administración SDJ V16.`;
+            showModal("✅ Pago editado exitosamente");
+            cerrarModalEditar();
+        } catch (error) {
+            console.error("Error al editar pago:", error);
+            showModal("❌ Error al guardar los cambios");
+        }
+    };
+    
+    window.validarPago = async (id) => {
+        if (!usuarioActivo) { showModal("Acceso restringido"); return; }
+        const docRef = doc(db, DB_PAGOS, id);
+        const docSnap = await getDoc(docRef);
+        if(!docSnap.exists()) return;
+        const pago = docSnap.data();
+        
+        if(await showModal(`¿Verificar pago de ${pago.nombreEst}?\n\nMeses pagados: ${(pago.mesesPagados || []).join(', ')}\nMonto: $${pago.montoDivisas}\n\nEsta acción actualizará la deuda del estudiante.`, true)) {
+            try {
+                await updateDoc(docRef, { 
+                    procesadoPor: usuarioActivo, 
+                    estado: `Verificado por ${usuarioActivo}`, 
+                    fechaProcesamiento: serverTimestamp() 
+                });
                 
-                window.open(`mailto:${correoRepresentante}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`, '_blank');
+                await addDoc(collection(db, DB_HISTORIAL), { 
+                    ...pago, 
+                    verificadoPor: usuarioActivo, 
+                    fecha: serverTimestamp() 
+                });
                 
-                // Registrar en auditoría de correos enviados
+                const q = query(collection(db, DB_MAIN), where("nombre", "==", pago.nombreEst));
+                const estudiantesSnap = await getDocs(q);
+                if(!estudiantesSnap.empty) {
+                    const estudiante = estudiantesSnap.docs[0];
+                    const mesesActuales = estudiante.data().meses || [];
+                    const mesesPagados = pago.mesesPagados || [];
+                    const nuevosMeses = mesesActuales.filter(m => !mesesPagados.includes(m));
+                    
+                    await updateDoc(doc(db, DB_MAIN, estudiante.id), {
+                        meses: nuevosMeses,
+                        total: calcularTotalReal(estudiante.data().montoMensual, nuevosMeses),
+                        ultimaModificacion: serverTimestamp(),
+                        modificadoPor: usuarioActivo
+                    });
+                }
+                
+                await deleteDoc(docRef);
+                showModal(`✅ Pago verificado por ${usuarioActivo}`);
+            } catch (error) {
+                console.error("Error al verificar pago:", error);
+                showModal("❌ Error al verificar el pago");
+            }
+        }
+    };
+    
+    window.rechazar = async (id, ref) => {
+        if (!usuarioActivo) { showModal("Acceso restringido"); return; }
+        const motivo = await showModal("Ingrese el motivo del rechazo:", true);
+        if(!motivo) return;
+        
+        try {
+            const docRef = doc(db, DB_PAGOS, id);
+            const docSnap = await getDoc(docRef);
+            const pago = docSnap.data();
+            
+            await updateDoc(docRef, { 
+                estado: `Rechazado - ${motivo}`, 
+                rechazadoPor: usuarioActivo, 
+                fechaRechazo: serverTimestamp() 
+            });
+            
+            const q = query(collection(db, DB_MAIN), where("nombre", "==", pago.nombreEst));
+            const snap = await getDocs(q);
+            let correo = null;
+            snap.forEach(d => { if(d.data().mail) correo = d.data().mail; });
+            
+            if(correo) {
+                window.open(`mailto:${correo}?subject=Pago Rechazado&body=Su pago ${ref} fue rechazado. Motivo: ${motivo}`, '_blank');
                 await addDoc(collection(db, "auditoria_correos"), {
                     tipo: "rechazo_pago",
                     referencia: ref,
-                    estudiante: pagoData.nombreEst || 'No especificado',
-                    correoDestino: correoRepresentante,
+                    estudiante: pago.nombreEst,
+                    correoDestino: correo,
                     enviadoPor: usuarioActivo,
-                    fechaEnvio: new Date(),
+                    fechaEnvio: serverTimestamp(),
                     motivo: motivo
                 });
-                
-            } else {
-                alert("⚠️ No se encontró correo del representante.\nEl pago fue rechazado pero no se pudo enviar el correo automático.");
-                
-                // Ofrecer enviar correo manualmente
-                if(confirm("¿Desea abrir su cliente de correo para enviar el mensaje manualmente?")) {
-                    const asunto = `Rechazo de pago - Referencia ${ref}`;
-                    const cuerpo = `Su pago con referencia ${ref} ha sido rechazado por el siguiente motivo: ${motivo}`;
-                    window.location.href = `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
-                }
             }
-            
+            showModal(`✅ Pago rechazado por ${usuarioActivo}`);
         } catch (error) {
             console.error("Error al rechazar pago:", error);
-            alert("Error al rechazar el pago: " + error.message);
+            showModal("❌ Error al rechazar el pago");
         }
     };
-
-    window.del = async(id) => { 
-        // Verificar que haya un usuario activo
-        if (!usuarioActivo) {
-            alert("⚠️ Acceso restringido\nPor favor, ingrese con una cédula autorizada.");
-            document.getElementById('securityOverlay').style.display = 'flex';
-            return;
-        }
+    
+    window.del = async (id) => {
+        if (!usuarioActivo || !await showModal("¿Eliminar alumno?", true)) return;
+        const docRef = doc(db, DB_MAIN, id);
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()) await addDoc(collection(db, "auditoria_eliminaciones"), { ...docSnap.data(), eliminadoPor: usuarioActivo, fecha: serverTimestamp() });
+        await deleteDoc(docRef);
+        showModal("✅ Alumno eliminado");
+    };
+    
+    // Inicializar listeners
+    setTimeout(async () => {
+        await actualizarMesDesdeServidor();
         
-        if(confirm("¿Eliminar Alumno?")) {
-            // Obtener datos del estudiante antes de eliminar
-            const docRef = doc(db, DB_MAIN, id);
-            const docSnap = await getDoc(docRef);
+        unsubscribeGlobal = onSnapshot(collection(db, DB_MAIN), (snap) => {
+            const lp = document.getElementById('list-pend');
+            const ls = document.getElementById('list-solv');
+            const globalDebt = document.getElementById('global-debt');
+            if (!lp) return;
             
-            if(docSnap.exists()) {
-                const estudianteData = docSnap.data();
-                
-                // Registrar en auditoría
-                await addDoc(collection(db, "auditoria_eliminaciones"), {
-                    estudiante: estudianteData.nombre,
-                    representante: estudianteData.rep,
-                    cedula: estudianteData.cedula,
-                    eliminadoPor: usuarioActivo,
-                    fechaEliminacion: new Date(),
-                    grado: estudianteData.grado,
-                    seccion: estudianteData.seccion,
-                    deudaEliminada: (estudianteData.montoMensual || 0) * (estudianteData.meses ? estudianteData.meses.length : 0)
-                });
+            lp.innerHTML = ""; 
+            ls.innerHTML = "";
+            cachePendientes = [];
+            let totalColegio = 0;
+            let allData = [];
+            
+            snap.forEach(d => { allData.push({ ...d.data(), id: d.id }); });
+            
+            ORDEN_GRADOS.forEach(grado => {
+                const grupo = allData.filter(x => x.grado === grado && !isSolvente(x.meses));
+                if(grupo.length) {
+                    lp.innerHTML += `<div class="grado-header">${grado}</div>`;
+                    grupo.forEach(a => {
+                        const mesesReales = calcularMesesReales(a.meses);
+                        const totalDeuda = calcularTotalReal(a.montoMensual, a.meses);
+                        const alerta = getNivelAlerta(mesesReales.length);
+                        cachePendientes.push({ ...a, total: totalDeuda, meses: mesesReales });
+                        totalColegio += totalDeuda;
+                        
+                        lp.innerHTML += `
+                            <div class="student-row alert-${alerta.clase}">
+                                <div class="info">
+                                    <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
+                                    <b>${a.nombre} (${a.seccion})</b>
+                                    <small>${a.rep} - ${a.cedula}</small>
+                                    <div>${mesesReales.map(m => `<span class="tag-mes">${m}</span>`).join('')}</div>
+                                    ${a.meses?.length > mesesReales.length ? `<small style="color:#f59e0b;">📅 ${a.meses.length - mesesReales.length} mes(es) futuro(s)</small>` : ''}
+                                </div>
+                                <div><b style="color:#ef4444">$${totalDeuda}</b><br><button class="btn-ws" onclick="enviarWhatsApp('${a.tel}', '${a.nombre}', '${mesesReales.join(',')}', ${totalDeuda})">📱</button><button class="btn-email" onclick="enviarGmailIndividual('${a.mail}', '${a.nombre}', '${a.rep}', ${totalDeuda}, '${mesesReales.join(',')}')">✉️</button><button onclick="del('${a.id}')" style="font-size:10px;">🗑</button></div>
+                            </div>`;
+                    });
+                }
+            });
+            
+            const solventes = allData.filter(a => isSolvente(a.meses));
+            solventes.forEach(a => { ls.innerHTML += `<div class="student-row" style="border-left:5px solid var(--green)"><div><b>${a.nombre}</b><small>${a.grado} - ${a.rep}</small></div><b style="color:var(--green)">SOLVENTE</b></div>`; });
+            if(solventes.length === 0) ls.innerHTML = '<p style="text-align:center; color:gray">No hay estudiantes solventes</p>';
+            if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString()}`;
+        });
+        
+        unsubscribePagos = onSnapshot(collection(db, DB_PAGOS), (snap) => {
+            const tb = document.getElementById('table-rep');
+            if (!tb) return;
+            tb.innerHTML = "";
+            if(snap.empty) { 
+                tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">📭 No hay pagos reportados</td></tr>'; 
+                return; 
             }
             
-            await deleteDoc(docRef);
-            alert(`✅ Alumno eliminado\nAcción realizada por: ${usuarioActivo}`);
-        }
-    };
-
-    // Inicializar cálculo de total
-    calcularTotal();
+            snap.forEach(d => {
+                const p = d.data();
+                let estadoColor = '#64748b';
+                let estadoTexto = p.estado || 'Pendiente';
+                if(estadoTexto.includes('Pendiente')) estadoColor = '#eab308';
+                if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
+                if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
+                
+                tb.innerHTML += `<tr class="clickable-row" onclick="mostrarDetallesPago('${d.id}')">
+                    <td><strong>${p.nombreEst || 'N/A'}</strong><br><small>${p.nombreRep || ''}</small></td>
+                    <td>${p.metodo || ''}<br><small>${p.referencia || ''}</small></td>
+                    <td><strong>$${p.montoDivisas || p.monto || 0}</strong></td>
+                    <td><span style="background:${estadoColor}; color:white; padding:4px 8px; border-radius:12px; font-size:11px;">${estadoTexto}</span></td>
+                    <td><button class="btn-edit-pago" onclick="event.stopPropagation(); abrirModalEditar('${d.id}')">✏️ Editar</button></td>
+                </tr>`;
+            });
+        });
+    }, 1000);
 </script>
 </body>
 </html>
