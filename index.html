@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA SDJ - CONTROL V16</title>
+    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V16</title>
     <style>
         /* OVERLAY DE SEGURIDAD */
         #securityOverlay {
@@ -177,12 +177,28 @@
         @media print { nav, header, .btn-print, button, input, .logout-btn { display: none !important; } body, .container, .modulo { background: white; } }
         
         .loading-text { text-align: center; padding: 40px; color: #64748b; }
+        
+        /* Estilos para el módulo de solicitudes */
+        .solicitud-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .solicitud-card .btn-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    SISTEMA ADMINISTRATIVO SDJ (V16)
+    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V16)
     <button id="logoutBtn" class="logout-btn" style="display: none;">🚪 Cerrar Sesión</button>
 </header>
 
@@ -192,7 +208,8 @@
     <div class="nav-btn" onclick="go('pend')">3. Pendientes</div>
     <div class="nav-btn" onclick="go('solv')">4. Solventes</div>
     <div class="nav-btn" onclick="go('rep')">5. Reportes</div>
-    <div class="nav-btn" onclick="go('padres')">6. Portal Padres</div>
+    <div class="nav-btn" onclick="go('padres')">6. Portal Pago</div>
+    <div class="nav-btn" onclick="go('sol')">7. Solicitudes</div>
 </nav>
 
 <div class="container">
@@ -287,7 +304,7 @@
 
     <section id="mod-padres" class="modulo">
         <div class="parent-portal">
-            <h3>👨‍👩‍👧‍👦 Portal para Padres</h3>
+            <h3>👨‍👩‍👧‍👦 Portal de Pago</h3>
             <p>Ingrese su cédula para consultar la situación de todos sus hijos.</p>
             <div style="display:flex; gap:10px; margin-top:15px;">
                 <input type="text" id="cedula-consulta" placeholder="Cédula del Representante">
@@ -295,6 +312,32 @@
             </div>
         </div>
         <div id="resultados-familia" style="display:none;"><div class="card"><h3>Resultados</h3><div id="lista-hijos"></div><div class="family-total" id="total-familiar"></div></div></div>
+    </section>
+
+    <!-- MÓDULO 7: SOLICITUDES DE REGISTRO -->
+    <section id="mod-sol" class="modulo">
+        <div class="card">
+            <h3>📋 Solicitudes de Registro</h3>
+            <p style="font-size:12px; color:gray; margin-bottom:15px;">
+                Representantes que han solicitado registro automático desde el Portal de Pago.
+            </p>
+            <div id="lista-solicitudes">Cargando solicitudes...</div>
+        </div>
+        
+        <!-- Modal para editar solicitud antes de aprobar -->
+        <div id="modal-editar-solicitud" class="modal-overlay" onclick="cerrarModalSolicitud(event)">
+            <div class="modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h3>✏️ Editar Solicitud</h3>
+                    <button class="close-modal" onclick="cerrarModalSolicitud()">×</button>
+                </div>
+                <div id="contenido-editar-solicitud"></div>
+                <div class="modal-actions">
+                    <button class="btn-check" onclick="aprobarSolicitudDesdeModal()">✅ Aprobar y Registrar</button>
+                    <button class="btn-reject" onclick="cerrarModalSolicitud()">Cancelar</button>
+                </div>
+            </div>
+        </div>
     </section>
 </div>
 
@@ -306,7 +349,7 @@
 <div id="securityOverlay">
     <div class="login-box">
         <h2>🔒 ACCESO RESTRINGIDO</h2>
-        <p>Sistema Administrativo SDJ V16<br>Ingrese sus credenciales para continuar</p>
+        <p>Sistema Administrativo U.E.P Santiago De Jesus V16<br>Ingrese sus credenciales para continuar</p>
         <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
         <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
         <div class="error" id="loginError"></div>
@@ -358,7 +401,7 @@
             
             setTimeout(() => {
                 document.getElementById('securityOverlay').style.display = 'none';
-                document.title = `SDJ V16 | ${usuarioActivo}`;
+                document.title = `U.E.P Santiago De Jesus V16 | ${usuarioActivo}`;
                 document.getElementById('logoutBtn').style.display = 'block';
             }, 1500);
         } else {
@@ -394,7 +437,7 @@
                     usuarioActivo = sesion.usuario;
                     document.getElementById('securityOverlay').style.display = 'none';
                     document.getElementById('logoutBtn').style.display = 'block';
-                    document.title = `SDJ V16 | ${usuarioActivo}`;
+                    document.title = `U.E.P Santiago De Jesus V16 | ${usuarioActivo}`;
                     return true;
                 } else {
                     localStorage.removeItem('sdj_sesion');
@@ -426,7 +469,7 @@
             modal.style.display = 'flex';
             modal.innerHTML = `
                 <div class="modal" style="max-width:400px; text-align:center;">
-                    <div class="modal-header"><h3>📢 Sistema SDJ</h3><button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button></div>
+                    <div class="modal-header"><h3>📢 U.E.P Santiago De Jesus</h3><button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button></div>
                     <p style="margin:20px 0">${message}</p>
                     <div class="modal-actions">
                         <button class="btn-check" id="modalConfirm">Aceptar</button>
@@ -470,6 +513,7 @@
     const DB_MAIN = "sdj_final_v16"; 
     const DB_PAGOS = "pagos_reportados";
     const DB_HISTORIAL = "historial_pagos";
+    const DB_SOLICITUDES = "solicitudes_registro";
     
     // Orden de meses (incluye Agosto)
     const MESES_ORDEN = ["Inscripción", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"];
@@ -477,6 +521,7 @@
     let mesActualIndex = 6; // Default Marzo
     let currentYear = new Date().getFullYear();
     let cachePendientes = [];
+    let solicitudSeleccionada = null;
     
     async function actualizarMesDesdeServidor() {
         const fecha = new Date();
@@ -523,17 +568,19 @@
         try {
             const estudiantesSnap = await getDocs(collection(db, DB_MAIN));
             const pagosSnap = await getDocs(collection(db, DB_PAGOS));
+            const solicitudesSnap = await getDocs(collection(db, DB_SOLICITUDES));
             const backup = {
                 fecha: new Date().toISOString(),
                 generadoPor: usuarioActivo,
                 estudiantes: estudiantesSnap.docs.map(d => ({ id: d.id, ...d.data() })),
-                pagos: pagosSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+                pagos: pagosSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+                solicitudes: solicitudesSnap.docs.map(d => ({ id: d.id, ...d.data() }))
             };
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `sdj_backup_${new Date().toISOString().slice(0,19)}.json`;
+            a.download = `uep_santiago_backup_${new Date().toISOString().slice(0,19)}.json`;
             a.click();
             URL.revokeObjectURL(url);
             showModal("✅ Backup generado");
@@ -602,6 +649,11 @@
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('mod-'+id).classList.add('active');
         event.currentTarget.classList.add('active');
+        
+        // Si se navega al módulo de solicitudes, cargar los datos
+        if (id === 'sol') {
+            cargarSolicitudes();
+        }
     };
     
     window.loadLevel = (l) => {
@@ -962,6 +1014,374 @@
         if(docSnap.exists()) await addDoc(collection(db, "auditoria_eliminaciones"), { ...docSnap.data(), eliminadoPor: usuarioActivo, fecha: serverTimestamp() });
         await deleteDoc(docRef);
         showModal("✅ Alumno eliminado");
+    };
+    
+    // ============================================
+    // MÓDULO DE SOLICITUDES DE REGISTRO
+    // ============================================
+    
+    // Función para cargar solicitudes pendientes
+    async function cargarSolicitudes() {
+        const div = document.getElementById('lista-solicitudes');
+        if (!div) return;
+        
+        div.innerHTML = '<div class="loading-text"><span class="spinner"></span> Cargando solicitudes...</div>';
+        
+        try {
+            const snap = await getDocs(collection(db, DB_SOLICITUDES));
+            div.innerHTML = '';
+            
+            const pendientes = snap.docs.filter(d => d.data().estado === 'pendiente' || !d.data().estado);
+            
+            if (pendientes.length === 0) {
+                div.innerHTML = '<p style="text-align:center; color:gray; padding:20px;">📭 No hay solicitudes pendientes</p>';
+                return;
+            }
+            
+            pendientes.forEach(docSnap => {
+                const s = docSnap.data();
+                const hijosStr = (s.hijos || []).map(h => h.nombre || `${h.pnombre || ''} ${h.papellido || ''}`).join(', ');
+                
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'solicitud-card';
+                cardDiv.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <b>${s.nombreRep || 'Sin nombre'}</b><br>
+                            <small>Cédula: ${s.cedula || 'N/A'} | Tel: ${s.telefono || s.tel || 'N/A'}</small><br>
+                            <small>Correo: ${s.correo || s.mail || 'N/A'}</small><br>
+                            <small><strong>Hijos:</strong> ${hijosStr || 'N/A'}</small><br>
+                            <small style="color:#64748b;">Fecha: ${s.timestamp ? new Date(s.timestamp.seconds * 1000).toLocaleDateString('es-ES') : 'N/A'}</small>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-edit" onclick="abrirEditarSolicitud('${docSnap.id}')" style="font-size:11px;">✏️ Editar</button>
+                        <button class="btn-check" onclick="aprobarSolicitudDirecta('${docSnap.id}')" style="font-size:11px;">✅ Aprobar</button>
+                        <button class="btn-reject" onclick="rechazarSolicitud('${docSnap.id}')" style="font-size:11px;">✖ Rechazar</button>
+                    </div>
+                `;
+                div.appendChild(cardDiv);
+            });
+        } catch (error) {
+            console.error("Error al cargar solicitudes:", error);
+            div.innerHTML = '<p style="color:red; text-align:center;">❌ Error al cargar solicitudes</p>';
+        }
+    }
+    
+    // Abrir modal de edición
+    window.abrirEditarSolicitud = async function(id) {
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        
+        try {
+            const docSnap = await getDoc(doc(db, DB_SOLICITUDES, id));
+            if (!docSnap.exists()) {
+                showModal("La solicitud no existe");
+                return;
+            }
+            
+            solicitudSeleccionada = { id, ...docSnap.data() };
+            const s = solicitudSeleccionada;
+            
+            let html = `
+                <label>Cédula (no editable):</label>
+                <input type="text" value="${s.cedula || ''}" readonly style="background:#f1f5f9;">
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+                    <div>
+                        <label>Primer Nombre *</label>
+                        <input type="text" id="edit-pnombreRep" value="${s.repPartes?.pnombre || ''}">
+                    </div>
+                    <div>
+                        <label>Segundo Nombre (opcional)</label>
+                        <input type="text" id="edit-snombreRep" value="${s.repPartes?.snombre || ''}">
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div>
+                        <label>Primer Apellido *</label>
+                        <input type="text" id="edit-papellidoRep" value="${s.repPartes?.papellido || ''}">
+                    </div>
+                    <div>
+                        <label>Segundo Apellido (opcional)</label>
+                        <input type="text" id="edit-sapellidoRep" value="${s.repPartes?.sapellido || ''}">
+                    </div>
+                </div>
+                
+                <label>Teléfono:</label>
+                <input type="tel" id="edit-telefono" value="${s.telefono || s.tel || ''}">
+                
+                <label>Correo:</label>
+                <input type="email" id="edit-correo" value="${s.correo || s.mail || ''}">
+                
+                <label style="margin-top:15px;">Monto Mensual ($):</label>
+                <input type="number" id="edit-monto-mensual" value="30" min="0" step="0.01">
+                
+                <h4 style="margin-top:20px;">Hijos a Registrar</h4>
+                <div id="edit-hijos-container">
+            `;
+            
+            (s.hijos || []).forEach((h, i) => {
+                html += `
+                    <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:10px;">
+                        <strong>Hijo ${i+1}</strong>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                            <div>
+                                <label>Primer Nombre *</label>
+                                <input type="text" class="edit-hijo-pnombre" value="${h.pnombre || ''}">
+                            </div>
+                            <div>
+                                <label>Segundo Nombre (opcional)</label>
+                                <input type="text" class="edit-hijo-snombre" value="${h.snombre || ''}">
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                            <div>
+                                <label>Primer Apellido *</label>
+                                <input type="text" class="edit-hijo-papellido" value="${h.papellido || ''}">
+                            </div>
+                            <div>
+                                <label>Segundo Apellido (opcional)</label>
+                                <input type="text" class="edit-hijo-sapellido" value="${h.sapellido || ''}">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <div style="flex:2;">
+                                <label>Grado</label>
+                                <select class="edit-hijo-grado">
+                                    <option value="">Seleccione...</option>
+                                    <option>5to Año</option><option>4to Año</option><option>3er Año</option><option>2do Año</option><option>1er Año</option>
+                                    <option>6to Grado</option><option>5to Grado</option><option>4to Grado</option><option>3er Grado</option><option>2do Grado</option><option>1er Grado</option>
+                                    <option>Preescolar 3</option><option>Preescolar 2</option><option>Preescolar 1</option><option>Maternal</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;">
+                                <label>Sección</label>
+                                <select class="edit-hijo-seccion">
+                                    <option>A</option><option>B</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            document.getElementById('contenido-editar-solicitud').innerHTML = html;
+            
+            // Seleccionar valores actuales
+            setTimeout(() => {
+                const grados = document.querySelectorAll('.edit-hijo-grado');
+                const secciones = document.querySelectorAll('.edit-hijo-seccion');
+                (s.hijos || []).forEach((h, i) => {
+                    if (grados[i]) grados[i].value = h.grado || '';
+                    if (secciones[i]) secciones[i].value = h.seccion || 'A';
+                });
+            }, 100);
+            
+            document.getElementById('modal-editar-solicitud').style.display = 'flex';
+            
+        } catch (error) {
+            console.error("Error al abrir edición:", error);
+            showModal("Error al cargar la solicitud");
+        }
+    };
+    
+    // Cerrar modal de solicitud
+    window.cerrarModalSolicitud = function(e) {
+        if (!e || e.target.id === 'modal-editar-solicitud') {
+            document.getElementById('modal-editar-solicitud').style.display = 'none';
+            solicitudSeleccionada = null;
+        }
+    };
+    
+    // Construir nombre completo
+    function construirNombreCompleto(pnombre, snombre, papellido, sapellido) {
+        let nombre = (pnombre || '').trim();
+        if (snombre && snombre.trim()) nombre += ' ' + snombre.trim();
+        nombre += ' ' + (papellido || '').trim();
+        if (sapellido && sapellido.trim()) nombre += ' ' + sapellido.trim();
+        return nombre.trim();
+    }
+    
+    // Aprobar desde el modal (con datos editados)
+    window.aprobarSolicitudDesdeModal = async function() {
+        if (!solicitudSeleccionada || !usuarioActivo) return;
+        
+        const pnombreRep = document.getElementById('edit-pnombreRep').value.trim();
+        const snombreRep = document.getElementById('edit-snombreRep').value.trim();
+        const papellidoRep = document.getElementById('edit-papellidoRep').value.trim();
+        const sapellidoRep = document.getElementById('edit-sapellidoRep').value.trim();
+        const telefono = document.getElementById('edit-telefono').value.trim();
+        const correo = document.getElementById('edit-correo').value.trim();
+        const montoMensual = parseFloat(document.getElementById('edit-monto-mensual').value) || 0;
+        
+        if (!pnombreRep || !papellidoRep) {
+            showModal("El representante debe tener al menos primer nombre y primer apellido");
+            return;
+        }
+        
+        const nombreRep = construirNombreCompleto(pnombreRep, snombreRep, papellidoRep, sapellidoRep);
+        
+        // Recopilar hijos
+        const hijos = [];
+        const pnombres = document.querySelectorAll('.edit-hijo-pnombre');
+        const snombres = document.querySelectorAll('.edit-hijo-snombre');
+        const papellidos = document.querySelectorAll('.edit-hijo-papellido');
+        const sapellidos = document.querySelectorAll('.edit-hijo-sapellido');
+        const grados = document.querySelectorAll('.edit-hijo-grado');
+        const secciones = document.querySelectorAll('.edit-hijo-seccion');
+        
+        for (let i = 0; i < pnombres.length; i++) {
+            const pn = pnombres[i].value.trim();
+            const sn = snombres[i] ? snombres[i].value.trim() : '';
+            const pa = papellidos[i].value.trim();
+            const sa = sapellidos[i] ? sapellidos[i].value.trim() : '';
+            const grado = grados[i].value;
+            const seccion = secciones[i].value;
+            
+            if (!pn || !pa || !grado) {
+                showModal(`Complete los campos obligatorios del hijo ${i+1}`);
+                return;
+            }
+            
+            hijos.push({
+                nombre: construirNombreCompleto(pn, sn, pa, sa),
+                pnombre: pn,
+                snombre: sn,
+                papellido: pa,
+                sapellido: sa,
+                grado: grado,
+                seccion: seccion
+            });
+        }
+        
+        if (hijos.length === 0) {
+            showModal("Debe haber al menos un hijo");
+            return;
+        }
+        
+        try {
+            // Registrar cada hijo en la colección principal
+            for (const hijo of hijos) {
+                await addDoc(collection(db, DB_MAIN), {
+                    nombre: hijo.nombre,
+                    rep: nombreRep,
+                    cedula: solicitudSeleccionada.cedula,
+                    mail: correo,
+                    tel: telefono,
+                    grado: hijo.grado,
+                    seccion: hijo.seccion,
+                    meses: [],
+                    montoMensual: montoMensual,
+                    total: 0,
+                    historial: [],
+                    timestamp: serverTimestamp(),
+                    añoEscolar: currentYear,
+                    creadoPor: usuarioActivo,
+                    origen: 'solicitud_automatica',
+                    solicitudId: solicitudSeleccionada.id
+                });
+            }
+            
+            // Actualizar la solicitud como aprobada
+            await updateDoc(doc(db, DB_SOLICITUDES, solicitudSeleccionada.id), {
+                estado: 'aprobado',
+                aprobadoPor: usuarioActivo,
+                fechaAprobacion: serverTimestamp(),
+                montoMensual: montoMensual,
+                adminNotas: `Aprobado por ${usuarioActivo} el ${new Date().toLocaleString()}`
+            });
+            
+            showModal("✅ Solicitud aprobada y estudiantes registrados correctamente");
+            cerrarModalSolicitud();
+            cargarSolicitudes();
+            
+        } catch (error) {
+            console.error("Error al aprobar solicitud:", error);
+            showModal("❌ Error al aprobar la solicitud: " + error.message);
+        }
+    };
+    
+    // Aprobar directamente sin editar
+    window.aprobarSolicitudDirecta = async function(id) {
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        
+        try {
+            const docSnap = await getDoc(doc(db, DB_SOLICITUDES, id));
+            if (!docSnap.exists()) return;
+            
+            const s = docSnap.data();
+            const montoStr = prompt(`Ingrese el monto mensual para los hijos de ${s.nombreRep} ($):`, '30');
+            if (!montoStr) return;
+            
+            const montoMensual = parseFloat(montoStr);
+            if (isNaN(montoMensual) || montoMensual <= 0) {
+                showModal("Monto inválido");
+                return;
+            }
+            
+            // Registrar cada hijo
+            for (const hijo of (s.hijos || [])) {
+                await addDoc(collection(db, DB_MAIN), {
+                    nombre: hijo.nombre || construirNombreCompleto(hijo.pnombre, hijo.snombre, hijo.papellido, hijo.sapellido),
+                    rep: s.nombreRep,
+                    cedula: s.cedula,
+                    mail: s.correo || '',
+                    tel: s.telefono || s.tel || '',
+                    grado: hijo.grado,
+                    seccion: hijo.seccion,
+                    meses: [],
+                    montoMensual: montoMensual,
+                    total: 0,
+                    historial: [],
+                    timestamp: serverTimestamp(),
+                    añoEscolar: currentYear,
+                    creadoPor: usuarioActivo,
+                    origen: 'solicitud_automatica',
+                    solicitudId: id
+                });
+            }
+            
+            // Marcar como aprobada
+            await updateDoc(doc(db, DB_SOLICITUDES, id), {
+                estado: 'aprobado',
+                aprobadoPor: usuarioActivo,
+                fechaAprobacion: serverTimestamp(),
+                montoMensual: montoMensual
+            });
+            
+            showModal("✅ Solicitud aprobada correctamente");
+            cargarSolicitudes();
+            
+        } catch (error) {
+            console.error("Error al aprobar:", error);
+            showModal("❌ Error al aprobar la solicitud");
+        }
+    };
+    
+    // Rechazar solicitud
+    window.rechazarSolicitud = async function(id) {
+        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
+        
+        if (!await showModal("¿Está seguro de rechazar esta solicitud? El representante no será registrado.", true)) {
+            return;
+        }
+        
+        try {
+            await updateDoc(doc(db, DB_SOLICITUDES, id), {
+                estado: 'rechazado',
+                rechazadoPor: usuarioActivo,
+                fechaRechazo: serverTimestamp()
+            });
+            
+            showModal("Solicitud rechazada");
+            cargarSolicitudes();
+            
+        } catch (error) {
+            console.error("Error al rechazar:", error);
+            showModal("❌ Error al rechazar la solicitud");
+        }
     };
     
     // Inicializar listeners
