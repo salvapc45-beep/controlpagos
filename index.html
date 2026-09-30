@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V19</title>
+    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V19.1</title>
     <style>
         #securityOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -130,6 +130,7 @@
         .btn-delete { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-pay-manual { background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-recibo { background: #0d9488; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-edit-meses { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
         .parent-portal { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .parent-results { margin-top: 20px; }
@@ -190,12 +191,40 @@
         .grado-bar .grado-info { font-size: 11px; color: #64748b; min-width: 90px; text-align: right; }
 
         .success-box { background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
+        
+        /* Meses editables */
+        .meses-edit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .meses-edit-grid label {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            border: 2px solid #e2e8f0;
+            transition: 0.2s;
+        }
+        .meses-edit-grid label:hover { border-color: #6366f1; }
+        .meses-edit-grid label.checked {
+            background: #e0e7ff;
+            border-color: #6366f1;
+            color: #4338ca;
+            font-weight: bold;
+        }
+        .meses-edit-grid input { width: auto; margin: 0; }
     </style>
 </head>
 <body>
 
 <header>
-    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V19)
+    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V19.1)
     <button id="logoutBtn" class="logout-btn" style="display: none;">🚪 Cerrar Sesión</button>
 </header>
 
@@ -256,7 +285,7 @@
                 <small>Total calculado (solo meses vencidos): <span id="totalPreview" style="font-weight:bold; color:#1e40af">$0</span></small>
                 <small style="display:block; color:#64748b; margin-top:3px;">Meses seleccionados: <span id="mesesCount">0</span> | Monto mensual: $<span id="montoMensualPreview">0</span></small>
             </div>
-            <button class="btn-main" onclick="guardar(event)">GUARDAR REGISTRO V19</button>
+            <button class="btn-main" onclick="guardar(event)">GUARDAR REGISTRO V19.1</button>
         </div>
     </section>
 
@@ -291,7 +320,7 @@
             <h3 id="tit-list"></h3>
             <div class="card"><div style="text-align:right;"><span id="sec-total-label"></span></div><input type="text" id="search-filter" placeholder="🔍 Buscar por nombre, representante o cédula..." onkeyup="filterList()"></div>
             <div class="card"><div id="final-list"></div></div>
-            <div id="ficha-estudiante" class="ficha-container" style="display:none;"><div class="card"><h3>📋 Ficha del Estudiante</h3><div><div><label>Nombre:</label><input type="text" id="edit-nombre"></div><div><label>Representante:</label><input type="text" id="edit-representante"></div><div><label>Cédula:</label><input type="text" id="edit-cedula" readonly></div><div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div><div><label>Correo:</label><input type="email" id="edit-correo"></div><div><label>Grado:</label><input type="text" id="edit-grado" readonly></div><div><label>Monto Mensual:</label><input type="number" id="edit-monto-mensual" step="0.01" min="0"></div><div><label>Meses Pendientes:</label><div id="edit-meses"></div></div><div><label>Total Deuda:</label><h3 id="edit-total"></h3></div><div class="ficha-actions"><button class="btn-edit" onclick="guardarCambiosEstudiante(event)">💾 Guardar</button><button class="btn-pay-manual" onclick="abrirModalPagoManual()">💰 Marcar mes pagado</button><button class="btn-recibo" onclick="imprimirReciboFicha()">🧾 Recibo</button><button class="btn-edit" onclick="volverALista()">⬅ Volver</button><button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button></div></div></div></div>
+            <div id="ficha-estudiante" class="ficha-container" style="display:none;"><div class="card"><h3>📋 Ficha del Estudiante</h3><div><div><label>Nombre:</label><input type="text" id="edit-nombre"></div><div><label>Representante:</label><input type="text" id="edit-representante"></div><div><label>Cédula:</label><input type="text" id="edit-cedula" readonly></div><div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div><div><label>Correo:</label><input type="email" id="edit-correo"></div><div><label>Grado:</label><input type="text" id="edit-grado" readonly></div><div><label>Monto Mensual:</label><input type="number" id="edit-monto-mensual" step="0.01" min="0"></div><div><label>Meses Pendientes:</label><div id="edit-meses"></div></div><div><label>Total Deuda:</label><h3 id="edit-total"></h3></div><div class="ficha-actions"><button class="btn-edit" onclick="guardarCambiosEstudiante(event)">💾 Guardar</button><button class="btn-edit-meses" onclick="abrirEditarMesesFicha()">📅 Editar meses</button><button class="btn-pay-manual" onclick="abrirModalPagoManual()">💰 Marcar mes pagado</button><button class="btn-recibo" onclick="imprimirReciboFicha()">🧾 Recibo</button><button class="btn-edit" onclick="volverALista()">⬅ Volver</button><button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button></div></div></div></div>
         </div>
     </section>
 
@@ -320,7 +349,7 @@
 
     <section id="mod-rep" class="modulo">
         <div class="card">
-            <h3>📊 Pagos Reportados (V19)</h3>
+            <h3>📊 Pagos Reportados (V19.1)</h3>
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                 <p style="font-size:12px; color:gray;">Haga clic en cualquier fila para ver detalles | <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">✏️ Editar solo admin</span></p>
                 <div>
@@ -334,6 +363,7 @@
                         <tr>
                             <th>Alumno / Representante</th>
                             <th>Método / Referencia</th>
+                            <th>Fecha del pago</th>
                             <th>Monto $</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -454,7 +484,7 @@
 
 <div id="modal-detalles-pago" class="modal-overlay" onclick="cerrarModalDetalles(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h3>📋 Detalles del Pago</h3><button class="close-modal" onclick="cerrarModalDetalles()">×</button></div><div class="modal-details" id="detalles-pago-content"></div><div class="modal-actions"><button class="btn-check" onclick="validarPagoDesdeModal()">✅ Verificar</button><button class="btn-reject" onclick="rechazarPagoDesdeModal()">✖ Rechazar</button></div></div></div>
 
-<div id="modal-editar-pago" class="modal-overlay" onclick="cerrarModalEditar(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h3>✏️ Editar Pago</h3><button class="close-modal" onclick="cerrarModalEditar()">×</button></div><div class="modal-details"><div class="detail-row"><span class="detail-label">Estudiante:</span><span id="edit-nombreEst"></span></div><div class="detail-row"><span class="detail-label">Representante:</span><span id="edit-nombreRep"></span></div><label>Método:</label><select id="edit-metodo"><option>Pago Móvil</option><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Zelle</option></select><label>Banco:</label><input type="text" id="edit-banco"><label>Referencia:</label><input type="text" id="edit-referencia"><label>Monto Bs.:</label><input type="number" id="edit-montoBs" step="0.01"><label>Monto USD:</label><input type="number" id="edit-montoUsd" step="0.01"><label>Meses Pagados:</label><select id="edit-mesesPagados" multiple style="height:140px"><option value="Inscripción">Inscripción</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option><option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option></select><label>Observaciones:</label><input type="text" id="edit-observaciones"></div><div class="modal-actions"><button class="btn-check" onclick="guardarEdicionPago()">💾 Guardar</button><button class="btn-reject" onclick="cerrarModalEditar()">Cancelar</button></div></div></div>
+<div id="modal-editar-pago" class="modal-overlay" onclick="cerrarModalEditar(event)"><div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h3>✏️ Editar Pago</h3><button class="close-modal" onclick="cerrarModalEditar()">×</button></div><div class="modal-details"><div class="detail-row"><span class="detail-label">Estudiante:</span><span id="edit-nombreEst"></span></div><div class="detail-row"><span class="detail-label">Representante:</span><span id="edit-nombreRep"></span></div><label>Método:</label><select id="edit-metodo"><option>Pago Móvil</option><option>Transferencia</option><option>Depósito</option><option>Efectivo</option><option>Zelle</option></select><label>Banco:</label><input type="text" id="edit-banco"><label>Referencia:</label><input type="text" id="edit-referencia"><label>Fecha del pago:</label><input type="date" id="edit-fechaPago"><label>Monto Bs.:</label><input type="number" id="edit-montoBs" step="0.01"><label>Monto USD:</label><input type="number" id="edit-montoUsd" step="0.01"><label>Meses Pagados:</label><select id="edit-mesesPagados" multiple style="height:140px"><option value="Inscripción">Inscripción</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option><option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option></select><label>Observaciones:</label><input type="text" id="edit-observaciones"></div><div class="modal-actions"><button class="btn-check" onclick="guardarEdicionPago()">💾 Guardar</button><button class="btn-reject" onclick="cerrarModalEditar()">Cancelar</button></div></div></div>
 
 <div id="modal-pago-manual" class="modal-overlay" onclick="cerrarModalPagoManual(event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -468,6 +498,8 @@
         <div id="pago-manual-meses" style="margin-top:8px;"></div>
         <label style="margin-top:12px;">Referencia (opcional):</label>
         <input type="text" id="pago-manual-ref" placeholder="Ej: MANUAL-001">
+        <label>Fecha del pago:</label>
+        <input type="date" id="pago-manual-fecha">
         <label>Monto pagado ($):</label>
         <input type="number" id="pago-manual-monto" placeholder="0.00" step="0.01">
         <label>Observaciones:</label>
@@ -482,7 +514,7 @@
 <div id="securityOverlay">
     <div class="login-box">
         <h2>🔒 ACCESO RESTRINGIDO</h2>
-        <p>Sistema Administrativo U.E.P Santiago De Jesus V19<br>Ingrese sus credenciales para continuar</p>
+        <p>Sistema Administrativo U.E.P Santiago De Jesus V19.1<br>Ingrese sus credenciales para continuar</p>
         <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
         <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
         <div class="error" id="loginError"></div>
@@ -498,7 +530,6 @@
     let bloqueoHasta = null;
     let inactivityTimer = null;
     
-    // CREDENCIALES OFUSCADAS EN BASE64
     const CREDENCIALES_B64 = {
         'MzQ4NjE4OTY=': 'Genesis',
         'MjI5NDMxMjY=': 'Edward'
@@ -560,7 +591,7 @@
             
             setTimeout(() => {
                 ocultarOverlaySeguridad();
-                document.title = `U.E.P Santiago De Jesus V19 | ${usuarioActivo}`;
+                document.title = `U.E.P Santiago De Jesus V19.1 | ${usuarioActivo}`;
                 document.getElementById('logoutBtn').style.display = 'block';
                 const ut = document.getElementById('userTagTop');
                 if (ut) ut.textContent = '👤 ' + usuarioActivo;
@@ -600,7 +631,7 @@
                     usuarioActivo = sesion.usuario;
                     ocultarOverlaySeguridad();
                     document.getElementById('logoutBtn').style.display = 'block';
-                    document.title = `U.E.P Santiago De Jesus V19 | ${usuarioActivo}`;
+                    document.title = `U.E.P Santiago De Jesus V19.1 | ${usuarioActivo}`;
                     const ut = document.getElementById('userTagTop');
                     if (ut) ut.textContent = '👤 ' + usuarioActivo;
                     iniciarInactividad();
@@ -750,6 +781,36 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     
+    // ═══════════════════════════════════════════════════════
+    // NUEVO: FORMATEAR FECHA DEL PAGO
+    // ═══════════════════════════════════════════════════════
+    function formatearFechaPago(pago) {
+        // Prioridad 1: fechaPago (string "2026-09-26")
+        if (pago.fechaPago) {
+            try {
+                const [y, m, d] = pago.fechaPago.split('-');
+                if (y && m && d) return `${d}/${m}/${y}`;
+            } catch(e) {}
+        }
+        // Prioridad 2: fechaPagoTimestamp (Timestamp de Firestore)
+        if (pago.fechaPagoTimestamp) {
+            try {
+                const ts = pago.fechaPagoTimestamp;
+                const ms = ts.seconds ? ts.seconds * 1000 : (ts.toMillis ? ts.toMillis() : ts);
+                return new Date(ms).toLocaleDateString('es-ES');
+            } catch(e) {}
+        }
+        // Prioridad 3: fecha (Timestamp de cuando se reportó)
+        if (pago.fecha) {
+            try {
+                const ms = pago.fecha.seconds ? pago.fecha.seconds * 1000 : pago.fecha;
+                return new Date(ms).toLocaleDateString('es-ES') + ' <small style="color:#94a3b8;">(reporte)</small>';
+            } catch(e) {}
+        }
+        return '<span style="color:#94a3b8;">Sin fecha</span>';
+    }
+    window.formatearFechaPago = formatearFechaPago;
+    
     function pedirTexto(titulo, placeholder = '') {
         return new Promise((resolve) => {
             const modal = document.createElement('div');
@@ -813,7 +874,6 @@
     let solicitudSeleccionada = null;
     let filtroAnioActual = 'todos';
     
-    // Cache de historial de pagos por nombre de alumno (para saber si hay evidencia)
     let cacheHistorialPorAlumno = {};
     let cacheHistorialCargado = false;
     
@@ -829,7 +889,7 @@
                 cacheHistorialPorAlumno[nombre].push(h);
             });
             cacheHistorialCargado = true;
-            console.log(`[V19] Historial cargado: ${Object.keys(cacheHistorialPorAlumno).length} alumnos con pagos`);
+            console.log(`[V19.1] Historial cargado: ${Object.keys(cacheHistorialPorAlumno).length} alumnos con pagos`);
         } catch (e) {
             console.error("Error cargando cache historial:", e);
         }
@@ -840,14 +900,12 @@
         return pagos.length > 0;
     }
     
-    // Devuelve 'DEUDOR', 'SOLVENTE' o 'SIN_MESES'
     function getEstadoAlumno(alumno) {
         const mesesRegistrados = alumno.meses || [];
         const mesesReales = calcularMesesReales(mesesRegistrados);
         
         if (mesesReales.length > 0) return 'DEUDOR';
-        if (mesesRegistrados.length > 0 && mesesReales.length === 0) return 'SOLVENTE'; // solo meses futuros
-        // meses vacío: verificar historial
+        if (mesesRegistrados.length > 0 && mesesReales.length === 0) return 'SOLVENTE';
         if (tieneEvidenciaDePago(alumno.nombre)) return 'SOLVENTE';
         return 'SIN_MESES';
     }
@@ -855,10 +913,6 @@
     function getMesesVencidosPorDefecto() {
         return MESES_ORDEN.filter((_, idx) => idx <= mesActualIndex);
     }
-    
-    // ═══════════════════════════════════════════════════════
-    // CÁLCULO DE MESES Y DEUDA (igual que V18)
-    // ═══════════════════════════════════════════════════════
     
     async function actualizarMesDesdeServidor() {
         const fecha = new Date();
@@ -869,7 +923,7 @@
             const m = fecha.getMonth();
             mesActualIndex = m >= 8 ? (m - 7) : (m + 5);
         }
-        console.log(`[SDJ V19] Mes detectado: "${mesNombre}" → índice ${mesActualIndex} (${MESES_ORDEN[mesActualIndex]})`);
+        console.log(`[SDJ V19.1] Mes detectado: "${mesNombre}" → índice ${mesActualIndex} (${MESES_ORDEN[mesActualIndex]})`);
         const lbl = document.getElementById('currentYearLabel');
         if (lbl) lbl.textContent = currentYear;
         return mesActualIndex;
@@ -1204,6 +1258,114 @@
         else await ejecutar();
     };
     
+    // ═══════════════════════════════════════════════════════
+    // NUEVO V19.1: EDITAR MESES DESDE LA FICHA
+    // ═══════════════════════════════════════════════════════
+    window.abrirEditarMesesFicha = () => {
+        if (!usuarioActivo || !estudianteActual) return;
+        
+        const mesesActuales = new Set(estudianteActual.meses || []);
+        // Sugerir meses vencidos si no tiene ninguno
+        if (mesesActuales.size === 0) {
+            getMesesVencidosPorDefecto().forEach(m => mesesActuales.add(m));
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal" style="max-width:600px;">
+                <div class="modal-header">
+                    <h3>📅 Editar meses: ${esc(estudianteActual.nombre)}</h3>
+                    <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
+                </div>
+                <div style="background:#f1f5f9; padding:10px; border-radius:8px; font-size:13px; margin-bottom:12px;">
+                    <b>Representante:</b> ${esc(estudianteActual.rep)} | 
+                    <b>Monto mensual:</b> $${estudianteActual.montoMensual || 0} |
+                    <b>Grado:</b> ${esc(estudianteActual.grado)} ${esc(estudianteActual.seccion)}
+                </div>
+                <p style="font-size:13px; color:#64748b; margin-bottom:10px;">
+                    Marca los meses que el alumno <b>debe</b> (pendientes). Los desmarcados quedan como pagados/no aplicables.
+                </p>
+                <div class="meses-edit-grid">
+                    ${MESES_ORDEN.map(mes => {
+                        const marcado = mesesActuales.has(mes);
+                        return `
+                            <label class="${marcado ? 'checked' : ''}" id="label-mes-${esc(mes)}">
+                                <input type="checkbox" class="mes-edit-check-ficha" value="${esc(mes)}" ${marcado ? 'checked' : ''} onchange="toggleLabelMes(this)">
+                                ${esc(mes)}
+                            </label>
+                        `;
+                    }).join('')}
+                </div>
+                <div style="margin-top:15px; padding:10px; background:#e0e7ff; border-radius:8px; font-size:13px;">
+                    <b>Total deuda calculado:</b> <span id="total-edit-meses" style="color:#4338ca; font-weight:bold;">$0</span>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-check" id="btn-guardar-meses-ficha">💾 Guardar cambios</button>
+                    <button class="btn-reject" onclick="this.closest('.modal-overlay').remove()">Cancelar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Función para recalcular
+        const recalcular = () => {
+            const checks = modal.querySelectorAll('.mes-edit-check-ficha:checked');
+            const total = checks.length * (estudianteActual.montoMensual || 0);
+            const el = modal.querySelector('#total-edit-meses');
+            if (el) el.textContent = `$${total.toFixed(2)}`;
+        };
+        modal.querySelectorAll('.mes-edit-check-ficha').forEach(cb => {
+            cb.addEventListener('change', recalcular);
+        });
+        recalcular();
+        
+        // Guardar
+        modal.querySelector('#btn-guardar-meses-ficha').onclick = async (evt) => {
+            const btn = evt.target;
+            btn.disabled = true;
+            btn.textContent = '⏳...';
+            try {
+                const nuevosMeses = Array.from(modal.querySelectorAll('.mes-edit-check-ficha:checked')).map(c => c.value);
+                const mesesAnteriores = estudianteActual.meses || [];
+                
+                await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
+                    meses: nuevosMeses,
+                    total: calcularTotalReal(estudianteActual.montoMensual, nuevosMeses),
+                    ultimaModificacion: serverTimestamp(),
+                    modificadoPor: usuarioActivo
+                });
+                
+                await addDoc(collection(db, DB_AUD_CORR), {
+                    alumnoId: estudianteActual.id,
+                    nombreEst: estudianteActual.nombre,
+                    tipo: 'edicion_meses_ficha',
+                    mesesAnteriores,
+                    mesesNuevos: nuevosMeses,
+                    corregidoPor: usuarioActivo,
+                    fecha: serverTimestamp()
+                });
+                
+                modal.remove();
+                showModal(`✅ Meses actualizados\n\nAnteriores: ${mesesAnteriores.length}\nNuevos: ${nuevosMeses.length}`);
+                await window.mostrarFichaEstudiante(estudianteActual.id);
+                window.loadFinal(curSec);
+            } catch (err) {
+                console.error(err);
+                showModal("❌ Error al guardar: " + err.message);
+                btn.disabled = false;
+                btn.textContent = '💾 Guardar cambios';
+            }
+        };
+    };
+    
+    window.toggleLabelMes = (cb) => {
+        const label = cb.closest('label');
+        if (cb.checked) label.classList.add('checked');
+        else label.classList.remove('checked');
+    };
+    
     window.volverALista = () => { document.getElementById('final-list').style.display = 'block'; document.getElementById('ficha-estudiante').style.display = 'none'; };
     
     window.eliminarEstudiante = async () => {
@@ -1372,14 +1534,19 @@
         showModal(`✅ Enviando ${conCorreo.length} correos. Revisa tu cliente de email.`);
     };
     
+    // ═══════════════════════════════════════════════════════
+    // NUEVO V19.1: MODAL DE DETALLES CON FECHA
+    // ═══════════════════════════════════════════════════════
     window.mostrarDetallesPago = async (id) => {
         if (!usuarioActivo) return;
         const docSnap = await getDoc(doc(db, DB_PAGOS, id));
         if(docSnap.exists()) {
             pagoSeleccionado = { id, ...docSnap.data() };
+            const fechaFormateada = formatearFechaPago(pagoSeleccionado);
             document.getElementById('detalles-pago-content').innerHTML = `
                 <div class="detail-row"><span class="detail-label">Estudiante:</span><span class="detail-value">${esc(pagoSeleccionado.nombreEst)}</span></div>
                 <div class="detail-row"><span class="detail-label">Representante:</span><span class="detail-value">${esc(pagoSeleccionado.nombreRep)}</span></div>
+                <div class="detail-row" style="background:#fef3c7;"><span class="detail-label">📅 Fecha del pago:</span><span class="detail-value"><b>${fechaFormateada}</b></span></div>
                 <div class="detail-row"><span class="detail-label">Método:</span><span class="detail-value">${esc(pagoSeleccionado.metodo)}</span></div>
                 <div class="detail-row"><span class="detail-label">Referencia:</span><span class="detail-value">${esc(pagoSeleccionado.referencia)}</span></div>
                 <div class="detail-row"><span class="detail-label">Monto USD:</span><span class="detail-value">$${pagoSeleccionado.montoDivisas || pagoSeleccionado.monto}</span></div>
@@ -1407,6 +1574,7 @@
                 document.getElementById('edit-metodo').value = pagoEditando.metodo || 'Pago Móvil';
                 document.getElementById('edit-banco').value = pagoEditando.banco || '';
                 document.getElementById('edit-referencia').value = pagoEditando.referencia || '';
+                document.getElementById('edit-fechaPago').value = pagoEditando.fechaPago || '';
                 document.getElementById('edit-montoBs').value = pagoEditando.montoBs || 0;
                 document.getElementById('edit-montoUsd').value = pagoEditando.montoDivisas || pagoEditando.monto || 0;
                 document.getElementById('edit-observaciones').value = pagoEditando.observaciones || '';
@@ -1438,6 +1606,7 @@
             metodo: document.getElementById('edit-metodo').value,
             banco: document.getElementById('edit-banco').value,
             referencia: document.getElementById('edit-referencia').value,
+            fechaPago: document.getElementById('edit-fechaPago').value,
             montoBs: parseFloat(document.getElementById('edit-montoBs').value) || 0,
             montoDivisas: parseFloat(document.getElementById('edit-montoUsd').value) || 0,
             observaciones: document.getElementById('edit-observaciones').value,
@@ -1455,6 +1624,7 @@
                     metodo: pagoEditando.metodo,
                     banco: pagoEditando.banco,
                     referencia: pagoEditando.referencia,
+                    fechaPago: pagoEditando.fechaPago,
                     montoBs: pagoEditando.montoBs,
                     montoDivisas: pagoEditando.montoDivisas,
                     mesesPagados: pagoEditando.mesesPagados
@@ -1520,7 +1690,8 @@
             }
         }
         
-        const msgConfirm = `¿Verificar pago de ${pago.nombreEst}?\n\nMeses pagados: ${(pago.mesesPagados || []).join(', ')}\nMonto: $${pago.montoDivisas}${advertenciaMonto}\n\nEsta acción actualizará la deuda del estudiante.`;
+        const fechaPagoStr = formatearFechaPago(pago).replace(/<[^>]*>/g, '');
+        const msgConfirm = `¿Verificar pago de ${pago.nombreEst}?\n\nFecha del pago: ${fechaPagoStr}\nMeses pagados: ${(pago.mesesPagados || []).join(', ')}\nMonto: $${pago.montoDivisas}${advertenciaMonto}\n\nEsta acción actualizará la deuda del estudiante.`;
         if (!await showModal(msgConfirm, true)) return;
         
         try {
@@ -1573,6 +1744,7 @@
                 montoBs: pago.montoBs || 0,
                 metodo: pago.metodo || '',
                 referencia: pago.referencia || '',
+                fechaPago: pago.fechaPago || '',
                 verificadoPor: usuarioActivo,
                 pagoIdOriginal: id,
                 tipo: 'verificacion_portal',
@@ -1596,7 +1768,6 @@
             
             await deleteDoc(docRef);
             
-            // Refrescar cache de historial para la nueva verificación
             cacheHistorialCargado = false;
             await cargarCacheHistorial();
             
@@ -1657,7 +1828,7 @@
     };
     
     // ═══════════════════════════════════════════════════════
-    // PAGO MANUAL
+    // PAGO MANUAL (con fecha nueva)
     // ═══════════════════════════════════════════════════════
     
     window.abrirModalPagoManual = () => {
@@ -1681,6 +1852,7 @@
             `).join('');
         }
         document.getElementById('pago-manual-ref').value = '';
+        document.getElementById('pago-manual-fecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('pago-manual-monto').value = estudianteActual.montoMensual || '';
         document.getElementById('pago-manual-obs').value = '';
         document.getElementById('modal-pago-manual').style.display = 'flex';
@@ -1707,6 +1879,7 @@
             if (checks.length === 0) { showModal("Selecciona al menos un mes"); return; }
             
             const ref = document.getElementById('pago-manual-ref').value.trim() || `MANUAL-${Date.now()}`;
+            const fechaPago = document.getElementById('pago-manual-fecha').value || new Date().toISOString().split('T')[0];
             const monto = parseFloat(document.getElementById('pago-manual-monto').value) || 0;
             const obs = document.getElementById('pago-manual-obs').value.trim();
             
@@ -1718,6 +1891,7 @@
                 montoDivisas: monto,
                 metodo: 'Manual',
                 referencia: ref,
+                fechaPago: fechaPago,
                 observaciones: obs,
                 verificadoPor: usuarioActivo,
                 tipo: 'pago_manual',
@@ -1733,11 +1907,10 @@
                 modificadoPor: usuarioActivo
             });
             
-            // Refrescar cache historial
             cacheHistorialCargado = false;
             await cargarCacheHistorial();
             
-            showModal(`✅ Pago manual registrado\n\nMeses: ${checks.join(', ')}\nMonto: $${monto.toFixed(2)}\nRef: ${ref}`);
+            showModal(`✅ Pago manual registrado\n\nFecha: ${fechaPago}\nMeses: ${checks.join(', ')}\nMonto: $${monto.toFixed(2)}\nRef: ${ref}`);
             cerrarModalPagoManual();
             
             await window.mostrarFichaEstudiante(estudianteActual.id);
@@ -1859,14 +2032,15 @@
         if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
         const snap = await getDocs(collection(db, DB_PAGOS));
         if (snap.empty) { showModal("No hay pagos"); return; }
-        const filas = [['Estudiante', 'Representante', 'Cédula', 'Método', 'Banco', 'Referencia', 'Monto Bs', 'Monto USD', 'Fecha', 'Estado', 'Meses pagados', 'Observaciones']];
+        const filas = [['Estudiante', 'Representante', 'Cédula', 'Método', 'Banco', 'Referencia', 'Fecha de pago', 'Monto Bs', 'Monto USD', 'Estado', 'Meses pagados', 'Observaciones']];
         snap.forEach(d => {
             const p = d.data();
             filas.push([
                 p.nombreEst || '', p.nombreRep || '', p.cedulaRep || '',
                 p.metodo || '', p.banco || '', p.referencia || '',
+                p.fechaPago || '',
                 p.montoBs || 0, p.montoDivisas || 0,
-                p.fechaPago || '', p.estado || '',
+                p.estado || '',
                 (p.mesesPagados || []).join(' - '),
                 p.observaciones || ''
             ]);
@@ -2383,6 +2557,8 @@
                     detalle = `<small><b>Meses asignados:</b> ${(item.mesesNuevos || []).join(' • ')}</small>`;
                 } else if (item.tipo === 'cambio_monto') {
                     detalle = `<small><b>Monto:</b> $${item.montoAnterior} → $${item.montoNuevo}</small>`;
+                } else if (item.tipo === 'edicion_meses_ficha') {
+                    detalle = `<small><b>Meses anteriores:</b> ${(item.mesesAnteriores || []).length} → <b>Nuevos:</b> ${(item.mesesNuevos || []).length}</small>`;
                 }
                 html += `<div class="audit-item tipo-correccion">
                     <b>🛠 Corrección (${esc(item.tipo || 'N/A')})</b> — ${esc(fechaStr)}<br>
@@ -2398,7 +2574,7 @@
     }
     
     // ═══════════════════════════════════════════════════════
-    // MÓDULO DE SANEAMIENTO
+    // MÓDULO DE SANEAMIENTO (sin cambios)
     // ═══════════════════════════════════════════════════════
     
     let saneaSeleccionados = new Set();
@@ -2650,7 +2826,7 @@
     
     (async () => {
         await actualizarMesDesdeServidor();
-        await cargarCacheHistorial();  // Cargar antes de listeners para tener evidencia disponible
+        await cargarCacheHistorial();
         
         unsubscribeGlobal = onSnapshot(collection(db, DB_MAIN), (snap) => {
             const lp = document.getElementById('list-pend');
@@ -2714,7 +2890,7 @@
             if (!tb) return;
             tb.innerHTML = "";
             if(snap.empty) { 
-                tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">📭 No hay pagos reportados</td></tr>'; 
+                tb.innerHTML = '<tr><td colspan="6" style="text-align:center;">📭 No hay pagos reportados</td></tr>'; 
                 return; 
             }
             
@@ -2726,9 +2902,12 @@
                 if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
                 if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
                 
+                const fechaFormateada = formatearFechaPago(p);
+                
                 tb.innerHTML += `<tr class="clickable-row" onclick="mostrarDetallesPago('${d.id}')">
                     <td><strong>${esc(p.nombreEst || 'N/A')}</strong><br><small>${esc(p.nombreRep || '')}</small></td>
                     <td>${esc(p.metodo || '')}<br><small>${esc(p.referencia || '')}</small></td>
+                    <td><strong>${fechaFormateada}</strong></td>
                     <td><strong>$${p.montoDivisas || p.monto || 0}</strong></td>
                     <td><span style="background:${estadoColor}; color:white; padding:4px 8px; border-radius:12px; font-size:11px;">${esc(estadoTexto)}</span></td>
                     <td><button class="btn-edit-pago" onclick="event.stopPropagation(); abrirModalEditar('${d.id}')">✏️ Editar</button></td>
