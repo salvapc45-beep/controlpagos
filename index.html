@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V19.1</title>
+    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V19.2</title>
     <style>
         #securityOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -74,8 +74,13 @@
         header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 1.2rem; position: relative; }
         
         nav { display: flex; background: white; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid #e2e8f0; overflow-x: auto; }
-        .nav-btn { flex: 1; min-width: 85px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 10px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; white-space: nowrap; }
+        .nav-btn { flex: 1; min-width: 85px; padding: 15px 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 10px; color: #64748b; text-transform: uppercase; border-bottom: 4px solid transparent; white-space: nowrap; position: relative; }
         .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f1f5f9; }
+        .nav-badge {
+            display: none; position: absolute; top: 8px; right: 8px;
+            background: #ef4444; color: white; border-radius: 10px;
+            padding: 1px 6px; font-size: 10px; font-weight: bold;
+        }
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .modulo { display: none; }
@@ -131,6 +136,7 @@
         .btn-pay-manual { background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-recibo { background: #0d9488; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-edit-meses { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-historial { background: #0891b2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
         .parent-portal { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .parent-results { margin-top: 20px; }
@@ -171,6 +177,7 @@
         .audit-item.tipo-correo { border-left-color: #3b82f6; }
         .audit-item.tipo-login { border-left-color: #10b981; }
         .audit-item.tipo-correccion { border-left-color: #8b5cf6; }
+        .audit-item.tipo-duplicado { border-left-color: #dc2626; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .stat-card {
@@ -192,7 +199,6 @@
 
         .success-box { background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
         
-        /* Meses editables */
         .meses-edit-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -219,12 +225,37 @@
             font-weight: bold;
         }
         .meses-edit-grid input { width: auto; margin: 0; }
+
+        .mes-estado {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 3px 8px; border-radius: 5px; font-size: 11px;
+            font-weight: 600; margin: 2px 3px 2px 0;
+        }
+        .mes-estado.pagado { background: #dcfce7; color: #166534; }
+        .mes-estado.abono { background: #fef3c7; color: #92400e; }
+        .mes-estado.pendiente { background: #fee2e2; color: #991b1b; }
+        .mes-estado.futuro { background: #f1f5f9; color: #94a3b8; }
+        
+        .hist-item {
+            background: white; border-left: 4px solid #0891b2;
+            padding: 10px 12px; border-radius: 6px; margin-bottom: 6px;
+            border: 1px solid #e2e8f0; font-size: 13px;
+        }
+        .hist-item.verificado { border-left-color: #22c55e; }
+        .hist-item.pendiente { border-left-color: #eab308; }
+        .hist-item.rechazado { border-left-color: #ef4444; }
+        
+        .duplicado-card {
+            background: white; border: 1px solid #fecaca; border-left: 5px solid #dc2626;
+            border-radius: 8px; padding: 15px; margin-bottom: 10px;
+        }
+        .duplicado-card.revisado { border-left-color: #22c55e; background: #f0fdf4; }
     </style>
 </head>
 <body>
 
 <header>
-    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V19.1)
+    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V19.2)
     <button id="logoutBtn" class="logout-btn" style="display: none;">🚪 Cerrar Sesión</button>
 </header>
 
@@ -244,12 +275,11 @@
     <div class="nav-btn" onclick="go('arch', event)">2. Archivos</div>
     <div class="nav-btn" onclick="go('pend', event)">3. Pendientes</div>
     <div class="nav-btn" onclick="go('solv', event)">4. Solventes</div>
-    <div class="nav-btn" onclick="go('rep', event)">5. Reportes</div>
+    <div class="nav-btn" onclick="go('rep', event)">5. Reportes<span class="nav-badge" id="nav-badge-rep"></span></div>
     <div class="nav-btn" onclick="go('padres', event)">6. Portal Pago</div>
     <div class="nav-btn" onclick="go('sol', event)">7. Solicitudes</div>
     <div class="nav-btn" onclick="go('stats', event)">8. Estadísticas</div>
     <div class="nav-btn" onclick="go('audit', event)">9. Auditoría</div>
-    <div class="nav-btn" onclick="go('sanea', event)">10. Saneamiento</div>
 </nav>
 
 <div class="container">
@@ -285,7 +315,7 @@
                 <small>Total calculado (solo meses vencidos): <span id="totalPreview" style="font-weight:bold; color:#1e40af">$0</span></small>
                 <small style="display:block; color:#64748b; margin-top:3px;">Meses seleccionados: <span id="mesesCount">0</span> | Monto mensual: $<span id="montoMensualPreview">0</span></small>
             </div>
-            <button class="btn-main" onclick="guardar(event)">GUARDAR REGISTRO V19.1</button>
+            <button class="btn-main" onclick="guardar(event)">GUARDAR REGISTRO V19.2</button>
         </div>
     </section>
 
@@ -320,7 +350,7 @@
             <h3 id="tit-list"></h3>
             <div class="card"><div style="text-align:right;"><span id="sec-total-label"></span></div><input type="text" id="search-filter" placeholder="🔍 Buscar por nombre, representante o cédula..." onkeyup="filterList()"></div>
             <div class="card"><div id="final-list"></div></div>
-            <div id="ficha-estudiante" class="ficha-container" style="display:none;"><div class="card"><h3>📋 Ficha del Estudiante</h3><div><div><label>Nombre:</label><input type="text" id="edit-nombre"></div><div><label>Representante:</label><input type="text" id="edit-representante"></div><div><label>Cédula:</label><input type="text" id="edit-cedula" readonly></div><div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div><div><label>Correo:</label><input type="email" id="edit-correo"></div><div><label>Grado:</label><input type="text" id="edit-grado" readonly></div><div><label>Monto Mensual:</label><input type="number" id="edit-monto-mensual" step="0.01" min="0"></div><div><label>Meses Pendientes:</label><div id="edit-meses"></div></div><div><label>Total Deuda:</label><h3 id="edit-total"></h3></div><div class="ficha-actions"><button class="btn-edit" onclick="guardarCambiosEstudiante(event)">💾 Guardar</button><button class="btn-edit-meses" onclick="abrirEditarMesesFicha()">📅 Editar meses</button><button class="btn-pay-manual" onclick="abrirModalPagoManual()">💰 Marcar mes pagado</button><button class="btn-recibo" onclick="imprimirReciboFicha()">🧾 Recibo</button><button class="btn-edit" onclick="volverALista()">⬅ Volver</button><button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button></div></div></div></div>
+            <div id="ficha-estudiante" class="ficha-container" style="display:none;"><div class="card"><h3>📋 Ficha del Estudiante</h3><div><div><label>Nombre:</label><input type="text" id="edit-nombre"></div><div><label>Representante:</label><input type="text" id="edit-representante"></div><div><label>Cédula:</label><input type="text" id="edit-cedula" readonly></div><div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div><div><label>Correo:</label><input type="email" id="edit-correo"></div><div><label>Grado:</label><input type="text" id="edit-grado" readonly></div><div><label>Monto Mensual:</label><input type="number" id="edit-monto-mensual" step="0.01" min="0"></div><div><label>Meses Pendientes:</label><div id="edit-meses"></div></div><div><label>Total Deuda:</label><h3 id="edit-total"></h3></div><div class="ficha-actions"><button class="btn-edit" onclick="guardarCambiosEstudiante(event)">💾 Guardar</button><button class="btn-edit-meses" onclick="abrirEditarMesesFicha()">📅 Editar meses</button><button class="btn-pay-manual" onclick="abrirModalPagoManual()">💰 Marcar pago / abono</button><button class="btn-historial" onclick="abrirHistorialRepresentante()">📜 Historial familiar</button><button class="btn-recibo" onclick="imprimirReciboFicha()">🧾 Recibo</button><button class="btn-edit" onclick="volverALista()">⬅ Volver</button><button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button></div></div></div></div>
         </div>
     </section>
 
@@ -342,14 +372,14 @@
                 <h3 style="margin:0;">Estudiantes al Día</h3>
                 <button class="btn-csv" onclick="exportarSolventesCSV()" style="margin:0;">📊 Exportar solventes (CSV)</button>
             </div>
-            <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Solo se muestran alumnos con evidencia de pago verificada. Los alumnos sin meses ni historial aparecen en "Saneamiento".</p>
+            <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Alumnos sin meses vencidos pendientes.</p>
             <div id="list-solv">Cargando...</div>
         </div>
     </section>
 
     <section id="mod-rep" class="modulo">
         <div class="card">
-            <h3>📊 Pagos Reportados (V19.1)</h3>
+            <h3>📊 Pagos Reportados (V19.2)</h3>
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
                 <p style="font-size:12px; color:gray;">Haga clic en cualquier fila para ver detalles | <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">✏️ Editar solo admin</span></p>
                 <div>
@@ -373,6 +403,15 @@
                 </table>
             </div>
         </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">🚨 Intentos de duplicados</h3>
+                <button class="btn-csv" onclick="marcarDuplicadosRevisados()" style="margin:0; background:#10b981;">✅ Marcar todos revisados</button>
+            </div>
+            <p style="font-size:12px; color:gray;">Reportes que fueron bloqueados por el sistema antiduplicados. El admin puede revisarlos aquí.</p>
+            <div id="lista-duplicados">Cargando...</div>
+        </div>
     </section>
 
     <section id="mod-padres" class="modulo">
@@ -392,7 +431,7 @@
             <h3>📋 Solicitudes de Registro</h3>
             <p style="font-size:12px; color:gray; margin-bottom:15px;">
                 Representantes que han solicitado registro automático desde el Portal de Pago.
-                <strong style="color:#dc2626;">Al aprobar, se asignan los meses seleccionados como deuda inicial.</strong>
+                <strong style="color:#dc2626;">Al aprobar, se asigna el año escolar completo (13 meses) con el monto por hijo.</strong>
             </p>
             <div id="lista-solicitudes">Cargando solicitudes...</div>
         </div>
@@ -439,45 +478,11 @@
                 <button class="nav-btn" style="flex:none; padding:8px 14px; border:1px solid #cbd5e1; border-radius:8px;" onclick="filtrarAuditoria('correos', event)">✉️ Correos</button>
                 <button class="nav-btn" style="flex:none; padding:8px 14px; border:1px solid #cbd5e1; border-radius:8px;" onclick="filtrarAuditoria('logins', event)">🔐 Logins</button>
                 <button class="nav-btn" style="flex:none; padding:8px 14px; border:1px solid #cbd5e1; border-radius:8px;" onclick="filtrarAuditoria('correcciones', event)">🛠 Correcciones</button>
+                <button class="nav-btn" style="flex:none; padding:8px 14px; border:1px solid #cbd5e1; border-radius:8px;" onclick="filtrarAuditoria('duplicados', event)">🚨 Duplicados</button>
             </div>
         </div>
         <div id="audit-container">
             <div class="loading-text"><span class="spinner"></span> Cargando auditoría...</div>
-        </div>
-    </section>
-
-    <section id="mod-sanea" class="modulo">
-        <div class="card" style="background: linear-gradient(135deg, #f59e0b, #ea580c); color: white;">
-            <h3 style="margin-bottom:5px;">⚠️ Saneamiento de Solventes</h3>
-            <p style="font-size:13px; opacity:0.95;">Alumnos sin meses asignados y sin historial de pagos. Fueron marcados erróneamente como solventes al aprobar solicitudes antes de la V19.</p>
-            <p style="font-size:12px; margin-top:10px; background:rgba(255,255,255,0.15); padding:8px 12px; border-radius:6px;">
-                ⚠️ <strong>Nada se modifica sin tu autorización.</strong> Selecciona alumnos y presiona "Asignar meses vencidos".
-            </p>
-        </div>
-
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-                <div>
-                    <h3 style="margin:0;">Alumnos afectados</h3>
-                    <small style="color:#64748b;">Total: <span id="sanea-count">0</span> alumnos sin meses ni historial</small>
-                </div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <button class="btn-secondary" style="background:#e2e8f0; color:#475569; padding:8px 14px; font-size:12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;" onclick="seleccionarTodosSanea()">☑️ Seleccionar todos</button>
-                    <button class="btn-secondary" style="background:#e2e8f0; color:#475569; padding:8px 14px; font-size:12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;" onclick="deseleccionarTodosSanea()">☐ Quitar todos</button>
-                    <button class="btn-secondary" style="background:#e2e8f0; color:#475569; padding:8px 14px; font-size:12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;" onclick="recargarCacheSanea()">🔄 Recargar</button>
-                </div>
-            </div>
-            
-            <div style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:12px; margin-bottom:15px; font-size:13px;">
-                <strong>⚠️ Meses por defecto:</strong> <span id="sanea-meses-defecto"></span>
-                <br><small>Estos meses se asignarán a los alumnos seleccionados. Luego puedes editarlos caso por caso.</small>
-            </div>
-
-            <button class="btn-main" style="background:#ea580c;" onclick="aplicarSaneamiento()">🔧 Asignar meses vencidos a seleccionados</button>
-
-            <div id="sanea-lista" style="margin-top:20px;">
-                <div class="loading-text"><span class="spinner"></span> Cargando alumnos...</div>
-            </div>
         </div>
     </section>
 </div>
@@ -489,32 +494,44 @@
 <div id="modal-pago-manual" class="modal-overlay" onclick="cerrarModalPagoManual(event)">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3>💰 Marcar mes como pagado (manual)</h3>
+            <h3>💰 Registrar pago / abono (manual)</h3>
             <button class="close-modal" onclick="cerrarModalPagoManual()">×</button>
         </div>
-        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Usa esto para registrar pagos antiguos que no están en el sistema. Solo se aplicará al estudiante abierto.</p>
+        <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Puedes poner monto completo o parcial por mes. Los abonos se acumulan.</p>
         <div id="pago-manual-info" style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:12px; font-size:13px;"></div>
-        <label>Meses a marcar como pagados:</label>
+        <label>Meses a pagar/abonar:</label>
         <div id="pago-manual-meses" style="margin-top:8px;"></div>
         <label style="margin-top:12px;">Referencia (opcional):</label>
         <input type="text" id="pago-manual-ref" placeholder="Ej: MANUAL-001">
         <label>Fecha del pago:</label>
         <input type="date" id="pago-manual-fecha">
-        <label>Monto pagado ($):</label>
+        <label>Monto total pagado ($):</label>
         <input type="number" id="pago-manual-monto" placeholder="0.00" step="0.01">
+        <p style="font-size:11px; color:#64748b; margin-top:5px;">💡 Se distribuye en los meses seleccionados en orden cronológico.</p>
         <label>Observaciones:</label>
         <input type="text" id="pago-manual-obs" placeholder="Ej: pago antiguo no registrado en sistema">
         <div class="modal-actions">
-            <button class="btn-pay-manual" onclick="guardarPagoManual(event)">💾 Registrar pago</button>
+            <button class="btn-pay-manual" onclick="guardarPagoManual(event)">💾 Registrar</button>
             <button class="btn-reject" onclick="cerrarModalPagoManual()">Cancelar</button>
         </div>
+    </div>
+</div>
+
+<div id="modal-historial-rep" class="modal-overlay" onclick="cerrarModalHistorialRep(event)">
+    <div class="modal" onclick="event.stopPropagation()" style="max-width:700px;">
+        <div class="modal-header">
+            <h3>📜 Historial del Representante</h3>
+            <button class="close-modal" onclick="cerrarModalHistorialRep()">×</button>
+        </div>
+        <div id="historial-rep-info" style="background:#f1f5f9; padding:10px; border-radius:8px; margin-bottom:12px; font-size:13px;"></div>
+        <div id="historial-rep-content"></div>
     </div>
 </div>
 
 <div id="securityOverlay">
     <div class="login-box">
         <h2>🔒 ACCESO RESTRINGIDO</h2>
-        <p>Sistema Administrativo U.E.P Santiago De Jesus V19.1<br>Ingrese sus credenciales para continuar</p>
+        <p>Sistema Administrativo U.E.P Santiago De Jesus V19.2<br>Ingrese sus credenciales para continuar</p>
         <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
         <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
         <div class="error" id="loginError"></div>
@@ -591,11 +608,14 @@
             
             setTimeout(() => {
                 ocultarOverlaySeguridad();
-                document.title = `U.E.P Santiago De Jesus V19.1 | ${usuarioActivo}`;
+                document.title = `U.E.P Santiago De Jesus V19.2 | ${usuarioActivo}`;
                 document.getElementById('logoutBtn').style.display = 'block';
                 const ut = document.getElementById('userTagTop');
                 if (ut) ut.textContent = '👤 ' + usuarioActivo;
                 iniciarInactividad();
+                if (typeof window.ejecutarMigracionV19_2 === 'function') {
+                    window.ejecutarMigracionV19_2();
+                }
             }, 1500);
         } else {
             intentosFallidos++;
@@ -631,10 +651,13 @@
                     usuarioActivo = sesion.usuario;
                     ocultarOverlaySeguridad();
                     document.getElementById('logoutBtn').style.display = 'block';
-                    document.title = `U.E.P Santiago De Jesus V19.1 | ${usuarioActivo}`;
+                    document.title = `U.E.P Santiago De Jesus V19.2 | ${usuarioActivo}`;
                     const ut = document.getElementById('userTagTop');
                     if (ut) ut.textContent = '👤 ' + usuarioActivo;
                     iniciarInactividad();
+                    if (typeof window.ejecutarMigracionV19_2 === 'function') {
+                        setTimeout(() => window.ejecutarMigracionV19_2(), 1000);
+                    }
                     return true;
                 } else {
                     localStorage.removeItem('sdj_sesion');
@@ -761,13 +784,10 @@
     const DB_AUD_DEL = "auditoria_eliminaciones";
     const DB_AUD_MAIL = "auditoria_correos";
     const DB_AUD_CORR = "auditoria_correcciones";
+    const DB_DUPLICADOS = "intentos_duplicados";
     
     const MESES_ORDEN = ["Inscripción", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"];
 
-    // ═══════════════════════════════════════════════════════
-    // UTILIDADES
-    // ═══════════════════════════════════════════════════════
-    
     function normalizarMes(m) {
         return (m || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
@@ -781,18 +801,13 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     
-    // ═══════════════════════════════════════════════════════
-    // NUEVO: FORMATEAR FECHA DEL PAGO
-    // ═══════════════════════════════════════════════════════
     function formatearFechaPago(pago) {
-        // Prioridad 1: fechaPago (string "2026-09-26")
         if (pago.fechaPago) {
             try {
                 const [y, m, d] = pago.fechaPago.split('-');
                 if (y && m && d) return `${d}/${m}/${y}`;
             } catch(e) {}
         }
-        // Prioridad 2: fechaPagoTimestamp (Timestamp de Firestore)
         if (pago.fechaPagoTimestamp) {
             try {
                 const ts = pago.fechaPagoTimestamp;
@@ -800,7 +815,6 @@
                 return new Date(ms).toLocaleDateString('es-ES');
             } catch(e) {}
         }
-        // Prioridad 3: fecha (Timestamp de cuando se reportó)
         if (pago.fecha) {
             try {
                 const ms = pago.fecha.seconds ? pago.fecha.seconds * 1000 : pago.fecha;
@@ -858,10 +872,6 @@
     }
     window.descargarCSV = descargarCSV;
     
-    // ═══════════════════════════════════════════════════════
-    // ESTADO GLOBAL
-    // ═══════════════════════════════════════════════════════
-    
     let mesActualIndex = 6;
     let currentYear = new Date().getFullYear();
     const anioGuardado = parseInt(localStorage.getItem('sdj_anio'), 10);
@@ -870,9 +880,9 @@
     let cachePendientes = [];
     let cacheSolventes = [];
     let cacheTodos = [];
-    let cacheSinMeses = [];
     let solicitudSeleccionada = null;
     let filtroAnioActual = 'todos';
+    let cacheDuplicados = [];
     
     let cacheHistorialPorAlumno = {};
     let cacheHistorialCargado = false;
@@ -889,7 +899,7 @@
                 cacheHistorialPorAlumno[nombre].push(h);
             });
             cacheHistorialCargado = true;
-            console.log(`[V19.1] Historial cargado: ${Object.keys(cacheHistorialPorAlumno).length} alumnos con pagos`);
+            console.log(`[V19.2] Historial cargado: ${Object.keys(cacheHistorialPorAlumno).length} alumnos`);
         } catch (e) {
             console.error("Error cargando cache historial:", e);
         }
@@ -903,15 +913,12 @@
     function getEstadoAlumno(alumno) {
         const mesesRegistrados = alumno.meses || [];
         const mesesReales = calcularMesesReales(mesesRegistrados);
-        
         if (mesesReales.length > 0) return 'DEUDOR';
-        if (mesesRegistrados.length > 0 && mesesReales.length === 0) return 'SOLVENTE';
-        if (tieneEvidenciaDePago(alumno.nombre)) return 'SOLVENTE';
-        return 'SIN_MESES';
+        return 'SOLVENTE';
     }
     
-    function getMesesVencidosPorDefecto() {
-        return MESES_ORDEN.filter((_, idx) => idx <= mesActualIndex);
+    function getTodosLosMeses() {
+        return [...MESES_ORDEN];
     }
     
     async function actualizarMesDesdeServidor() {
@@ -923,7 +930,7 @@
             const m = fecha.getMonth();
             mesActualIndex = m >= 8 ? (m - 7) : (m + 5);
         }
-        console.log(`[SDJ V19.1] Mes detectado: "${mesNombre}" → índice ${mesActualIndex} (${MESES_ORDEN[mesActualIndex]})`);
+        console.log(`[V19.2] Mes detectado: "${mesNombre}" → índice ${mesActualIndex}`);
         const lbl = document.getElementById('currentYearLabel');
         if (lbl) lbl.textContent = currentYear;
         return mesActualIndex;
@@ -939,8 +946,16 @@
     function isSolvente(mesesRegistrados) {
         return calcularMesesReales(mesesRegistrados || []).length === 0;
     }
-    function calcularTotalReal(montoMensual, mesesRegistrados) {
-        return (montoMensual || 0) * calcularMesesReales(mesesRegistrados || []).length;
+    function calcularTotalReal(montoMensual, mesesRegistrados, abonos) {
+        const mesesReales = calcularMesesReales(mesesRegistrados || []);
+        const monto = montoMensual || 0;
+        let total = 0;
+        mesesReales.forEach(mes => {
+            const abonoAplicado = (abonos && abonos[mes]) ? abonos[mes] : 0;
+            const restante = Math.max(0, monto - abonoAplicado);
+            total += restante;
+        });
+        return total;
     }
     function getNivelAlerta(meses) {
         const dia = new Date().getDate();
@@ -960,7 +975,77 @@
         return snap.empty;
     }
     
-    async function construirCuadriculaMeses(nombreEstudiante) {
+    // ═══════════════════════════════════════════════════════
+    // MIGRACIÓN AUTOMÁTICA V19.2
+    // ═══════════════════════════════════════════════════════
+    window.ejecutarMigracionV19_2 = async function() {
+        const bandera = localStorage.getItem('sdj_migracion_v19_2_ok');
+        if (bandera === 'completada') return;
+        if (!usuarioActivo) return;
+        
+        console.log("[V19.2] Iniciando migración...");
+        try {
+            const snap = await getDocs(collection(db, DB_MAIN));
+            let migrados = 0, sinCambios = 0, errores = 0;
+            const todosLosMeses = getTodosLosMeses();
+            
+            for (const d of snap.docs) {
+                const a = d.data();
+                const mesesActuales = a.meses || [];
+                const abonosActuales = a.abonos || {};
+                
+                // Si ya tiene los 13 meses, no tocar
+                const mesesFaltantes = todosLosMeses.filter(m => !mesesActuales.includes(m));
+                // Si tiene historial, no rellenar esos meses
+                const historial = cacheHistorialPorAlumno[a.nombre] || [];
+                const mesesPagadosHist = new Set();
+                historial.forEach(h => (h.mesesPagados || []).forEach(m => mesesPagadosHist.add(m)));
+                
+                const mesesAAgregar = mesesFaltantes.filter(m => !mesesPagadosHist.has(m));
+                
+                if (mesesAAgregar.length === 0 && Object.keys(abonosActuales).length >= 0) {
+                    sinCambios++;
+                    continue;
+                }
+                
+                try {
+                    const nuevosMeses = [...mesesActuales, ...mesesAAgregar];
+                    await updateDoc(doc(db, DB_MAIN, d.id), {
+                        meses: nuevosMeses,
+                        abonos: abonosActuales,
+                        total: calcularTotalReal(a.montoMensual, nuevosMeses, abonosActuales),
+                        migradoV19_2: true,
+                        fechaMigracion: serverTimestamp()
+                    });
+                    migrados++;
+                } catch (err) {
+                    console.error("Error migrando", a.nombre, err);
+                    errores++;
+                }
+            }
+            
+            await addDoc(collection(db, DB_AUD_CORR), {
+                tipo: 'migracion_v19_2',
+                migrados,
+                sinCambios,
+                errores,
+                ejecutadoPor: usuarioActivo,
+                fecha: serverTimestamp()
+            });
+            
+            localStorage.setItem('sdj_migracion_v19_2_ok', 'completada');
+            console.log(`[V19.2] Migración completa: ${migrados} migrados, ${sinCambios} sin cambios, ${errores} errores`);
+            
+            if (migrados > 0) {
+                showModal(`✅ Migración V19.2 completada\n\n• Migrados: ${migrados}\n• Sin cambios: ${sinCambios}\n• Errores: ${errores}\n\nTodos los alumnos ahora tienen el año escolar completo.`);
+            }
+        } catch (e) {
+            console.error("Error en migración:", e);
+            localStorage.removeItem('sdj_migracion_v19_2_ok');
+        }
+    };
+    
+    async function construirCuadriculaMeses(nombreEstudiante, montoMensual, abonos) {
         try {
             const q = query(collection(db, DB_HISTORIAL), where("nombreEst", "==", nombreEstudiante));
             const snap = await getDocs(q);
@@ -969,25 +1054,35 @@
                 const data = d.data();
                 (data.mesesPagados || []).forEach(m => mesesPagados.add(m));
             });
-            let html = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(95px, 1fr)); gap:6px; margin-top:8px;">';
+            
+            let html = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:6px; margin-top:8px;">';
             MESES_ORDEN.forEach(mes => {
-                const pagado = mesesPagados.has(mes);
                 const idx = indiceMes(mes);
                 const esFuturo = idx > mesActualIndex;
-                let bg, color, icono;
-                if (pagado) { bg = '#dcfce7'; color = '#166534'; icono = '✅'; }
-                else if (esFuturo) { bg = '#f1f5f9'; color = '#94a3b8'; icono = '⏳'; }
-                else { bg = '#fee2e2'; color = '#991b1b'; icono = '❌'; }
-                html += `<div style="background:${bg}; color:${color}; padding:6px 4px; border-radius:6px; text-align:center; font-size:11px; font-weight:600;">${icono} ${esc(mes)}</div>`;
+                const pagadoHist = mesesPagados.has(mes);
+                const abonoMes = (abonos && abonos[mes]) ? abonos[mes] : 0;
+                const monto = montoMensual || 0;
+                
+                let clase, icono, texto;
+                if (pagadoHist || (monto > 0 && abonoMes >= monto)) {
+                    clase = 'pagado'; icono = '✅'; texto = 'Pagado';
+                } else if (abonoMes > 0) {
+                    clase = 'abono'; icono = '🟡'; texto = `$${abonoMes.toFixed(0)}/$${monto.toFixed(0)}`;
+                } else if (esFuturo) {
+                    clase = 'futuro'; icono = '⏳'; texto = 'Futuro';
+                } else {
+                    clase = 'pendiente'; icono = '🔴'; texto = `$${monto.toFixed(0)}`;
+                }
+                
+                html += `<div class="mes-estado ${clase}" style="justify-content:center; padding:6px 4px; font-size:11px;">
+                    ${icono} ${esc(mes)}<br><span style="font-size:10px;">${texto}</span>
+                </div>`;
             });
             html += '</div>';
-            if (snap.empty) {
-                html += '<p style="font-size:11px; color:#94a3b8; margin-top:8px;">ℹ️ No hay pagos verificados registrados para este estudiante todavía.</p>';
-            }
             return html;
         } catch (err) {
             console.error("Error construyendo cuadrícula:", err);
-            return '<p style="color:#ef4444; font-size:12px;">Error al cargar historial de pagos.</p>';
+            return '<p style="color:#ef4444; font-size:12px;">Error al cargar historial.</p>';
         }
     }
     
@@ -1027,7 +1122,7 @@
         currentYear = anio;
         localStorage.setItem('sdj_anio', currentYear);
         document.getElementById('currentYearLabel').textContent = currentYear;
-        showModal(`✅ Año escolar cambiado a ${currentYear}\n\n⚠️ Solo afecta a nuevos registros. Los alumnos existentes mantienen su año original.`);
+        showModal(`✅ Año escolar cambiado a ${currentYear}\n\n⚠️ Solo afecta a nuevos registros.`);
     };
     
     function actualizarTotalPreview() {
@@ -1053,21 +1148,16 @@
     
     window.guardar = async (evt) => {
         if (!usuarioActivo) { showModal("⚠️ Sistema bloqueado"); mostrarOverlaySeguridad(); return; }
-        
         const cedula = document.getElementById('rCedula').value;
         if (!cedula) { showModal("Ingrese la cédula del representante"); return; }
-        
         if (!await validarCedulaUnica(cedula)) {
             showModal("❌ Esta cédula ya está registrada.");
             return;
         }
-        
         const meses = Array.from(document.getElementById('rMes').selectedOptions).map(o => o.value);
         const montoMensual = parseFloat(document.getElementById('rMon').value) || 0;
-        
         const btn = evt?.target || null;
         if (btn) btn.disabled = true;
-        
         try {
             await addDoc(collection(db, DB_MAIN), {
                 nombre: document.getElementById('rNom').value,
@@ -1078,14 +1168,14 @@
                 grado: document.getElementById('rGra').value,
                 seccion: document.getElementById('rSec').value,
                 meses: meses,
+                abonos: {},
                 montoMensual: montoMensual,
-                total: calcularTotalReal(montoMensual, meses),
+                total: calcularTotalReal(montoMensual, meses, {}),
                 historial: [],
                 timestamp: serverTimestamp(),
                 añoEscolar: currentYear,
                 creadoPor: usuarioActivo
             });
-            
             showModal("✅ Registro exitoso");
             document.getElementById('rNom').value = '';
             document.getElementById('rRep').value = '';
@@ -1112,6 +1202,7 @@
     let pagoEditando = null;
     let unsubscribeGlobal = null;
     let unsubscribePagos = null;
+    let unsubscribeDuplicados = null;
     let currentListUnsubscribe = null;
     
     window.go = (id, evt) => {
@@ -1120,11 +1211,9 @@
         document.getElementById('mod-'+id).classList.add('active');
         const btn = evt?.currentTarget || document.querySelector(`nav .nav-btn[onclick*="'${id}'"]`);
         if (btn) btn.classList.add('active');
-        
         if (id === 'sol') cargarSolicitudes();
         if (id === 'stats') cargarEstadisticas();
         if (id === 'audit') cargarAuditoria();
-        if (id === 'sanea') cargarSaneamiento();
     };
     
     window.loadLevel = (l) => {
@@ -1138,6 +1227,11 @@
     };
     
     window.loadSec = (g) => { curGra = g; document.getElementById('view-grade').style.display='none'; document.getElementById('view-sec').style.display='block'; document.getElementById('tit-sec').innerText = g; };
+    
+    function generarEstadoHTML(estado, total) {
+        if (estado === 'DEUDOR') return `<b style="color:var(--red)">DEUDA</b><br><span>$${total.toFixed(2)}</span>`;
+        return '<b style="color:var(--green)">SOLVENTE</b>';
+    }
     
     window.loadFinal = (s) => {
         curSec = s;
@@ -1161,21 +1255,28 @@
                 if(a.grado === curGra && a.seccion === s && pasaFiltroAnio(a)) {
                     contador++;
                     const estado = getEstadoAlumno(a);
-                    const total = calcularTotalReal(a.montoMensual, a.meses);
+                    const total = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
                     const mesesReales = calcularMesesReales(a.meses);
-                    const colorBorde = estado === 'DEUDOR' ? 'var(--red)' : (estado === 'SOLVENTE' ? 'var(--green)' : '#f59e0b');
-                    const estadoHTML = estado === 'DEUDOR' 
-                        ? `<b style="color:var(--red)">DEUDA</b><br><span>$${total}</span>` 
-                        : (estado === 'SOLVENTE' 
-                            ? '<b style="color:var(--green)">SOLVENTE</b>' 
-                            : '<b style="color:#f59e0b">⚠️ SIN MESES</b>');
-                    
+                    const colorBorde = estado === 'DEUDOR' ? 'var(--red)' : 'var(--green)';
+                    const estadoHTML = generarEstadoHTML(estado, total);
                     if(estado === 'DEUDOR') deudaAcumulada += total;
                     
-                    div.innerHTML += `<div class="student-row item-lista" data-id="${d.id}" data-name="${esc((a.nombre||'').toLowerCase())}" data-rep="${esc((a.rep||'').toLowerCase())}" data-ced="${esc(a.cedula||'')}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; border-left:6px solid ${colorBorde}"><div><b>${esc(a.nombre)}</b><small>${esc(a.rep)} - ${esc(a.cedula)}</small>${estado === 'DEUDOR' ? `<div>${mesesReales.map(m => `<span class="tag-mes">${esc(m)}</span>`).join('')}</div>` : ''}${a.meses?.length > mesesReales.length ? `<small style="color:#f59e0b;">📅 ${a.meses.length - mesesReales.length} futuro(s)</small>` : ''}</div><div>${estadoHTML}</div></div>`;
+                    let mesesTags = '';
+                    if (estado === 'DEUDOR') {
+                        mesesTags = mesesReales.map(m => {
+                            const abono = (a.abonos && a.abonos[m]) ? a.abonos[m] : 0;
+                            const monto = a.montoMensual || 0;
+                            if (abono > 0 && abono < monto) {
+                                return `<span class="mes-estado abono" style="font-size:10px;">🟡 ${esc(m)}</span>`;
+                            }
+                            return `<span class="mes-estado pendiente" style="font-size:10px;">🔴 ${esc(m)}</span>`;
+                        }).join('');
+                    }
+                    
+                    div.innerHTML += `<div class="student-row item-lista" data-id="${d.id}" data-name="${esc((a.nombre||'').toLowerCase())}" data-rep="${esc((a.rep||'').toLowerCase())}" data-ced="${esc(a.cedula||'')}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; border-left:6px solid ${colorBorde}"><div><b>${esc(a.nombre)}</b><small>${esc(a.rep)} - ${esc(a.cedula)}</small>${estado === 'DEUDOR' ? `<div>${mesesTags}</div>` : ''}</div><div>${estadoHTML}</div></div>`;
                 }
             });
-            labelTotal.innerHTML = deudaAcumulada > 0 ? `TOTAL PENDIENTE: <span style="color:#ef4444">$${deudaAcumulada}</span> (${contador})` : `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador})`;
+            labelTotal.innerHTML = deudaAcumulada > 0 ? `TOTAL PENDIENTE: <span style="color:#ef4444">$${deudaAcumulada.toFixed(2)}</span> (${contador})` : `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador})`;
             if(contador === 0) div.innerHTML = "<p style='text-align:center; color:gray'>Carpeta Vacía</p>";
         });
     };
@@ -1186,6 +1287,7 @@
         if(docSnap.exists()) {
             estudianteActual = { id, ...docSnap.data() };
             const mesesReales = calcularMesesReales(estudianteActual.meses);
+            const abonos = estudianteActual.abonos || {};
             document.getElementById('edit-nombre').value = estudianteActual.nombre;
             document.getElementById('edit-representante').value = estudianteActual.rep;
             document.getElementById('edit-cedula').value = estudianteActual.cedula || '';
@@ -1193,15 +1295,28 @@
             document.getElementById('edit-correo').value = estudianteActual.mail || '';
             document.getElementById('edit-grado').value = `${estudianteActual.grado} - ${estudianteActual.seccion}`;
             document.getElementById('edit-monto-mensual').value = estudianteActual.montoMensual || 0;
-            document.getElementById('edit-meses').innerHTML = mesesReales.length ? mesesReales.map(m => `<span class="tag-mes">${esc(m)}</span>`).join('') : '<span style="color:var(--green)">Sin deudas</span>';
+            
+            let mesesHTML = '';
+            if (mesesReales.length > 0) {
+                mesesHTML = mesesReales.map(m => {
+                    const abono = abonos[m] || 0;
+                    const monto = estudianteActual.montoMensual || 0;
+                    if (abono > 0 && abono < monto) {
+                        return `<span class="mes-estado abono">🟡 ${esc(m)} ($${abono.toFixed(0)}/$${monto.toFixed(0)})</span>`;
+                    }
+                    return `<span class="mes-estado pendiente">🔴 ${esc(m)}</span>`;
+                }).join('');
+            } else {
+                mesesHTML = '<span style="color:var(--green)">Sin deudas</span>';
+            }
+            document.getElementById('edit-meses').innerHTML = mesesHTML;
             
             const estadoEst = getEstadoAlumno(estudianteActual);
-            const estadoTexto = estadoEst === 'DEUDOR' ? '' 
-                : (estadoEst === 'SOLVENTE' ? ' <span style="color:var(--green); font-size:12px;">(SOLVENTE)</span>' 
-                : ' <span style="color:#f59e0b; font-size:12px;">⚠️ SIN MESES ASIGNADOS</span>');
-            document.getElementById('edit-total').innerHTML = `$${calcularTotalReal(estudianteActual.montoMensual, estudianteActual.meses)}${estadoTexto}`;
+            const total = calcularTotalReal(estudianteActual.montoMensual, estudianteActual.meses, abonos);
+            const estadoTexto = estadoEst === 'DEUDOR' ? '' : ' <span style="color:var(--green); font-size:12px;">(SOLVENTE)</span>';
+            document.getElementById('edit-total').innerHTML = `$${total.toFixed(2)}${estadoTexto}`;
             
-            const cuadriculaHTML = await construirCuadriculaMeses(estudianteActual.nombre);
+            const cuadriculaHTML = await construirCuadriculaMeses(estudianteActual.nombre, estudianteActual.montoMensual, abonos);
             let divCuadricula = document.getElementById('cuadricula-meses');
             if (!divCuadricula) {
                 divCuadricula = document.createElement('div');
@@ -1223,22 +1338,19 @@
             const nuevoMonto = parseFloat(document.getElementById('edit-monto-mensual').value) || 0;
             const montoAnterior = estudianteActual.montoMensual || 0;
             const montoCambio = Math.abs(nuevoMonto - montoAnterior) > 0.01;
-            
             if (montoCambio) {
-                const confirmar = await showModal(`⚠️ El monto mensual cambió:\n\n$${montoAnterior} → $${nuevoMonto}\n\nLa deuda del alumno se recalculará automáticamente.\n¿Continuar?`, true);
+                const confirmar = await showModal(`⚠️ El monto mensual cambió:\n\n$${montoAnterior} → $${nuevoMonto}\n\nLa deuda se recalculará.\n¿Continuar?`, true);
                 if (!confirmar) return;
             }
-            
             await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
                 rep: document.getElementById('edit-representante').value,
                 tel: document.getElementById('edit-telefono').value,
                 mail: document.getElementById('edit-correo').value,
                 montoMensual: nuevoMonto,
-                total: calcularTotalReal(nuevoMonto, estudianteActual.meses),
+                total: calcularTotalReal(nuevoMonto, estudianteActual.meses, estudianteActual.abonos || {}),
                 modificadoPor: usuarioActivo,
                 fechaModificacion: serverTimestamp()
             });
-            
             if (montoCambio) {
                 await addDoc(collection(db, DB_AUD_CORR), {
                     alumnoId: estudianteActual.id,
@@ -1250,7 +1362,6 @@
                     fecha: serverTimestamp()
                 });
             }
-            
             showModal("✅ Cambios guardados");
             window.loadFinal(curSec);
         };
@@ -1258,17 +1369,10 @@
         else await ejecutar();
     };
     
-    // ═══════════════════════════════════════════════════════
-    // NUEVO V19.1: EDITAR MESES DESDE LA FICHA
-    // ═══════════════════════════════════════════════════════
     window.abrirEditarMesesFicha = () => {
         if (!usuarioActivo || !estudianteActual) return;
-        
         const mesesActuales = new Set(estudianteActual.meses || []);
-        // Sugerir meses vencidos si no tiene ninguno
-        if (mesesActuales.size === 0) {
-            getMesesVencidosPorDefecto().forEach(m => mesesActuales.add(m));
-        }
+        if (mesesActuales.size === 0) getTodosLosMeses().forEach(m => mesesActuales.add(m));
         
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -1281,21 +1385,16 @@
                 </div>
                 <div style="background:#f1f5f9; padding:10px; border-radius:8px; font-size:13px; margin-bottom:12px;">
                     <b>Representante:</b> ${esc(estudianteActual.rep)} | 
-                    <b>Monto mensual:</b> $${estudianteActual.montoMensual || 0} |
-                    <b>Grado:</b> ${esc(estudianteActual.grado)} ${esc(estudianteActual.seccion)}
+                    <b>Monto mensual:</b> $${estudianteActual.montoMensual || 0}
                 </div>
-                <p style="font-size:13px; color:#64748b; margin-bottom:10px;">
-                    Marca los meses que el alumno <b>debe</b> (pendientes). Los desmarcados quedan como pagados/no aplicables.
-                </p>
+                <p style="font-size:13px; color:#64748b; margin-bottom:10px;">Marca los meses que el alumno <b>debe</b>.</p>
                 <div class="meses-edit-grid">
                     ${MESES_ORDEN.map(mes => {
                         const marcado = mesesActuales.has(mes);
-                        return `
-                            <label class="${marcado ? 'checked' : ''}" id="label-mes-${esc(mes)}">
-                                <input type="checkbox" class="mes-edit-check-ficha" value="${esc(mes)}" ${marcado ? 'checked' : ''} onchange="toggleLabelMes(this)">
-                                ${esc(mes)}
-                            </label>
-                        `;
+                        return `<label class="${marcado ? 'checked' : ''}">
+                            <input type="checkbox" class="mes-edit-check-ficha" value="${esc(mes)}" ${marcado ? 'checked' : ''} onchange="toggleLabelMes(this)">
+                            ${esc(mes)}
+                        </label>`;
                     }).join('')}
                 </div>
                 <div style="margin-top:15px; padding:10px; background:#e0e7ff; border-radius:8px; font-size:13px;">
@@ -1309,19 +1408,15 @@
         `;
         document.body.appendChild(modal);
         
-        // Función para recalcular
         const recalcular = () => {
             const checks = modal.querySelectorAll('.mes-edit-check-ficha:checked');
             const total = checks.length * (estudianteActual.montoMensual || 0);
             const el = modal.querySelector('#total-edit-meses');
             if (el) el.textContent = `$${total.toFixed(2)}`;
         };
-        modal.querySelectorAll('.mes-edit-check-ficha').forEach(cb => {
-            cb.addEventListener('change', recalcular);
-        });
+        modal.querySelectorAll('.mes-edit-check-ficha').forEach(cb => cb.addEventListener('change', recalcular));
         recalcular();
         
-        // Guardar
         modal.querySelector('#btn-guardar-meses-ficha').onclick = async (evt) => {
             const btn = evt.target;
             btn.disabled = true;
@@ -1329,14 +1424,12 @@
             try {
                 const nuevosMeses = Array.from(modal.querySelectorAll('.mes-edit-check-ficha:checked')).map(c => c.value);
                 const mesesAnteriores = estudianteActual.meses || [];
-                
                 await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
                     meses: nuevosMeses,
-                    total: calcularTotalReal(estudianteActual.montoMensual, nuevosMeses),
+                    total: calcularTotalReal(estudianteActual.montoMensual, nuevosMeses, estudianteActual.abonos || {}),
                     ultimaModificacion: serverTimestamp(),
                     modificadoPor: usuarioActivo
                 });
-                
                 await addDoc(collection(db, DB_AUD_CORR), {
                     alumnoId: estudianteActual.id,
                     nombreEst: estudianteActual.nombre,
@@ -1346,14 +1439,12 @@
                     corregidoPor: usuarioActivo,
                     fecha: serverTimestamp()
                 });
-                
                 modal.remove();
-                showModal(`✅ Meses actualizados\n\nAnteriores: ${mesesAnteriores.length}\nNuevos: ${nuevosMeses.length}`);
+                showModal(`✅ Meses actualizados`);
                 await window.mostrarFichaEstudiante(estudianteActual.id);
                 window.loadFinal(curSec);
             } catch (err) {
-                console.error(err);
-                showModal("❌ Error al guardar: " + err.message);
+                showModal("❌ Error: " + err.message);
                 btn.disabled = false;
                 btn.textContent = '💾 Guardar cambios';
             }
@@ -1402,7 +1493,6 @@
             const ced = (a.cedula || '').replace(/\D/g, '');
             return nombre.includes(term) || rep.includes(term) || (termDigits && ced.includes(termDigits));
         }).slice(0, 30);
-        
         if (encontrados.length === 0) {
             cont.innerHTML = '<div class="card" style="text-align:center; color:#64748b;">Sin resultados</div>';
             return;
@@ -1410,13 +1500,9 @@
         let html = '<div class="card"><h4 style="margin-bottom:10px;">Resultados (' + encontrados.length + ')</h4>';
         encontrados.forEach(a => {
             const estado = getEstadoAlumno(a);
-            const total = calcularTotalReal(a.montoMensual, a.meses);
-            const colorBorde = estado === 'DEUDOR' ? 'var(--red)' : (estado === 'SOLVENTE' ? 'var(--green)' : '#f59e0b');
-            const estadoHTML = estado === 'DEUDOR' 
-                ? `<b style="color:var(--red)">$${total}</b>` 
-                : (estado === 'SOLVENTE' 
-                    ? '<b style="color:var(--green)">SOLVENTE</b>' 
-                    : '<b style="color:#f59e0b">⚠️ SIN MESES</b>');
+            const total = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
+            const colorBorde = estado === 'DEUDOR' ? 'var(--red)' : 'var(--green)';
+            const estadoHTML = estado === 'DEUDOR' ? `<b style="color:var(--red)">$${total.toFixed(2)}</b>` : '<b style="color:var(--green)">SOLVENTE</b>';
             html += `<div class="student-row" style="border-left:5px solid ${colorBorde}; cursor:pointer;" onclick="irAEstudiante('${a.id}','${esc(a.grado)}','${esc(a.seccion)}')">
                 <div><b>${esc(a.nombre)}</b><small>${esc(a.grado)}-${esc(a.seccion)} | ${esc(a.rep)} | ${esc(a.cedula)}</small></div>
                 <div>${estadoHTML}</div>
@@ -1435,7 +1521,6 @@
         document.getElementById('tit-list').innerText = `${grado} - SECCIÓN ${seccion}`;
         document.getElementById('resultadosBusquedaGlobal').innerHTML = '';
         document.getElementById('busquedaGlobal').value = '';
-        
         if (currentListUnsubscribe) currentListUnsubscribe();
         currentListUnsubscribe = onSnapshot(collection(db, DB_MAIN), (snap) => {
             const div = document.getElementById('final-list');
@@ -1448,20 +1533,14 @@
                 if(a.grado === curGra && a.seccion === curSec && pasaFiltroAnio(a)) {
                     contador++;
                     const estado = getEstadoAlumno(a);
-                    const total = calcularTotalReal(a.montoMensual, a.meses);
-                    const mesesReales = calcularMesesReales(a.meses);
-                    const colorBorde = estado === 'DEUDOR' ? 'var(--red)' : (estado === 'SOLVENTE' ? 'var(--green)' : '#f59e0b');
-                    const estadoHTML = estado === 'DEUDOR' 
-                        ? `<b style="color:var(--red)">DEUDA</b><br><span>$${total}</span>` 
-                        : (estado === 'SOLVENTE' 
-                            ? '<b style="color:var(--green)">SOLVENTE</b>' 
-                            : '<b style="color:#f59e0b">⚠️ SIN MESES</b>');
+                    const total = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
+                    const colorBorde = estado === 'DEUDOR' ? 'var(--red)' : 'var(--green)';
+                    const estadoHTML = generarEstadoHTML(estado, total);
                     if(estado === 'DEUDOR') deudaAcumulada += total;
-                    
-                    div.innerHTML += `<div class="student-row item-lista" data-id="${d.id}" data-name="${esc((a.nombre||'').toLowerCase())}" data-rep="${esc((a.rep||'').toLowerCase())}" data-ced="${esc(a.cedula||'')}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; border-left:6px solid ${colorBorde}"><div><b>${esc(a.nombre)}</b><small>${esc(a.rep)} - ${esc(a.cedula)}</small>${estado === 'DEUDOR' ? `<div>${mesesReales.map(m => `<span class="tag-mes">${esc(m)}</span>`).join('')}</div>` : ''}</div><div>${estadoHTML}</div></div>`;
+                    div.innerHTML += `<div class="student-row item-lista" data-id="${d.id}" data-name="${esc((a.nombre||'').toLowerCase())}" data-rep="${esc((a.rep||'').toLowerCase())}" data-ced="${esc(a.cedula||'')}" onclick="mostrarFichaEstudiante('${d.id}')" style="cursor:pointer; border-left:6px solid ${colorBorde}"><div><b>${esc(a.nombre)}</b><small>${esc(a.rep)} - ${esc(a.cedula)}</small></div><div>${estadoHTML}</div></div>`;
                 }
             });
-            labelTotal.innerHTML = deudaAcumulada > 0 ? `TOTAL PENDIENTE: <span style="color:#ef4444">$${deudaAcumulada}</span> (${contador})` : `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador})`;
+            labelTotal.innerHTML = deudaAcumulada > 0 ? `TOTAL PENDIENTE: <span style="color:#ef4444">$${deudaAcumulada.toFixed(2)}</span> (${contador})` : `<span style="color:var(--green)">SECCIÓN SOLVENTE ($0)</span> (${contador})`;
         });
         await window.mostrarFichaEstudiante(id);
     };
@@ -1480,7 +1559,7 @@
             if(data.cedula === cedula) {
                 if(!repNombre) repNombre = data.rep;
                 const estado = getEstadoAlumno(data);
-                const total = calcularTotalReal(data.montoMensual, data.meses);
+                const total = calcularTotalReal(data.montoMensual, data.meses, data.abonos);
                 hijos.push({ nombre: data.nombre, grado: data.grado, seccion: data.seccion, meses: calcularMesesReales(data.meses), total, estado });
                 if(estado === 'DEUDOR') totalFamiliar += total;
             }
@@ -1489,15 +1568,11 @@
         const lista = document.getElementById('lista-hijos');
         if(hijos.length === 0) lista.innerHTML = `<p>No se encontraron estudiantes para cédula: ${esc(cedula)}</p>`;
         else lista.innerHTML = `<h4>Representante: ${esc(repNombre)}</h4><p>Cédula: ${esc(cedula)} - ${hijos.length} hijo(s)</p>${hijos.map(h => {
-            const colorBorde = h.estado === 'DEUDOR' ? 'var(--red)' : (h.estado === 'SOLVENTE' ? 'var(--green)' : '#f59e0b');
-            const estadoHTML = h.estado === 'DEUDOR' 
-                ? `<b style="color:var(--red)">$${h.total}</b>` 
-                : (h.estado === 'SOLVENTE' 
-                    ? '<b style="color:var(--green)">AL DÍA</b>' 
-                    : '<b style="color:#f59e0b">⚠️ SIN MESES</b>');
+            const colorBorde = h.estado === 'DEUDOR' ? 'var(--red)' : 'var(--green)';
+            const estadoHTML = h.estado === 'DEUDOR' ? `<b style="color:var(--red)">$${h.total.toFixed(2)}</b>` : '<b style="color:var(--green)">AL DÍA</b>';
             return `<div class="student-row" style="border-left:5px solid ${colorBorde}"><div><b>${esc(h.nombre)}</b><small>${esc(h.grado)} - ${esc(h.seccion)}</small>${h.estado === 'DEUDOR' ? `<div>${h.meses.map(m => `<span class="tag-mes">${esc(m)}</span>`).join('')}</div>` : ''}</div><div>${estadoHTML}</div></div>`;
         }).join('')}`;
-        document.getElementById('total-familiar').innerHTML = totalFamiliar > 0 ? `TOTAL DEUDA FAMILIAR: $${totalFamiliar}` : '🎉 FAMILIA COMPLETAMENTE SOLVENTE';
+        document.getElementById('total-familiar').innerHTML = totalFamiliar > 0 ? `TOTAL DEUDA FAMILIAR: $${totalFamiliar.toFixed(2)}` : '🎉 FAMILIA COMPLETAMENTE SOLVENTE';
         div.style.display = 'block';
     };
     
@@ -1524,19 +1599,14 @@
         if (!cachePendientes?.length) { showModal("No hay deudores"); return; }
         const conCorreo = cachePendientes.filter(a => a.mail);
         if (!conCorreo.length) { showModal("Ningún deudor tiene correo registrado"); return; }
-        const ok = await showModal(`Se abrirán ${conCorreo.length} correos en tu cliente de email. ¿Continuar?`, true);
+        const ok = await showModal(`Se abrirán ${conCorreo.length} correos. ¿Continuar?`, true);
         if (!ok) return;
         conCorreo.forEach((a, i) => {
-            setTimeout(() => {
-                window.enviarGmailIndividual(a.mail, a.nombre, a.rep, a.total, a.meses?.join(','));
-            }, i * 800);
+            setTimeout(() => window.enviarGmailIndividual(a.mail, a.nombre, a.rep, a.total, a.meses?.join(',')), i * 800);
         });
-        showModal(`✅ Enviando ${conCorreo.length} correos. Revisa tu cliente de email.`);
+        showModal(`✅ Enviando ${conCorreo.length} correos.`);
     };
     
-    // ═══════════════════════════════════════════════════════
-    // NUEVO V19.1: MODAL DE DETALLES CON FECHA
-    // ═══════════════════════════════════════════════════════
     window.mostrarDetallesPago = async (id) => {
         if (!usuarioActivo) return;
         const docSnap = await getDoc(doc(db, DB_PAGOS, id));
@@ -1551,9 +1621,9 @@
                 <div class="detail-row"><span class="detail-label">Referencia:</span><span class="detail-value">${esc(pagoSeleccionado.referencia)}</span></div>
                 <div class="detail-row"><span class="detail-label">Monto USD:</span><span class="detail-value">$${pagoSeleccionado.montoDivisas || pagoSeleccionado.monto}</span></div>
                 <div class="detail-row"><span class="detail-label">Meses pagados:</span><span class="detail-value">${(pagoSeleccionado.mesesPagados||[]).map(m=>esc(m)).join(', ')}</span></div>
+                ${pagoSeleccionado.esAbono ? '<div class="detail-row" style="background:#fef3c7;"><span class="detail-label">Tipo:</span><span class="detail-value"><b>ABONO PARCIAL</b></span></div>' : ''}
                 ${pagoSeleccionado.editadoPor ? `<div class="detail-row" style="background:#fef3c7;"><span class="detail-label">Editado por:</span><span class="detail-value">${esc(pagoSeleccionado.editadoPor)}</span></div>` : ''}
-                ${pagoSeleccionado.procesadoPor ? `<div class="detail-row"><span class="detail-label">Verificado por:</span><span class="detail-value">${esc(pagoSeleccionado.procesadoPor)}</span></div>` : ''}
-                ${pagoSeleccionado.rechazadoPor ? `<div class="detail-row"><span class="detail-label">Rechazado por:</span><span class="detail-value">${esc(pagoSeleccionado.rechazadoPor)}</span></div>` : ''}`;
+                ${pagoSeleccionado.procesadoPor ? `<div class="detail-row"><span class="detail-label">Verificado por:</span><span class="detail-value">${esc(pagoSeleccionado.procesadoPor)}</span></div>` : ''}`;
             document.getElementById('modal-detalles-pago').style.display = 'flex';
         }
     };
@@ -1588,7 +1658,7 @@
                 showModal("El pago no existe");
             }
         } catch (error) {
-            console.error("Error al abrir edición:", error);
+            console.error("Error:", error);
             showModal("Error al cargar el pago");
         }
     };
@@ -1615,17 +1685,14 @@
             fechaEdicion: serverTimestamp(),
             estado: pagoEditando.estado || 'Pendiente'
         };
-        
         try {
             await updateDoc(doc(db, DB_PAGOS, pagoEditando.id), nuevosDatos);
             await addDoc(collection(db, DB_AUD_EDIC), { 
                 pagoId: pagoEditando.id, 
                 anteriores: {
                     metodo: pagoEditando.metodo,
-                    banco: pagoEditando.banco,
                     referencia: pagoEditando.referencia,
                     fechaPago: pagoEditando.fechaPago,
-                    montoBs: pagoEditando.montoBs,
                     montoDivisas: pagoEditando.montoDivisas,
                     mesesPagados: pagoEditando.mesesPagados
                 }, 
@@ -1633,31 +1700,17 @@
                 editadoPor: usuarioActivo, 
                 fecha: serverTimestamp() 
             });
-            
-            const q = query(collection(db, DB_MAIN), where("nombre", "==", pagoEditando.nombreEst));
-            const snap = await getDocs(q);
-            let correo = null;
-            snap.forEach(d => { if(d.data().mail) correo = d.data().mail; });
-            if(correo) {
-                window.open(`mailto:${correo}?subject=Pago Actualizado&body=Su pago ha sido actualizado. Nuevos datos: Referencia ${nuevosDatos.referencia}, Monto $${nuevosDatos.montoDivisas}`, '_blank');
-                await addDoc(collection(db, DB_AUD_MAIL), {
-                    tipo: "edicion_pago",
-                    referencia: nuevosDatos.referencia,
-                    estudiante: pagoEditando.nombreEst,
-                    correoDestino: correo,
-                    enviadoPor: usuarioActivo,
-                    fechaEnvio: serverTimestamp()
-                });
-            }
-            
             showModal("✅ Pago editado exitosamente");
             cerrarModalEditar();
         } catch (error) {
-            console.error("Error al editar pago:", error);
-            showModal("❌ Error al guardar los cambios");
+            console.error("Error:", error);
+            showModal("❌ Error al guardar");
         }
     };
     
+    // ═══════════════════════════════════════════════════════
+    // VALIDAR PAGO (con soporte de abonos)
+    // ═══════════════════════════════════════════════════════
     window.validarPago = async (id) => {
         if (!usuarioActivo) { showModal("Acceso restringido"); return; }
         const docRef = doc(db, DB_PAGOS, id);
@@ -1665,140 +1718,122 @@
         if(!docSnap.exists()) return;
         const pago = docSnap.data();
         
-        let estudianteDataPrevio = null;
-        try {
-            const cedulaEst = pago.cedulaRep || '';
-            if (cedulaEst) {
-                const qPre = query(collection(db, DB_MAIN), where("cedula", "==", cedulaEst), where("nombre", "==", pago.nombreEst));
-                const snapPre = await getDocs(qPre);
-                if (!snapPre.empty) estudianteDataPrevio = snapPre.docs[0].data();
-            }
-            if (!estudianteDataPrevio) {
-                const qPre = query(collection(db, DB_MAIN), where("nombre", "==", pago.nombreEst));
-                const snapPre = await getDocs(qPre);
-                if (!snapPre.empty) estudianteDataPrevio = snapPre.docs[0].data();
-            }
-        } catch(e) {}
-        
-        let advertenciaMonto = '';
-        if (estudianteDataPrevio && estudianteDataPrevio.montoMensual) {
-            const meses = pago.mesesPagados || [];
-            const esperado = estudianteDataPrevio.montoMensual * meses.length;
-            const pagado = parseFloat(pago.montoDivisas || pago.monto || 0);
-            if (esperado > 0 && Math.abs(esperado - pagado) > 0.5) {
-                advertenciaMonto = `\n\n⚠️ ATENCIÓN: Monto no coincide.\nEsperado: $${esperado.toFixed(2)} (${meses.length} mes/es x $${estudianteDataPrevio.montoMensual})\nReportado: $${pagado.toFixed(2)}`;
-            }
+        // Buscar estudiante
+        let estudianteId = null;
+        let estudianteData = null;
+        const cedulaEst = pago.cedulaRep || '';
+        if (cedulaEst) {
+            const qCed = query(collection(db, DB_MAIN), where("cedula", "==", cedulaEst), where("nombre", "==", pago.nombreEst));
+            const snapCed = await getDocs(qCed);
+            if (!snapCed.empty) { estudianteId = snapCed.docs[0].id; estudianteData = snapCed.docs[0].data(); }
+        }
+        if (!estudianteId) {
+            const qNom = query(collection(db, DB_MAIN), where("nombre", "==", pago.nombreEst));
+            const snapNom = await getDocs(qNom);
+            if (!snapNom.empty) { estudianteId = snapNom.docs[0].id; estudianteData = snapNom.docs[0].data(); }
         }
         
+        // Determinar si es abono parcial
+        const montoPagado = parseFloat(pago.montoDivisas || pago.monto || 0);
+        const mesesPagados = pago.mesesPagados || [];
+        const montoMensual = estudianteData?.montoMensual || 0;
+        const esAbono = mesesPagados.length === 1 && montoMensual > 0 && montoPagado < montoMensual - 0.5;
+        
         const fechaPagoStr = formatearFechaPago(pago).replace(/<[^>]*>/g, '');
-        const msgConfirm = `¿Verificar pago de ${pago.nombreEst}?\n\nFecha del pago: ${fechaPagoStr}\nMeses pagados: ${(pago.mesesPagados || []).join(', ')}\nMonto: $${pago.montoDivisas}${advertenciaMonto}\n\nEsta acción actualizará la deuda del estudiante.`;
+        let msgConfirm = `¿Verificar pago de ${pago.nombreEst}?\n\nFecha: ${fechaPagoStr}\nMeses: ${mesesPagados.join(', ')}\nMonto: $${montoPagado}`;
+        if (esAbono) {
+            msgConfirm += `\n\n🟡 TIPO: ABONO PARCIAL (esperado $${montoMensual} por mes)`;
+        }
+        msgConfirm += '\n\n¿Continuar?';
         if (!await showModal(msgConfirm, true)) return;
         
         try {
-            const refPago = (pago.referencia || '').trim();
-            if (refPago) {
-                const dupSnap = await getDocs(query(collection(db, DB_PAGOS), where("referencia", "==", refPago)));
-                const duplicado = dupSnap.docs.find(d =>
-                    d.id !== id && (d.data().estado || '').includes('Verificado')
-                );
-                if (duplicado) {
-                    const seguir = await showModal(`⚠️ Ya existe un pago VERIFICADO con la referencia ${refPago}. ¿Continuar de todas formas?`, true);
-                    if (!seguir) return;
-                }
-            }
-            
-            const cedulaEst = pago.cedulaRep || '';
-            let estudianteId = null;
-            let estudianteData = null;
-            
-            if (cedulaEst) {
-                const qCed = query(collection(db, DB_MAIN), where("cedula", "==", cedulaEst), where("nombre", "==", pago.nombreEst));
-                const snapCed = await getDocs(qCed);
-                if (!snapCed.empty) { estudianteId = snapCed.docs[0].id; estudianteData = snapCed.docs[0].data(); }
-            }
-            if (!estudianteId) {
-                const qNom = query(collection(db, DB_MAIN), where("nombre", "==", pago.nombreEst));
-                const snapNom = await getDocs(qNom);
-                if (!snapNom.empty) {
-                    if (snapNom.docs.length > 1) {
-                        const seguir = await showModal(`⚠️ Hay ${snapNom.docs.length} estudiantes con el nombre "${pago.nombreEst}". Se usará el primero. Verifica manualmente.`, true);
-                        if (!seguir) return;
-                    }
-                    estudianteId = snapNom.docs[0].id;
-                    estudianteData = snapNom.docs[0].data();
-                }
-            }
-            
+            // Actualizar estado del pago
             await updateDoc(docRef, {
                 procesadoPor: usuarioActivo,
                 estado: `Verificado por ${usuarioActivo}`,
                 fechaProcesamiento: serverTimestamp()
             });
             
+            // Guardar en historial
             await addDoc(collection(db, DB_HISTORIAL), {
                 nombreEst: pago.nombreEst,
                 nombreRep: pago.nombreRep,
                 cedulaRep: pago.cedulaRep || '',
-                mesesPagados: pago.mesesPagados || [],
-                montoDivisas: pago.montoDivisas || 0,
+                mesesPagados: mesesPagados,
+                montoDivisas: montoPagado,
                 montoBs: pago.montoBs || 0,
                 metodo: pago.metodo || '',
                 referencia: pago.referencia || '',
                 fechaPago: pago.fechaPago || '',
+                esAbono: esAbono,
                 verificadoPor: usuarioActivo,
                 pagoIdOriginal: id,
                 tipo: 'verificacion_portal',
                 fecha: serverTimestamp()
             });
             
+            // Actualizar alumno (con abonos)
             if (estudianteId && estudianteData) {
                 const mesesActuales = estudianteData.meses || [];
-                const mesesPagados = pago.mesesPagados || [];
-                const nuevosMeses = mesesActuales.filter(m => !mesesPagados.includes(m));
+                const abonosActuales = estudianteData.abonos || {};
+                const nuevosAbonos = { ...abonosActuales };
+                let nuevosMeses = [...mesesActuales];
+                
+                if (esAbono && mesesPagados.length === 1) {
+                    // Abono parcial a un solo mes
+                    const mes = mesesPagados[0];
+                    nuevosAbonos[mes] = (nuevosAbonos[mes] || 0) + montoPagado;
+                    // Si el abono completa el mes, quitar de pendientes
+                    if (nuevosAbonos[mes] >= montoMensual - 0.5) {
+                        nuevosMeses = nuevosMeses.filter(m => m !== mes);
+                    }
+                } else {
+                    // Pago completo de uno o varios meses
+                    mesesPagados.forEach(mes => {
+                        nuevosMeses = nuevosMeses.filter(m => m !== mes);
+                        nuevosAbonos[mes] = montoMensual; // marcar completo
+                    });
+                }
                 
                 await updateDoc(doc(db, DB_MAIN, estudianteId), {
                     meses: nuevosMeses,
-                    total: calcularTotalReal(estudianteData.montoMensual, nuevosMeses),
+                    abonos: nuevosAbonos,
+                    total: calcularTotalReal(estudianteData.montoMensual, nuevosMeses, nuevosAbonos),
                     ultimaModificacion: serverTimestamp(),
                     modificadoPor: usuarioActivo
                 });
             } else {
-                showModal(`⚠️ Pago verificado pero NO se encontró al estudiante en la base. Actualiza sus meses manualmente.`);
+                showModal(`⚠️ Pago verificado pero NO se encontró al estudiante.`);
             }
             
             await deleteDoc(docRef);
-            
             cacheHistorialCargado = false;
             await cargarCacheHistorial();
-            
-            showModal(`✅ Pago verificado por ${usuarioActivo}`);
+            showModal(`✅ Pago verificado${esAbono ? ' (abono registrado)' : ''}`);
         } catch (error) {
-            console.error("Error al verificar pago:", error);
+            console.error("Error:", error);
             showModal("❌ Error al verificar el pago");
         }
     };
     
     window.rechazar = async (id, ref) => {
         if (!usuarioActivo) { showModal("Acceso restringido"); return; }
-        const motivo = await pedirTexto("Motivo del rechazo", "Ej: referencia no coincide con el monto");
+        const motivo = await pedirTexto("Motivo del rechazo", "Ej: referencia no coincide");
         if (!motivo) return;
-        
         try {
             const docRef = doc(db, DB_PAGOS, id);
             const docSnap = await getDoc(docRef);
             const pago = docSnap.data();
-            
             await updateDoc(docRef, { 
                 estado: `Rechazado - ${motivo}`, 
                 rechazadoPor: usuarioActivo, 
                 fechaRechazo: serverTimestamp() 
             });
-            
             const q = query(collection(db, DB_MAIN), where("nombre", "==", pago.nombreEst));
             const snap = await getDocs(q);
             let correo = null;
             snap.forEach(d => { if(d.data().mail) correo = d.data().mail; });
-            
             if(correo) {
                 window.open(`mailto:${correo}?subject=Pago Rechazado&body=Su pago ${ref} fue rechazado. Motivo: ${motivo}`, '_blank');
                 await addDoc(collection(db, DB_AUD_MAIL), {
@@ -1813,8 +1848,8 @@
             }
             showModal(`✅ Pago rechazado por ${usuarioActivo}`);
         } catch (error) {
-            console.error("Error al rechazar pago:", error);
-            showModal("❌ Error al rechazar el pago");
+            console.error("Error:", error);
+            showModal("❌ Error al rechazar");
         }
     };
     
@@ -1828,7 +1863,7 @@
     };
     
     // ═══════════════════════════════════════════════════════
-    // PAGO MANUAL (con fecha nueva)
+    // PAGO MANUAL con soporte de abonos
     // ═══════════════════════════════════════════════════════
     
     window.abrirModalPagoManual = () => {
@@ -1836,13 +1871,12 @@
         document.getElementById('pago-manual-info').innerHTML = `
             <b>Estudiante:</b> ${esc(estudianteActual.nombre)}<br>
             <b>Representante:</b> ${esc(estudianteActual.rep)}<br>
-            <b>Grado:</b> ${esc(estudianteActual.grado)} - ${esc(estudianteActual.seccion)}<br>
             <b>Monto mensual:</b> $${estudianteActual.montoMensual || 0}
         `;
         const mesesContainer = document.getElementById('pago-manual-meses');
         const pendientes = estudianteActual.meses || [];
         if (pendientes.length === 0) {
-            mesesContainer.innerHTML = '<p style="color:var(--green); font-size:13px;">Este estudiante no tiene meses pendientes registrados.</p>';
+            mesesContainer.innerHTML = '<p style="color:var(--green); font-size:13px;">Este estudiante no tiene meses pendientes.</p>';
         } else {
             mesesContainer.innerHTML = pendientes.map(m => `
                 <label style="display:inline-block; margin-right:12px; margin-bottom:6px; font-size:13px; cursor:pointer;">
@@ -1853,7 +1887,7 @@
         }
         document.getElementById('pago-manual-ref').value = '';
         document.getElementById('pago-manual-fecha').value = new Date().toISOString().split('T')[0];
-        document.getElementById('pago-manual-monto').value = estudianteActual.montoMensual || '';
+        document.getElementById('pago-manual-monto').value = '';
         document.getElementById('pago-manual-obs').value = '';
         document.getElementById('modal-pago-manual').style.display = 'flex';
     };
@@ -1877,12 +1911,13 @@
         const ejecutar = async () => {
             const checks = Array.from(document.querySelectorAll('.pago-manual-mes:checked')).map(c => c.value);
             if (checks.length === 0) { showModal("Selecciona al menos un mes"); return; }
-            
             const ref = document.getElementById('pago-manual-ref').value.trim() || `MANUAL-${Date.now()}`;
             const fechaPago = document.getElementById('pago-manual-fecha').value || new Date().toISOString().split('T')[0];
             const monto = parseFloat(document.getElementById('pago-manual-monto').value) || 0;
             const obs = document.getElementById('pago-manual-obs').value.trim();
+            const montoMensual = estudianteActual.montoMensual || 0;
             
+            // Registrar en historial
             await addDoc(collection(db, DB_HISTORIAL), {
                 nombreEst: estudianteActual.nombre,
                 nombreRep: estudianteActual.rep,
@@ -1898,21 +1933,38 @@
                 fecha: serverTimestamp()
             });
             
+            // Distribuir monto entre los meses (en orden cronológico)
             const mesesActuales = estudianteActual.meses || [];
-            const nuevosMeses = mesesActuales.filter(m => !checks.includes(m));
+            const abonosActuales = estudianteActual.abonos || {};
+            const nuevosAbonos = { ...abonosActuales };
+            let nuevosMeses = [...mesesActuales];
+            let montoRestante = monto;
+            
+            const mesesOrdenados = checks.slice().sort((a, b) => indiceMes(a) - indiceMes(b));
+            for (const mes of mesesOrdenados) {
+                if (montoRestante <= 0) break;
+                const yaAbonado = nuevosAbonos[mes] || 0;
+                const falta = Math.max(0, montoMensual - yaAbonado);
+                const aplicar = Math.min(montoRestante, falta);
+                nuevosAbonos[mes] = yaAbonado + aplicar;
+                montoRestante -= aplicar;
+                if (nuevosAbonos[mes] >= montoMensual - 0.5) {
+                    nuevosMeses = nuevosMeses.filter(m => m !== mes);
+                }
+            }
+            
             await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
                 meses: nuevosMeses,
-                total: calcularTotalReal(estudianteActual.montoMensual, nuevosMeses),
+                abonos: nuevosAbonos,
+                total: calcularTotalReal(montoMensual, nuevosMeses, nuevosAbonos),
                 ultimaModificacion: serverTimestamp(),
                 modificadoPor: usuarioActivo
             });
             
             cacheHistorialCargado = false;
             await cargarCacheHistorial();
-            
-            showModal(`✅ Pago manual registrado\n\nFecha: ${fechaPago}\nMeses: ${checks.join(', ')}\nMonto: $${monto.toFixed(2)}\nRef: ${ref}`);
+            showModal(`✅ Pago manual registrado\n\nMonto: $${monto.toFixed(2)}\nMeses: ${checks.join(', ')}`);
             cerrarModalPagoManual();
-            
             await window.mostrarFichaEstudiante(estudianteActual.id);
         };
         if (btn) await window.conBotonBloqueado(btn, ejecutar);
@@ -1920,13 +1972,95 @@
     };
     
     // ═══════════════════════════════════════════════════════
-    // RECIBO IMPRIMIBLE
+    // HISTORIAL DEL REPRESENTANTE (nueva función)
+    // ═══════════════════════════════════════════════════════
+    
+    window.abrirHistorialRepresentante = async () => {
+        if (!estudianteActual || !usuarioActivo) return;
+        const cedula = estudianteActual.cedula;
+        if (!cedula) { showModal("Este alumno no tiene cédula de representante"); return; }
+        
+        document.getElementById('historial-rep-info').innerHTML = `
+            <b>Representante:</b> ${esc(estudianteActual.rep)}<br>
+            <b>Cédula:</b> ${esc(cedula)}
+        `;
+        document.getElementById('historial-rep-content').innerHTML = '<div class="loading-text"><span class="spinner"></span> Cargando...</div>';
+        document.getElementById('modal-historial-rep').style.display = 'flex';
+        
+        try {
+            // Buscar todos los hijos del rep
+            const hijosSnap = await getDocs(query(collection(db, DB_MAIN), where("cedula", "==", cedula)));
+            const hijos = hijosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            
+            // Buscar todo el historial de esos hijos
+            const historial = [];
+            for (const hijo of hijos) {
+                const hSnap = await getDocs(query(collection(db, DB_HISTORIAL), where("nombreEst", "==", hijo.nombre)));
+                hSnap.forEach(d => historial.push({ _hijoNombre: hijo.nombre, id: d.id, ...d.data() }));
+            }
+            
+            // Ordenar por fecha descendente
+            historial.sort((a, b) => {
+                const fa = a.fecha?.seconds || 0;
+                const fb = b.fecha?.seconds || 0;
+                return fb - fa;
+            });
+            
+            let html = `
+                <div style="background:#eff6ff; padding:10px; border-radius:8px; margin-bottom:12px; font-size:13px;">
+                    <b>👨‍👩‍👧‍👦 Hijos registrados:</b> ${hijos.length}
+                    <div style="margin-top:5px; display:flex; flex-wrap:wrap; gap:5px;">
+                        ${hijos.map(h => `<span style="background:white; padding:3px 8px; border-radius:5px; font-size:11px;">${esc(h.nombre)} (${esc(h.grado)})</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            if (historial.length === 0) {
+                html += '<div class="success-box">No hay pagos registrados para esta familia.</div>';
+            } else {
+                html += `<h4 style="margin-bottom:10px;">📜 Historial de pagos (${historial.length})</h4>`;
+                historial.slice(0, 50).forEach(h => {
+                    const fechaStr = h.fecha?.seconds ? new Date(h.fecha.seconds * 1000).toLocaleDateString('es-ES') : 'N/A';
+                    const clase = h.esAbono ? 'pendiente' : 'verificado';
+                    html += `<div class="hist-item ${clase}">
+                        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:5px;">
+                            <div>
+                                <b>${esc(h.nombreEst)}</b>
+                                ${h.esAbono ? '<span style="background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">🟡 ABONO</span>' : ''}
+                                <br>
+                                <small>${esc((h.mesesPagados || []).join(', '))}</small>
+                            </div>
+                            <div style="text-align:right;">
+                                <b style="color:#0891b2;">$${parseFloat(h.montoDivisas || 0).toFixed(2)}</b><br>
+                                <small style="color:#94a3b8;">${fechaStr}</small>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                if (historial.length > 50) html += `<p style="text-align:center; color:#94a3b8; font-size:12px;">Mostrando los últimos 50 de ${historial.length}</p>`;
+            }
+            
+            document.getElementById('historial-rep-content').innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('historial-rep-content').innerHTML = '<p style="color:red;">Error al cargar historial</p>';
+        }
+    };
+    
+    window.cerrarModalHistorialRep = (e) => {
+        if (!e || e.target.id === 'modal-historial-rep') {
+            document.getElementById('modal-historial-rep').style.display = 'none';
+        }
+    };
+    
+    // ═══════════════════════════════════════════════════════
+    // RECIBO
     // ═══════════════════════════════════════════════════════
     
     window.imprimirReciboFicha = () => {
         if (!estudianteActual) return;
         const meses = calcularMesesReales(estudianteActual.meses || []);
-        const total = calcularTotalReal(estudianteActual.montoMensual, estudianteActual.meses);
+        const total = calcularTotalReal(estudianteActual.montoMensual, estudianteActual.meses, estudianteActual.abonos || {});
         const estado = getEstadoAlumno(estudianteActual);
         const html = `
             <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Recibo</title>
@@ -1939,28 +2073,25 @@
                 .total { font-size: 22px; color: #ef4444; font-weight: bold; margin-top: 15px; text-align: right; }
                 .meses { margin-top: 15px; }
                 .mes-tag { display: inline-block; background: #fee2e2; color: #991b1b; padding: 4px 10px; margin: 3px; border-radius: 5px; font-size: 12px; }
-                .estado-solvente { color: #22c55e; font-weight: bold; }
                 .footer { margin-top: 40px; font-size: 11px; color: #94a3b8; text-align: center; }
                 @media print { body { padding: 15px; } }
             </style></head><body>
                 <div class="head">
                     <h1>🏫 U.E.P Santiago De Jesus</h1>
-                    <small>Recibo de Estado de Cuenta — Generado el ${new Date().toLocaleString('es-ES')}</small>
+                    <small>Recibo de Estado de Cuenta — ${new Date().toLocaleString('es-ES')}</small>
                 </div>
                 <div class="row"><span class="label">Estudiante:</span><span>${esc(estudianteActual.nombre)}</span></div>
                 <div class="row"><span class="label">Grado:</span><span>${esc(estudianteActual.grado)} - ${esc(estudianteActual.seccion)}</span></div>
                 <div class="row"><span class="label">Representante:</span><span>${esc(estudianteActual.rep)}</span></div>
                 <div class="row"><span class="label">Cédula:</span><span>${esc(estudianteActual.cedula || 'N/A')}</span></div>
-                <div class="row"><span class="label">Teléfono:</span><span>${esc(estudianteActual.tel || 'N/A')}</span></div>
                 <div class="row"><span class="label">Monto mensual:</span><span>$${estudianteActual.montoMensual || 0}</span></div>
-                <div class="row"><span class="label">Año escolar:</span><span>${estudianteActual.añoEscolar || 'N/A'}</span></div>
-                <div class="row"><span class="label">Estado:</span><span>${estado === 'DEUDOR' ? 'DEUDOR' : (estado === 'SOLVENTE' ? 'SOLVENTE' : 'SIN MESES ASIGNADOS')}</span></div>
+                <div class="row"><span class="label">Estado:</span><span>${estado}</span></div>
                 <div class="meses">
                     <div class="label">Meses pendientes (${meses.length}):</div>
-                    <div>${meses.length ? meses.map(m => `<span class="mes-tag">${esc(m)}</span>`).join('') : '<span class="estado-solvente">Sin deudas — Al día ✅</span>'}</div>
+                    <div>${meses.length ? meses.map(m => `<span class="mes-tag">${esc(m)}</span>`).join('') : '<span style="color:#22c55e;">Sin deudas ✅</span>'}</div>
                 </div>
                 <div class="total">Total: $${total.toFixed(2)}</div>
-                <div class="footer">Este documento es un estado de cuenta generado por el sistema. No constituye un recibo de pago oficial.</div>
+                <div class="footer">Documento generado por el sistema. No constituye recibo de pago oficial.</div>
             </body></html>
         `;
         const win = window.open('', '_blank');
@@ -1979,18 +2110,9 @@
         const filas = [['Nombre', 'Representante', 'Cédula', 'Correo', 'Teléfono', 'Grado', 'Sección', 'Meses pendientes', 'Monto mensual', 'Total deuda', 'Estado', 'Año escolar']];
         cacheTodos.forEach(a => {
             const mesesReales = calcularMesesReales(a.meses);
-            const total = calcularTotalReal(a.montoMensual, a.meses);
+            const total = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
             const estado = getEstadoAlumno(a);
-            const estadoStr = estado === 'DEUDOR' ? 'DEUDOR' : (estado === 'SOLVENTE' ? 'SOLVENTE' : 'SIN MESES');
-            filas.push([
-                a.nombre || '', a.rep || '', a.cedula || '', a.mail || '', a.tel || '',
-                a.grado || '', a.seccion || '',
-                mesesReales.join(' - '),
-                a.montoMensual || 0,
-                total,
-                estadoStr,
-                a.añoEscolar || ''
-            ]);
+            filas.push([a.nombre || '', a.rep || '', a.cedula || '', a.mail || '', a.tel || '', a.grado || '', a.seccion || '', mesesReales.join(' - '), a.montoMensual || 0, total, estado, a.añoEscolar || '']);
         });
         descargarCSV(`uep_todos_${new Date().toISOString().slice(0,10)}.csv`, filas);
     };
@@ -2021,9 +2143,9 @@
         const filas = [['Nombre', 'Representante', 'Cédula', 'Correo', 'Teléfono', 'Meses pendientes', 'Monto mensual', 'Total deuda', 'Estado']];
         alumnos.forEach(a => {
             const mesesReales = calcularMesesReales(a.meses);
-            const total = calcularTotalReal(a.montoMensual, a.meses);
+            const total = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
             const estado = getEstadoAlumno(a);
-            filas.push([a.nombre, a.rep, a.cedula, a.mail || '', a.tel || '', mesesReales.join(' - '), a.montoMensual || 0, total, estado === 'DEUDOR' ? 'DEUDOR' : (estado === 'SOLVENTE' ? 'SOLVENTE' : 'SIN MESES')]);
+            filas.push([a.nombre, a.rep, a.cedula, a.mail || '', a.tel || '', mesesReales.join(' - '), a.montoMensual || 0, total, estado]);
         });
         descargarCSV(`uep_${curGra.replace(/\s+/g,'_')}_${curSec}.csv`, filas);
     };
@@ -2035,21 +2157,13 @@
         const filas = [['Estudiante', 'Representante', 'Cédula', 'Método', 'Banco', 'Referencia', 'Fecha de pago', 'Monto Bs', 'Monto USD', 'Estado', 'Meses pagados', 'Observaciones']];
         snap.forEach(d => {
             const p = d.data();
-            filas.push([
-                p.nombreEst || '', p.nombreRep || '', p.cedulaRep || '',
-                p.metodo || '', p.banco || '', p.referencia || '',
-                p.fechaPago || '',
-                p.montoBs || 0, p.montoDivisas || 0,
-                p.estado || '',
-                (p.mesesPagados || []).join(' - '),
-                p.observaciones || ''
-            ]);
+            filas.push([p.nombreEst || '', p.nombreRep || '', p.cedulaRep || '', p.metodo || '', p.banco || '', p.referencia || '', p.fechaPago || '', p.montoBs || 0, p.montoDivisas || 0, p.estado || '', (p.mesesPagados || []).join(' - '), p.observaciones || '']);
         });
         descargarCSV(`uep_pagos_${new Date().toISOString().slice(0,10)}.csv`, filas);
     };
     
     // ═══════════════════════════════════════════════════════
-    // MÓDULO DE SOLICITUDES
+    // MÓDULO DE SOLICITUDES (con monto por hijo)
     // ═══════════════════════════════════════════════════════
     
     async function cargarSolicitudes() {
@@ -2070,14 +2184,12 @@
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'solicitud-card';
                 cardDiv.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;">
-                        <div>
-                            <b>${esc(s.nombreRep || 'Sin nombre')}</b><br>
-                            <small>Cédula: ${esc(s.cedula || 'N/A')} | Tel: ${esc(s.telefono || s.tel || 'N/A')}</small><br>
-                            <small>Correo: ${esc(s.correo || s.mail || 'N/A')}</small><br>
-                            <small><strong>Hijos:</strong> ${esc(hijosStr) || 'N/A'}</small><br>
-                            <small style="color:#64748b;">Fecha: ${s.timestamp ? new Date(s.timestamp.seconds * 1000).toLocaleDateString('es-ES') : 'N/A'}</small>
-                        </div>
+                    <div>
+                        <b>${esc(s.nombreRep || 'Sin nombre')}</b><br>
+                        <small>Cédula: ${esc(s.cedula || 'N/A')} | Tel: ${esc(s.telefono || s.tel || 'N/A')}</small><br>
+                        <small>Correo: ${esc(s.correo || s.mail || 'N/A')}</small><br>
+                        <small><strong>Hijos:</strong> ${esc(hijosStr) || 'N/A'}</small><br>
+                        <small style="color:#64748b;">Fecha: ${s.timestamp ? new Date(s.timestamp.seconds * 1000).toLocaleDateString('es-ES') : 'N/A'}</small>
                     </div>
                     <div class="btn-group">
                         <button class="btn-edit" onclick="abrirEditarSolicitud('${docSnap.id}')" style="font-size:11px;">✏️ Editar</button>
@@ -2088,8 +2200,8 @@
                 div.appendChild(cardDiv);
             });
         } catch (error) {
-            console.error("Error al cargar solicitudes:", error);
-            div.innerHTML = '<p style="color:red; text-align:center;">❌ Error al cargar solicitudes</p>';
+            console.error("Error:", error);
+            div.innerHTML = '<p style="color:red; text-align:center;">❌ Error al cargar</p>';
         }
     }
     
@@ -2116,25 +2228,9 @@
                 <input type="tel" id="edit-telefono" value="${esc(s.telefono || s.tel || '')}">
                 <label>Correo:</label>
                 <input type="email" id="edit-correo" value="${esc(s.correo || s.mail || '')}">
-                <label style="margin-top:15px;">Monto Mensual ($):</label>
-                <input type="number" id="edit-monto-mensual" value="30" min="0" step="0.01">
-                
-                <label style="margin-top:15px;">Meses iniciales que debe (por defecto: vencidos):</label>
-                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:6px; margin-top:6px; background:#f8fafc; padding:10px; border-radius:8px;">
-                    ${MESES_ORDEN.map(mes => {
-                        const idx = indiceMes(mes);
-                        const esVencido = idx <= mesActualIndex;
-                        return `
-                            <label style="font-size:12px; display:flex; gap:5px; align-items:center; margin:0; cursor:pointer;">
-                                <input type="checkbox" class="aprobar-mes-check" value="${esc(mes)}" ${esVencido ? 'checked' : ''} style="width:auto; margin:0;">
-                                ${esc(mes)}
-                            </label>
-                        `;
-                    }).join('')}
-                </div>
-                <p style="font-size:11px; color:#64748b; margin-top:5px;">Los meses marcados se asignarán como deuda inicial a cada hijo.</p>
                 
                 <h4 style="margin-top:20px;">Hijos a Registrar</h4>
+                <p style="font-size:11px; color:#64748b;">Cada hijo puede tener un monto mensual diferente.</p>
                 <div id="edit-hijos-container">
             `;
             (s.hijos || []).forEach((h, i) => {
@@ -2163,6 +2259,10 @@
                                 <label>Sección</label>
                                 <select class="edit-hijo-seccion"><option>A</option><option>B</option></select>
                             </div>
+                            <div style="flex:1;">
+                                <label>Monto $ *</label>
+                                <input type="number" class="edit-hijo-monto" value="30" min="0" step="0.01" style="margin-top:5px;">
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2179,8 +2279,8 @@
             }, 100);
             document.getElementById('modal-editar-solicitud').style.display = 'flex';
         } catch (error) {
-            console.error("Error al abrir edición:", error);
-            showModal("Error al cargar la solicitud");
+            console.error("Error:", error);
+            showModal("Error al cargar");
         }
     };
     
@@ -2208,21 +2308,15 @@
         const sapellidoRep = document.getElementById('edit-sapellidoRep').value.trim();
         const telefono = document.getElementById('edit-telefono').value.trim();
         const correo = document.getElementById('edit-correo').value.trim();
-        const montoMensual = parseFloat(document.getElementById('edit-monto-mensual').value) || 0;
         
         if (!pnombreRep || !papellidoRep) {
-            showModal("El representante debe tener al menos primer nombre y primer apellido");
+            showModal("El representante debe tener al menos primer nombre y apellido");
             return;
-        }
-        
-        const mesesSeleccionados = Array.from(document.querySelectorAll('.aprobar-mes-check:checked')).map(c => c.value);
-        if (mesesSeleccionados.length === 0) {
-            const ok = await showModal("⚠️ No seleccionaste meses. El alumno quedará SIN deuda asignada (aparecerá como 'SIN MESES').\n\n¿Continuar de todas formas?", true);
-            if (!ok) return;
         }
         
         const nombreRep = construirNombreCompleto(pnombreRep, snombreRep, papellidoRep, sapellidoRep);
         
+        // Recopilar hijos con monto individual
         const hijos = [];
         const pnombres = document.querySelectorAll('.edit-hijo-pnombre');
         const snombres = document.querySelectorAll('.edit-hijo-snombre');
@@ -2230,6 +2324,7 @@
         const sapellidos = document.querySelectorAll('.edit-hijo-sapellido');
         const grados = document.querySelectorAll('.edit-hijo-grado');
         const secciones = document.querySelectorAll('.edit-hijo-seccion');
+        const montos = document.querySelectorAll('.edit-hijo-monto');
         
         for (let i = 0; i < pnombres.length; i++) {
             const pn = pnombres[i].value.trim();
@@ -2238,19 +2333,26 @@
             const sa = sapellidos[i] ? sapellidos[i].value.trim() : '';
             const grado = grados[i].value;
             const seccion = secciones[i].value;
+            const monto = parseFloat(montos[i].value) || 0;
             
             if (!pn || !pa || !grado) {
-                showModal(`Complete los campos obligatorios del hijo ${i+1}`);
+                showModal(`Complete los campos del hijo ${i+1}`);
+                return;
+            }
+            if (monto <= 0) {
+                showModal(`Monto inválido en hijo ${i+1}`);
                 return;
             }
             hijos.push({
                 nombre: construirNombreCompleto(pn, sn, pa, sa),
                 pnombre: pn, snombre: sn, papellido: pa, sapellido: sa,
-                grado, seccion
+                grado, seccion, montoMensual: monto
             });
         }
         
         if (hijos.length === 0) { showModal("Debe haber al menos un hijo"); return; }
+        
+        const todosLosMeses = getTodosLosMeses();
         
         try {
             for (const hijo of hijos) {
@@ -2262,9 +2364,10 @@
                     tel: telefono,
                     grado: hijo.grado,
                     seccion: hijo.seccion,
-                    meses: [...mesesSeleccionados],
-                    montoMensual: montoMensual,
-                    total: montoMensual * mesesSeleccionados.length,
+                    meses: [...todosLosMeses],
+                    abonos: {},
+                    montoMensual: hijo.montoMensual,
+                    total: hijo.montoMensual * todosLosMeses.length,
                     historial: [],
                     timestamp: serverTimestamp(),
                     añoEscolar: currentYear,
@@ -2278,39 +2381,34 @@
                 estado: 'aprobado',
                 aprobadoPor: usuarioActivo,
                 fechaAprobacion: serverTimestamp(),
-                montoMensual: montoMensual,
-                mesesIniciales: mesesSeleccionados,
+                hijosConMonto: hijos.map(h => ({ nombre: h.nombre, monto: h.montoMensual })),
                 adminNotas: `Aprobado por ${usuarioActivo} el ${new Date().toLocaleString()}`
             });
             
-            showModal("✅ Solicitud aprobada y estudiantes registrados correctamente");
+            showModal("✅ Solicitud aprobada. Alumnos registrados con los 13 meses del año.");
             cerrarModalSolicitud();
             cargarSolicitudes();
         } catch (error) {
-            console.error("Error al aprobar solicitud:", error);
-            showModal("❌ Error al aprobar la solicitud: " + error.message);
+            console.error("Error:", error);
+            showModal("❌ Error: " + error.message);
         }
     };
     
     window.aprobarSolicitudDirecta = async function(id) {
         if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
-        
         try {
             const docSnap = await getDoc(doc(db, DB_SOLICITUDES, id));
             if (!docSnap.exists()) return;
             const s = docSnap.data();
             
-            const montoStr = await pedirTexto(`Monto mensual para los hijos de ${s.nombreRep} ($):`, '30');
+            const montoStr = await pedirTexto(`Monto mensual único para todos los hijos de ${s.nombreRep} ($):`, '30');
             if (!montoStr) return;
             const montoMensual = parseFloat(montoStr);
             if (isNaN(montoMensual) || montoMensual <= 0) { showModal("Monto inválido"); return; }
             
-            const mesesDefecto = getMesesVencidosPorDefecto();
-            const okMeses = await showModal(
-                `Se asignarán estos meses a los alumnos:\n\n${mesesDefecto.join(' • ')}\n\n¿Continuar? (Puedes editar después desde Saneamiento)`, 
-                true
-            );
-            if (!okMeses) return;
+            const todosLosMeses = getTodosLosMeses();
+            const ok = await showModal(`Se asignarán los 13 meses a ${s.hijos.length} hijo(s) con monto $${montoMensual}.\n\n¿Continuar?`, true);
+            if (!ok) return;
             
             for (const hijo of (s.hijos || [])) {
                 await addDoc(collection(db, DB_MAIN), {
@@ -2321,9 +2419,10 @@
                     tel: s.telefono || s.tel || '',
                     grado: hijo.grado,
                     seccion: hijo.seccion,
-                    meses: [...mesesDefecto],
+                    meses: [...todosLosMeses],
+                    abonos: {},
                     montoMensual: montoMensual,
-                    total: montoMensual * mesesDefecto.length,
+                    total: montoMensual * todosLosMeses.length,
                     historial: [],
                     timestamp: serverTimestamp(),
                     añoEscolar: currentYear,
@@ -2337,21 +2436,20 @@
                 estado: 'aprobado',
                 aprobadoPor: usuarioActivo,
                 fechaAprobacion: serverTimestamp(),
-                montoMensual: montoMensual,
-                mesesIniciales: mesesDefecto
+                montoMensual: montoMensual
             });
             
-            showModal("✅ Solicitud aprobada con meses asignados");
+            showModal("✅ Solicitud aprobada con 13 meses asignados");
             cargarSolicitudes();
         } catch (error) {
-            console.error("Error al aprobar:", error);
-            showModal("❌ Error al aprobar la solicitud");
+            console.error("Error:", error);
+            showModal("❌ Error al aprobar");
         }
     };
     
     window.rechazarSolicitud = async function(id) {
         if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
-        if (!await showModal("¿Está seguro de rechazar esta solicitud? El representante no será registrado.", true)) return;
+        if (!await showModal("¿Rechazar esta solicitud?", true)) return;
         try {
             await updateDoc(doc(db, DB_SOLICITUDES, id), {
                 estado: 'rechazado', rechazadoPor: usuarioActivo, fechaRechazo: serverTimestamp()
@@ -2359,13 +2457,13 @@
             showModal("Solicitud rechazada");
             cargarSolicitudes();
         } catch (error) {
-            console.error("Error al rechazar:", error);
-            showModal("❌ Error al rechazar la solicitud");
+            console.error("Error:", error);
+            showModal("❌ Error");
         }
     };
     
     // ═══════════════════════════════════════════════════════
-    // MÓDULO DE ESTADÍSTICAS
+    // ESTADÍSTICAS
     // ═══════════════════════════════════════════════════════
     
     window.cargarEstadisticas = async () => {
@@ -2374,7 +2472,7 @@
         cont.innerHTML = '<div class="loading-text"><span class="spinner"></span> Calculando...</div>';
         try {
             const snap = await getDocs(collection(db, DB_MAIN));
-            let totalAlumnos = 0, totalDeudores = 0, totalSolventes = 0, totalSinMeses = 0, deudaTotal = 0;
+            let totalAlumnos = 0, totalDeudores = 0, totalSolventes = 0, deudaTotal = 0;
             const porGrado = {};
             
             snap.forEach(d => {
@@ -2382,12 +2480,11 @@
                 if (!pasaFiltroAnio(a)) return;
                 totalAlumnos++;
                 const estado = getEstadoAlumno(a);
-                const total = calcularTotalReal(a.montoMensual, a.meses);
+                const total = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
                 const key = a.grado || 'Sin grado';
                 if (!porGrado[key]) porGrado[key] = { alumnos: 0, deudores: 0, deuda: 0 };
                 porGrado[key].alumnos++;
                 if (estado === 'SOLVENTE') totalSolventes++;
-                else if (estado === 'SIN_MESES') totalSinMeses++;
                 else {
                     totalDeudores++;
                     deudaTotal += total;
@@ -2418,40 +2515,34 @@
                     <div class="stat-card"><div class="stat-label">Total alumnos</div><div class="stat-value">${totalAlumnos}</div></div>
                     <div class="stat-card red"><div class="stat-label">Deudores</div><div class="stat-value">${totalDeudores}</div></div>
                     <div class="stat-card green"><div class="stat-label">Solventes</div><div class="stat-value">${totalSolventes}</div></div>
-                    <div class="stat-card orange"><div class="stat-label">Sin meses</div><div class="stat-value">${totalSinMeses}</div></div>
                     <div class="stat-card yellow"><div class="stat-label">% Solvencia</div><div class="stat-value">${porcentajeSolvencia}%</div></div>
                     <div class="stat-card red"><div class="stat-label">Deuda total</div><div class="stat-value">$${deudaTotal.toFixed(2)}</div></div>
-                    <div class="stat-card green"><div class="stat-label">Cobrado (últ. 30 días)</div><div class="stat-value">$${pagosUltimoMes.toFixed(2)}</div></div>
+                    <div class="stat-card green"><div class="stat-label">Cobrado (30 días)</div><div class="stat-value">$${pagosUltimoMes.toFixed(2)}</div></div>
                 </div>
-                
                 <div class="card">
                     <h3 style="margin-bottom:15px; color:var(--primary);">📊 Deuda por grado</h3>
                     ${gradosOrdenados.length === 0 ? '<p style="text-align:center; color:gray;">Sin datos</p>' : gradosOrdenados.map(([grado, data]) => `
                         <div class="grado-bar">
                             <div class="grado-nombre">${esc(grado)}</div>
-                            <div class="grado-progress">
-                                <div class="grado-fill" style="width:${(data.deuda / maxDeuda) * 100}%"></div>
-                            </div>
+                            <div class="grado-progress"><div class="grado-fill" style="width:${(data.deuda / maxDeuda) * 100}%"></div></div>
                             <div class="grado-info">$${data.deuda.toFixed(2)}</div>
                         </div>
-                        <div style="font-size:11px; color:#94a3b8; margin:-4px 0 10px 120px;">
-                            ${data.alumnos} alumnos • ${data.deudores} con deuda
-                        </div>
+                        <div style="font-size:11px; color:#94a3b8; margin:-4px 0 10px 120px;">${data.alumnos} alumnos • ${data.deudores} con deuda</div>
                     `).join('')}
                 </div>
             `;
             cont.innerHTML = html;
         } catch (error) {
-            console.error("Error cargando estadísticas:", error);
-            cont.innerHTML = '<p style="color:red; text-align:center;">❌ Error al cargar estadísticas</p>';
+            console.error("Error:", error);
+            cont.innerHTML = '<p style="color:red; text-align:center;">❌ Error</p>';
         }
     };
     
     // ═══════════════════════════════════════════════════════
-    // MÓDULO DE AUDITORÍA
+    // AUDITORÍA
     // ═══════════════════════════════════════════════════════
     
-    let cacheAuditoria = { ediciones: [], eliminaciones: [], correos: [], correcciones: [], logins: [] };
+    let cacheAuditoria = { ediciones: [], eliminaciones: [], correos: [], correcciones: [], logins: [], duplicados: [] };
     let filtroAuditoriaActual = 'todas';
     
     window.filtrarAuditoria = (tipo, evt) => {
@@ -2466,27 +2557,26 @@
         if (!cont) return;
         cont.innerHTML = '<div class="loading-text"><span class="spinner"></span> Cargando auditoría...</div>';
         try {
-            const [edicSnap, delSnap, mailSnap, corrSnap] = await Promise.all([
+            const [edicSnap, delSnap, mailSnap, corrSnap, dupSnap] = await Promise.all([
                 getDocs(collection(db, DB_AUD_EDIC)),
                 getDocs(collection(db, DB_AUD_DEL)),
                 getDocs(collection(db, DB_AUD_MAIL)),
-                getDocs(collection(db, DB_AUD_CORR))
+                getDocs(collection(db, DB_AUD_CORR)),
+                getDocs(collection(db, DB_DUPLICADOS))
             ]);
-            
             cacheAuditoria.ediciones = edicSnap.docs.map(d => ({ _tipo: 'edicion', _id: d.id, ...d.data() }));
             cacheAuditoria.eliminaciones = delSnap.docs.map(d => ({ _tipo: 'eliminacion', _id: d.id, ...d.data() }));
             cacheAuditoria.correos = mailSnap.docs.map(d => ({ _tipo: 'correo', _id: d.id, ...d.data() }));
             cacheAuditoria.correcciones = corrSnap.docs.map(d => ({ _tipo: 'correccion', _id: d.id, ...d.data() }));
-            
+            cacheAuditoria.duplicados = dupSnap.docs.map(d => ({ _tipo: 'duplicado', _id: d.id, ...d.data() }));
             try {
                 const logins = JSON.parse(localStorage.getItem('sdj_login_history') || '[]');
                 cacheAuditoria.logins = logins.map(l => ({ _tipo: 'login', ...l }));
             } catch(e) { cacheAuditoria.logins = []; }
-            
             renderAuditoria();
         } catch (error) {
-            console.error("Error cargando auditoría:", error);
-            cont.innerHTML = '<p style="color:red; text-align:center;">❌ Error al cargar la auditoría</p>';
+            console.error("Error:", error);
+            cont.innerHTML = '<p style="color:red;">❌ Error</p>';
         }
     };
     
@@ -2495,18 +2585,13 @@
         if (!cont) return;
         let items = [];
         if (filtroAuditoriaActual === 'todas') {
-            items = [
-                ...cacheAuditoria.ediciones,
-                ...cacheAuditoria.eliminaciones,
-                ...cacheAuditoria.correos,
-                ...cacheAuditoria.correcciones,
-                ...(cacheAuditoria.logins || [])
-            ];
+            items = [...cacheAuditoria.ediciones, ...cacheAuditoria.eliminaciones, ...cacheAuditoria.correos, ...cacheAuditoria.correcciones, ...(cacheAuditoria.logins || []), ...cacheAuditoria.duplicados];
         } else if (filtroAuditoriaActual === 'ediciones') items = cacheAuditoria.ediciones;
         else if (filtroAuditoriaActual === 'eliminaciones') items = cacheAuditoria.eliminaciones;
         else if (filtroAuditoriaActual === 'correos') items = cacheAuditoria.correos;
         else if (filtroAuditoriaActual === 'logins') items = cacheAuditoria.logins || [];
         else if (filtroAuditoriaActual === 'correcciones') items = cacheAuditoria.correcciones;
+        else if (filtroAuditoriaActual === 'duplicados') items = cacheAuditoria.duplicados;
         
         items.sort((a, b) => {
             const fa = a.fecha?.seconds || (a.fecha ? new Date(a.fecha).getTime()/1000 : 0);
@@ -2525,47 +2610,18 @@
                 : (item.fecha ? new Date(item.fecha).toLocaleString('es-ES') : 'N/A');
             
             if (item._tipo === 'edicion') {
-                html += `<div class="audit-item tipo-edicion">
-                    <b>✏️ Edición de pago</b> — ${esc(fechaStr)}<br>
-                    <small><b>Editado por:</b> ${esc(item.editadoPor || 'N/A')}</small><br>
-                    <small><b>Pago ID:</b> ${esc(item.pagoId || 'N/A')}</small><br>
-                    ${item.anteriores?.referencia ? `<small><b>Ref anterior:</b> ${esc(item.anteriores.referencia)} → <b>Nueva:</b> ${esc(item.nuevos?.referencia || 'N/A')}</small>` : ''}
-                </div>`;
+                html += `<div class="audit-item tipo-edicion"><b>✏️ Edición de pago</b> — ${esc(fechaStr)}<br><small><b>Por:</b> ${esc(item.editadoPor || 'N/A')}</small></div>`;
             } else if (item._tipo === 'eliminacion') {
-                html += `<div class="audit-item tipo-eliminacion">
-                    <b>🗑 Eliminación de alumno</b> — ${esc(fechaStr)}<br>
-                    <small><b>Alumno:</b> ${esc(item.nombre || 'N/A')} | <b>Rep:</b> ${esc(item.rep || 'N/A')}</small><br>
-                    <small><b>Eliminado por:</b> ${esc(item.eliminadoPor || 'N/A')}</small>
-                </div>`;
+                html += `<div class="audit-item tipo-eliminacion"><b>🗑 Eliminación</b> — ${esc(fechaStr)}<br><small><b>Alumno:</b> ${esc(item.nombre || 'N/A')} | <b>Por:</b> ${esc(item.eliminadoPor || 'N/A')}</small></div>`;
             } else if (item._tipo === 'correo') {
-                html += `<div class="audit-item tipo-correo">
-                    <b>✉️ Correo (${esc(item.tipo || 'N/A')})</b> — ${esc(fechaStr)}<br>
-                    <small><b>Estudiante:</b> ${esc(item.estudiante || 'N/A')} | <b>Ref:</b> ${esc(item.referencia || 'N/A')}</small><br>
-                    <small><b>Destino:</b> ${esc(item.correoDestino || 'N/A')} | <b>Por:</b> ${esc(item.enviadoPor || 'N/A')}</small>
-                    ${item.motivo ? `<br><small><b>Motivo:</b> ${esc(item.motivo)}</small>` : ''}
-                </div>`;
+                html += `<div class="audit-item tipo-correo"><b>✉️ Correo (${esc(item.tipo || '')})</b> — ${esc(fechaStr)}<br><small><b>Est:</b> ${esc(item.estudiante || '')} | <b>Por:</b> ${esc(item.enviadoPor || '')}</small></div>`;
             } else if (item._tipo === 'login') {
                 const color = item.exito ? '#22c55e' : '#ef4444';
-                html += `<div class="audit-item tipo-login" style="border-left-color:${color};">
-                    <b>${item.exito ? '🔓 Login exitoso' : '🔒 Intento fallido'}</b> — ${esc(fechaStr)}<br>
-                    <small><b>Usuario:</b> ${esc(item.usuario)}</small><br>
-                    <small style="color:#94a3b8;">${esc(item.ua || '')}</small>
-                </div>`;
+                html += `<div class="audit-item tipo-login" style="border-left-color:${color};"><b>${item.exito ? '🔓 Login' : '🔒 Fallido'}</b> — ${esc(fechaStr)}<br><small><b>Usuario:</b> ${esc(item.usuario)}</small></div>`;
             } else if (item._tipo === 'correccion') {
-                let detalle = '';
-                if (item.tipo === 'saneamiento_masivo' || item.tipo === 'saneamiento_individual') {
-                    detalle = `<small><b>Meses asignados:</b> ${(item.mesesNuevos || []).join(' • ')}</small>`;
-                } else if (item.tipo === 'cambio_monto') {
-                    detalle = `<small><b>Monto:</b> $${item.montoAnterior} → $${item.montoNuevo}</small>`;
-                } else if (item.tipo === 'edicion_meses_ficha') {
-                    detalle = `<small><b>Meses anteriores:</b> ${(item.mesesAnteriores || []).length} → <b>Nuevos:</b> ${(item.mesesNuevos || []).length}</small>`;
-                }
-                html += `<div class="audit-item tipo-correccion">
-                    <b>🛠 Corrección (${esc(item.tipo || 'N/A')})</b> — ${esc(fechaStr)}<br>
-                    <small><b>Alumno:</b> ${esc(item.nombreEst || 'N/A')}</small><br>
-                    ${detalle}<br>
-                    <small><b>Por:</b> ${esc(item.corregidoPor || 'N/A')}</small>
-                </div>`;
+                html += `<div class="audit-item tipo-correccion"><b>🛠 Corrección (${esc(item.tipo || '')})</b> — ${esc(fechaStr)}<br><small><b>Alumno:</b> ${esc(item.nombreEst || 'N/A')} | <b>Por:</b> ${esc(item.corregidoPor || 'N/A')}</small></div>`;
+            } else if (item._tipo === 'duplicado') {
+                html += `<div class="audit-item tipo-duplicado"><b>🚨 Intento duplicado</b> — ${esc(fechaStr)}<br><small><b>Rep:</b> ${esc(item.cedulaRep || 'N/A')} | <b>Ref:</b> ${esc(item.referencia || 'N/A')}</small><br><small><b>Motivo:</b> ${esc(item.motivo || 'N/A')}</small></div>`;
             }
         });
         if (items.length > 200) html += '<p style="text-align:center; color:#94a3b8; font-size:12px;">Mostrando los últimos 200</p>';
@@ -2574,225 +2630,70 @@
     }
     
     // ═══════════════════════════════════════════════════════
-    // MÓDULO DE SANEAMIENTO (sin cambios)
+    // DUPLICADOS - LISTA Y GESTIÓN
     // ═══════════════════════════════════════════════════════
     
-    let saneaSeleccionados = new Set();
-    
-    window.seleccionarTodosSanea = () => {
-        document.querySelectorAll('.sanea-check').forEach(cb => {
-            cb.checked = true;
-            saneaSeleccionados.add(cb.value);
-        });
-        actualizarBotonSanea();
-    };
-    
-    window.deseleccionarTodosSanea = () => {
-        document.querySelectorAll('.sanea-check').forEach(cb => cb.checked = false);
-        saneaSeleccionados.clear();
-        actualizarBotonSanea();
-    };
-    
-    window.recargarCacheSanea = async () => {
-        cacheHistorialCargado = false;
-        await cargarCacheHistorial();
-        cargarSaneamiento();
-    };
-    
-    function actualizarBotonSanea() {
-        const btn = document.querySelector('#mod-sanea .btn-main');
-        if (btn) btn.textContent = `🔧 Asignar meses vencidos a ${saneaSeleccionados.size} seleccionado(s)`;
-    }
-    
-    async function cargarSaneamiento() {
-        const lista = document.getElementById('sanea-lista');
-        if (!lista) return;
-        
-        lista.innerHTML = '<div class="loading-text"><span class="spinner"></span> Cargando...</div>';
-        
-        if (!cacheHistorialCargado) await cargarCacheHistorial();
-        
-        const mesesDef = getMesesVencidosPorDefecto();
-        const mesesDefEl = document.getElementById('sanea-meses-defecto');
-        if (mesesDefEl) mesesDefEl.textContent = mesesDef.join(' • ');
-        
-        const alumnosAfectados = cacheTodos.filter(a => getEstadoAlumno(a) === 'SIN_MESES' && pasaFiltroAnio(a));
-        
-        document.getElementById('sanea-count').textContent = alumnosAfectados.length;
-        
-        if (alumnosAfectados.length === 0) {
-            lista.innerHTML = '<div class="success-box">✅ No hay alumnos con problemas de meses. Todo está en orden.</div>';
+    function renderDuplicados() {
+        const cont = document.getElementById('lista-duplicados');
+        if (!cont) return;
+        if (cacheDuplicados.length === 0) {
+            cont.innerHTML = '<p style="text-align:center; color:gray; padding:20px;">✅ No hay intentos de duplicados</p>';
             return;
         }
-        
-        alumnosAfectados.sort((a, b) => {
-            const ia = ORDEN_GRADOS.indexOf(a.grado);
-            const ib = ORDEN_GRADOS.indexOf(b.grado);
-            if (ia !== ib) return ia - ib;
-            return (a.nombre || '').localeCompare(b.nombre || '');
-        });
-        
         let html = '';
-        let gradoActual = '';
-        alumnosAfectados.forEach(a => {
-            if (a.grado !== gradoActual) {
-                gradoActual = a.grado;
-                html += `<div class="grado-header">${esc(gradoActual)}</div>`;
-            }
-            const origen = a.origen === 'solicitud_automatica' ? '📋 Solicitud' : '✏️ Manual';
-            const fecha = a.timestamp?.seconds 
-                ? new Date(a.timestamp.seconds * 1000).toLocaleDateString('es-ES')
-                : (a.timestamp ? new Date(a.timestamp).toLocaleDateString('es-ES') : 'N/A');
-            
-            html += `
-                <div class="student-row" style="border-left:6px solid #f59e0b;">
-                    <div style="display:flex; align-items:center; gap:12px; flex:1;">
-                        <input type="checkbox" class="sanea-check" value="${a.id}" style="width:auto; margin:0; cursor:pointer;" onchange="toggleSanea('${a.id}', this.checked)">
-                        <div>
-                            <b>${esc(a.nombre)}</b>
-                            <small>${esc(a.rep)} - ${esc(a.cedula)}</small>
-                            <small>${origen} • Creado: ${fecha} • Monto: $${a.montoMensual || 0}</small>
-                        </div>
+        cacheDuplicados.slice(0, 30).forEach(d => {
+            const fechaStr = d.fecha?.seconds ? new Date(d.fecha.seconds * 1000).toLocaleString('es-ES') : 'N/A';
+            const clase = d.revisado ? 'duplicado-card revisado' : 'duplicado-card';
+            html += `<div class="${clase}">
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <b>🚨 ${esc(d.nombreEst || 'N/A')}</b><br>
+                        <small><b>Representante:</b> ${esc(d.nombreRep || 'N/A')} (C.I: ${esc(d.cedulaRep || 'N/A')})</small><br>
+                        <small><b>Motivo:</b> ${esc(d.motivo || 'N/A')}</small><br>
+                        <small><b>Referencia:</b> ${esc(d.referencia || 'N/A')} | <b>Monto:</b> $${d.monto || 0}</small><br>
+                        <small style="color:#94a3b8;">${fechaStr}</small>
                     </div>
-                    <div style="display:flex; gap:5px; align-items:center;">
-                        <button class="btn-edit" style="padding:6px 10px; font-size:11px;" onclick="editarMesesSanea('${a.id}')">✏️ Editar meses</button>
-                    </div>
+                    ${d.revisado ? '<span style="background:#10b981; color:white; padding:4px 10px; border-radius:5px; font-size:11px; font-weight:bold;">✅ Revisado</span>' : ''}
                 </div>
-            `;
+            </div>`;
         });
-        lista.innerHTML = html;
-        saneaSeleccionados.clear();
-        actualizarBotonSanea();
+        cont.innerHTML = html;
     }
-    window.cargarSaneamiento = cargarSaneamiento;
     
-    window.toggleSanea = (id, checked) => {
-        if (checked) saneaSeleccionados.add(id);
-        else saneaSeleccionados.delete(id);
-        actualizarBotonSanea();
-    };
-    
-    window.editarMesesSanea = async (id) => {
+    window.marcarDuplicadosRevisados = async () => {
         if (!usuarioActivo) return;
-        const docSnap = await getDoc(doc(db, DB_MAIN, id));
-        if (!docSnap.exists()) return;
-        const a = docSnap.data();
-        
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.style.display = 'flex';
-        const mesesActuales = new Set(a.meses || []);
-        const mesesDef = getMesesVencidosPorDefecto();
-        if ((a.meses || []).length === 0) mesesDef.forEach(m => mesesActuales.add(m));
-        
-        modal.innerHTML = `
-            <div class="modal" style="max-width:550px;">
-                <div class="modal-header">
-                    <h3>✏️ Asignar meses: ${esc(a.nombre)}</h3>
-                    <button class="close-modal" onclick="this.closest('.modal-overlay').remove()">×</button>
-                </div>
-                <div style="background:#f1f5f9; padding:10px; border-radius:8px; font-size:13px; margin-bottom:12px;">
-                    <b>Representante:</b> ${esc(a.rep)} | <b>Monto mensual:</b> $${a.montoMensual || 0}
-                </div>
-                <label style="margin-bottom:8px; display:block;">Meses que debe (marca los pendientes):</label>
-                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px;">
-                    ${MESES_ORDEN.map(mes => `
-                        <label style="background:#f8fafc; padding:8px; border-radius:6px; cursor:pointer; font-size:13px; display:flex; gap:6px; align-items:center;">
-                            <input type="checkbox" class="mes-edit-check" value="${esc(mes)}" ${mesesActuales.has(mes) ? 'checked' : ''} style="width:auto; margin:0;">
-                            ${esc(mes)}
-                        </label>
-                    `).join('')}
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-check" id="sanea-guardar-btn">💾 Guardar</button>
-                    <button class="btn-reject" onclick="this.closest('.modal-overlay').remove()">Cancelar</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        modal.querySelector('#sanea-guardar-btn').onclick = async () => {
-            const nuevosMeses = Array.from(modal.querySelectorAll('.mes-edit-check:checked')).map(c => c.value);
-            const btn = modal.querySelector('#sanea-guardar-btn');
-            btn.disabled = true;
-            btn.textContent = '⏳...';
-            try {
-                await updateDoc(doc(db, DB_MAIN, id), {
-                    meses: nuevosMeses,
-                    total: calcularTotalReal(a.montoMensual, nuevosMeses),
-                    corregidoPor: usuarioActivo,
-                    fechaCorreccion: serverTimestamp()
+        if (!await showModal("¿Marcar todos los intentos de duplicados como revisados?", true)) return;
+        try {
+            for (const d of cacheDuplicados.filter(x => !x.revisado)) {
+                await updateDoc(doc(db, DB_DUPLICADOS, d._id), {
+                    revisado: true,
+                    revisadoPor: usuarioActivo,
+                    fechaRevision: serverTimestamp()
                 });
-                await addDoc(collection(db, DB_AUD_CORR), {
-                    alumnoId: id,
-                    nombreEst: a.nombre,
-                    mesesAnteriores: a.meses || [],
-                    mesesNuevos: nuevosMeses,
-                    tipo: "saneamiento_individual",
-                    corregidoPor: usuarioActivo,
-                    fecha: serverTimestamp()
-                });
-                modal.remove();
-                showModal("✅ Meses actualizados correctamente");
-                cargarSaneamiento();
-            } catch (err) {
-                console.error(err);
-                showModal("❌ Error al guardar: " + err.message);
-                btn.disabled = false;
-                btn.textContent = '💾 Guardar';
             }
-        };
+            showModal("✅ Duplicados marcados como revisados");
+            actualizarBadgeDuplicados();
+        } catch (e) {
+            console.error(e);
+            showModal("❌ Error");
+        }
     };
     
-    window.aplicarSaneamiento = async () => {
-        if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
-        if (saneaSeleccionados.size === 0) { showModal("Selecciona al menos un alumno"); return; }
-        
-        const mesesAsignar = getMesesVencidosPorDefecto();
-        const ok = await showModal(
-            `⚠️ Se asignarán los siguientes meses a ${saneaSeleccionados.size} alumno(s):\n\n${mesesAsignar.join(' • ')}\n\n¿Confirmar?`, 
-            true
-        );
-        if (!ok) return;
-        
-        let exitosos = 0, fallidos = 0;
-        for (const id of saneaSeleccionados) {
-            try {
-                const docSnap = await getDoc(doc(db, DB_MAIN, id));
-                if (!docSnap.exists()) { fallidos++; continue; }
-                const a = docSnap.data();
-                if (getEstadoAlumno(a) !== 'SIN_MESES') { fallidos++; continue; }
-                
-                await updateDoc(doc(db, DB_MAIN, id), {
-                    meses: mesesAsignar,
-                    total: calcularTotalReal(a.montoMensual, mesesAsignar),
-                    corregidoPor: usuarioActivo,
-                    fechaCorreccion: serverTimestamp()
-                });
-                
-                await addDoc(collection(db, DB_AUD_CORR), {
-                    alumnoId: id,
-                    nombreEst: a.nombre,
-                    mesesAnteriores: [],
-                    mesesNuevos: mesesAsignar,
-                    tipo: "saneamiento_masivo",
-                    corregidoPor: usuarioActivo,
-                    fecha: serverTimestamp()
-                });
-                exitosos++;
-            } catch (e) {
-                console.error("Error con alumno", id, e);
-                fallidos++;
+    function actualizarBadgeDuplicados() {
+        const noRevisados = cacheDuplicados.filter(d => !d.revisado).length;
+        const badge = document.getElementById('nav-badge-rep');
+        if (badge) {
+            if (noRevisados > 0) {
+                badge.textContent = noRevisados;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
             }
         }
-        
-        showModal(`✅ Saneamiento completo\n\nExitosos: ${exitosos}\nFallidos: ${fallidos}`);
-        saneaSeleccionados.clear();
-        cargarSaneamiento();
-    };
+    }
     
     // ═══════════════════════════════════════════════════════
-    // FILTRO DE AÑO ESCOLAR
+    // FILTRO DE AÑO
     // ═══════════════════════════════════════════════════════
     
     window.aplicarFiltroAnio = () => {
@@ -2802,9 +2703,6 @@
             window.loadFinal(curSec);
         }
         cargarEstadisticas();
-        if (document.getElementById('mod-sanea')?.classList.contains('active')) {
-            cargarSaneamiento();
-        }
     };
     
     async function actualizarOpcionesAnio() {
@@ -2839,7 +2737,6 @@
             cachePendientes = [];
             cacheSolventes = [];
             cacheTodos = [];
-            cacheSinMeses = [];
             let totalColegio = 0;
             let allData = [];
             
@@ -2855,10 +2752,17 @@
                     lp.innerHTML += `<div class="grado-header">${esc(grado)}</div>`;
                     grupo.forEach(a => {
                         const mesesReales = calcularMesesReales(a.meses);
-                        const totalDeuda = calcularTotalReal(a.montoMensual, a.meses);
+                        const totalDeuda = calcularTotalReal(a.montoMensual, a.meses, a.abonos);
                         const alerta = getNivelAlerta(mesesReales.length);
                         cachePendientes.push({ ...a, total: totalDeuda, meses: mesesReales });
                         totalColegio += totalDeuda;
+                        
+                        const mesesTags = mesesReales.map(m => {
+                            const abono = (a.abonos && a.abonos[m]) ? a.abonos[m] : 0;
+                            const monto = a.montoMensual || 0;
+                            if (abono > 0 && abono < monto) return `<span class="mes-estado abono" style="font-size:10px;">🟡 ${esc(m)}</span>`;
+                            return `<span class="mes-estado pendiente" style="font-size:10px;">🔴 ${esc(m)}</span>`;
+                        }).join('');
                         
                         lp.innerHTML += `
                             <div class="student-row alert-${alerta.clase}">
@@ -2866,10 +2770,9 @@
                                     <span class="badge bg-${alerta.clase}">${alerta.texto}</span>
                                     <b>${esc(a.nombre)} (${esc(a.seccion)})</b>
                                     <small>${esc(a.rep)} - ${esc(a.cedula)}</small>
-                                    <div>${mesesReales.map(m => `<span class="tag-mes">${esc(m)}</span>`).join('')}</div>
-                                    ${a.meses?.length > mesesReales.length ? `<small style="color:#f59e0b;">📅 ${a.meses.length - mesesReales.length} mes(es) futuro(s)</small>` : ''}
+                                    <div>${mesesTags}</div>
                                 </div>
-                                <div><b style="color:#ef4444">$${totalDeuda}</b><br><button class="btn-ws" onclick="enviarWhatsApp('${esc(a.tel)}', '${esc(a.nombre)}', '${mesesReales.join(',')}', ${totalDeuda})">📱</button><button class="btn-email" onclick="enviarGmailIndividual('${esc(a.mail)}', '${esc(a.nombre)}', '${esc(a.rep)}', ${totalDeuda}, '${mesesReales.join(',')}')">✉️</button><button onclick="del('${a.id}')" style="font-size:10px;">🗑</button></div>
+                                <div><b style="color:#ef4444">$${totalDeuda.toFixed(2)}</b><br><button class="btn-ws" onclick="enviarWhatsApp('${esc(a.tel)}', '${esc(a.nombre)}', '${mesesReales.join(',')}', ${totalDeuda})">📱</button><button class="btn-email" onclick="enviarGmailIndividual('${esc(a.mail)}', '${esc(a.nombre)}', '${esc(a.rep)}', ${totalDeuda}, '${mesesReales.join(',')}')">✉️</button></div>
                             </div>`;
                     });
                 }
@@ -2880,9 +2783,7 @@
             solventes.forEach(a => { ls.innerHTML += `<div class="student-row" style="border-left:5px solid var(--green)"><div><b>${esc(a.nombre)}</b><small>${esc(a.grado)} - ${esc(a.rep)}</small></div><b style="color:var(--green)">SOLVENTE</b></div>`; });
             if(solventes.length === 0) ls.innerHTML = '<p style="text-align:center; color:gray">No hay estudiantes solventes</p>';
             
-            cacheSinMeses = allData.filter(a => getEstadoAlumno(a) === 'SIN_MESES' && pasaFiltroAnio(a));
-            
-            if(globalDebt) globalDebt.innerText = `$${totalColegio.toLocaleString()}`;
+            if(globalDebt) globalDebt.innerText = `$${totalColegio.toFixed(2)}`;
         });
         
         unsubscribePagos = onSnapshot(collection(db, DB_PAGOS), (snap) => {
@@ -2893,7 +2794,6 @@
                 tb.innerHTML = '<tr><td colspan="6" style="text-align:center;">📭 No hay pagos reportados</td></tr>'; 
                 return; 
             }
-            
             snap.forEach(d => {
                 const p = d.data();
                 let estadoColor = '#64748b';
@@ -2901,9 +2801,7 @@
                 if(estadoTexto.includes('Pendiente')) estadoColor = '#eab308';
                 if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
                 if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
-                
                 const fechaFormateada = formatearFechaPago(p);
-                
                 tb.innerHTML += `<tr class="clickable-row" onclick="mostrarDetallesPago('${d.id}')">
                     <td><strong>${esc(p.nombreEst || 'N/A')}</strong><br><small>${esc(p.nombreRep || '')}</small></td>
                     <td>${esc(p.metodo || '')}<br><small>${esc(p.referencia || '')}</small></td>
@@ -2913,6 +2811,13 @@
                     <td><button class="btn-edit-pago" onclick="event.stopPropagation(); abrirModalEditar('${d.id}')">✏️ Editar</button></td>
                 </tr>`;
             });
+        });
+        
+        unsubscribeDuplicados = onSnapshot(collection(db, DB_DUPLICADOS), (snap) => {
+            cacheDuplicados = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+            cacheDuplicados.sort((a, b) => (b.fecha?.seconds || 0) - (a.fecha?.seconds || 0));
+            actualizarBadgeDuplicados();
+            renderDuplicados();
         });
         
         actualizarTotalPreview();
