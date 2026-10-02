@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal de Pago - U.E.P Santiago De Jesus (V21)</title>
+    <title>Portal de Pago - U.E.P Santiago De Jesus (V22)</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -32,6 +32,10 @@
         .btn-outline:hover { background: var(--primary); color: white; }
         .btn-secondary { background: #e2e8f0; color: #475569; padding: 10px; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; }
         .btn-secondary:hover { background: #cbd5e1; }
+        .btn-familiar { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-familiar:hover { background: linear-gradient(135deg, #6d28d9, #9333ea); }
+        .btn-historial { background: #0891b2; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; transition: 0.2s; }
+        .btn-historial:hover { background: #0e7490; }
 
         .step { display: none; animation: fadeIn 0.4s; }
         .step.active { display: block; }
@@ -41,12 +45,11 @@
         .student-card:hover { background: #e2e8f0; }
         .student-card.deudor { border-left-color: var(--red); }
         .student-card.solvente { border-left-color: var(--green); }
-        .student-card.sin-meses { border-left-color: var(--orange); }
         .student-card h3 { color: var(--primary); font-size: 18px; margin-bottom: 5px; }
         .student-card p { font-size: 13px; color: #64748b; margin-bottom: 5px; }
         .debt-tag { background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-right: 5px; margin-top: 5px; }
+        .abono-tag { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-right: 5px; margin-top: 5px; }
         .solvente-tag { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
-        .sin-meses-tag { background: #ffedd5; color: #9a3412; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
         .month-tag { background: #fef3c7; color: #92400e; padding: 3px 6px; border-radius: 3px; font-size: 11px; display: inline-block; margin: 3px 3px 0 0; }
 
         .info-box { background: #dbeafe; border: 1px solid #3b82f6; color: #1e40af; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
@@ -54,22 +57,16 @@
         .success-box { background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
         .error-message { background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
         .warning-box { background: #fff7ed; border: 1px solid #fb923c; color: #9a3412; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
-        .sin-meses-box { background: #ffedd5; border: 2px solid #ea580c; color: #9a3412; padding: 20px; border-radius: 8px; margin: 15px 0; font-size: 14px; text-align: center; }
 
         .hijo-item { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
-        
         .name-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .name-fields input { width: 100%; }
         .optional-note { font-size: 11px; color: #64748b; margin-left: 5px; font-weight: normal; }
         
         .school-header {
             background: linear-gradient(135deg, #1e40af, #3b82f6);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            color: white; padding: 25px; border-radius: 15px; margin-bottom: 20px;
+            text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .school-header h1 { color: white; font-size: 26px; margin-bottom: 5px; }
         .school-header p { color: #e2e8f0; font-size: 14px; }
@@ -77,114 +74,60 @@
         .loading { text-align: center; padding: 20px; color: var(--primary); font-weight: bold; }
         .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 10px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Cuadrícula mes por mes */
-        .mes-cuadricula {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-            gap: 6px;
-            margin-top: 10px;
-        }
-        .mes-celda {
-            padding: 8px 4px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 11px;
-            font-weight: 600;
-            border: 1px solid transparent;
-        }
+
+        .mes-cuadricula { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 6px; margin-top: 10px; }
+        .mes-celda { padding: 8px 4px; border-radius: 6px; text-align: center; font-size: 11px; font-weight: 600; border: 1px solid transparent; }
         .mes-celda.pagado { background: #dcfce7; color: #166534; }
+        .mes-celda.abono { background: #fef3c7; color: #92400e; }
         .mes-celda.pendiente { background: #fee2e2; color: #991b1b; }
         .mes-celda.futuro { background: #f1f5f9; color: #94a3b8; }
-        .mes-celda.pendiente-verif { background: #fef3c7; color: #92400e; }
-        .mes-celda.sin-asignar { background: #ffedd5; color: #9a3412; }
+        .mes-celda.gracia { background: #e0e7ff; color: #4338ca; }
+        .mes-celda.pendiente-verif { background: #fff7ed; color: #9a3412; border: 1px dashed #fb923c; }
 
-        /* Selector de meses tipo checkbox mejorado */
-        .meses-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-        }
+        .meses-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; }
         .meses-selector label {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 0;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-            font-weight: 600;
-            color: #334155;
+            background: #f8fafc; border: 2px solid #e2e8f0; padding: 10px; border-radius: 8px;
+            cursor: pointer; margin: 0; font-size: 13px; display: flex; align-items: center;
+            gap: 8px; transition: 0.2s; font-weight: 600; color: #334155;
         }
         .meses-selector label:hover { border-color: var(--primary); }
-        .meses-selector input[type="checkbox"] {
-            width: auto;
-            margin: 0;
-            cursor: pointer;
-        }
-        .meses-selector label.selected {
-            background: #dbeafe;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
+        .meses-selector input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+        .meses-selector label.selected { background: #dbeafe; border-color: var(--primary); color: var(--primary); }
+        .meses-selector label.disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .badge-estado {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-        }
+        .badge-estado { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
         .badge-pendiente { background: #fef3c7; color: #92400e; }
         .badge-verificado { background: #dcfce7; color: #166534; }
         .badge-rechazado { background: #fee2e2; color: #991b1b; }
 
-        .pago-historial-item {
-            background: #f8fafc;
-            border-left: 4px solid #3b82f6;
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
+        .pago-historial-item { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
         .pago-historial-item.pendiente { border-left-color: var(--yellow); }
         .pago-historial-item.rechazado { border-left-color: var(--red); }
+        .pago-historial-item.abono { border-left-color: #f59e0b; }
 
-        .resumen-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 14px;
-        }
+        .resumen-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
         .resumen-item:last-child { border-bottom: none; }
         .resumen-item .label { color: #64748b; font-weight: 600; }
         .resumen-item .value { font-weight: bold; text-align: right; }
 
-        /* Aviso toast */
         .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #0f172a;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 13px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            opacity: 0;
-            transition: opacity 0.3s;
-            max-width: 90%;
-            text-align: center;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #0f172a; color: white; padding: 12px 20px; border-radius: 8px;
+            font-size: 13px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0; transition: opacity 0.3s; max-width: 90%; text-align: center;
         }
         .toast.show { opacity: 1; }
+
+        .hijo-pago-familiar {
+            background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .hijo-pago-familiar h4 { color: var(--primary); margin-bottom: 8px; font-size: 14px; }
+        .hijo-pago-familiar .deuda-hijo {
+            background: #fee2e2; padding: 8px 12px; border-radius: 6px; font-size: 12px;
+            color: #991b1b; font-weight: bold; margin-bottom: 10px;
+        }
+        .hijo-pago-familiar .deuda-hijo.solvente { background: #dcfce7; color: #166534; }
 
         @media (max-width: 480px) {
             .name-fields { grid-template-columns: 1fr; }
@@ -214,7 +157,7 @@
         </div>
         
         <div class="info-box">
-            <strong>⚠️ Importante:</strong> Ingrese la <strong>Cédula del Representante</strong> exactamente como fue registrada en el sistema. No use puntos ni guiones.
+            <strong>⚠️ Importante:</strong> Ingrese la <strong>Cédula del Representante</strong> exactamente como fue registrada. No use puntos ni guiones.
         </div>
     </div>
 
@@ -232,24 +175,12 @@
                 <input type="text" id="sol-cedula" required placeholder="Ej: 12345678" inputmode="numeric" maxlength="12">
 
                 <div class="name-fields">
-                    <div>
-                        <label>Primer Nombre *</label>
-                        <input type="text" id="sol-pnombre" required autocomplete="given-name">
-                    </div>
-                    <div>
-                        <label>Segundo Nombre <span class="optional-note">(opcional)</span></label>
-                        <input type="text" id="sol-snombre" autocomplete="additional-name">
-                    </div>
+                    <div><label>Primer Nombre *</label><input type="text" id="sol-pnombre" required autocomplete="given-name"></div>
+                    <div><label>Segundo Nombre <span class="optional-note">(opcional)</span></label><input type="text" id="sol-snombre" autocomplete="additional-name"></div>
                 </div>
                 <div class="name-fields">
-                    <div>
-                        <label>Primer Apellido *</label>
-                        <input type="text" id="sol-papellido" required autocomplete="family-name">
-                    </div>
-                    <div>
-                        <label>Segundo Apellido <span class="optional-note">(opcional)</span></label>
-                        <input type="text" id="sol-sapellido">
-                    </div>
+                    <div><label>Primer Apellido *</label><input type="text" id="sol-papellido" required autocomplete="family-name"></div>
+                    <div><label>Segundo Apellido <span class="optional-note">(opcional)</span></label><input type="text" id="sol-sapellido"></div>
                 </div>
 
                 <label>Teléfono *</label>
@@ -287,6 +218,9 @@
             <p style="font-size:12px; color:gray; margin-bottom:15px;">Haga clic en un estudiante para ver detalles y reportar pagos.</p>
             
             <div id="hijos-lista"></div>
+            
+            <button class="btn-familiar" onclick="abrirPagoFamiliar()">👨‍👩‍👧‍👦 PAGO FAMILIAR (varios hijos)</button>
+            <button class="btn-historial" onclick="abrirHistorialPagos()">📜 MIS PAGOS / HISTORIAL</button>
         </div>
         
         <div class="alert-box">
@@ -310,20 +244,6 @@
             </div>
         </div>
         
-        <!-- Aviso: alumno SIN MESES asignados -->
-        <div id="aviso-sin-meses" class="card" style="display:none;">
-            <div class="sin-meses-box">
-                <div style="font-size: 45px; margin-bottom: 10px;">⚠️</div>
-                <h3 style="margin-bottom: 10px;">Pendiente de asignación</h3>
-                <p style="font-size: 14px; line-height: 1.6;">
-                    Este estudiante aún no tiene meses asignados por la administración.<br><br>
-                    <strong>No es posible reportar pagos todavía.</strong><br>
-                    Por favor contacta a la administración del colegio para que activen la deuda de tu representado.
-                </p>
-            </div>
-        </div>
-        
-        <!-- Pagos pendientes de verificación -->
         <div class="card" id="pagos-pendientes-card" style="display:none;">
             <h3 style="color:var(--primary); margin-bottom:10px;">⏳ Pagos en revisión</h3>
             <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Estos pagos están siendo verificados por la administración.</p>
@@ -333,7 +253,7 @@
         <div class="card" id="card-reportar-pago">
             <h3 style="color:var(--primary); margin-bottom:10px;">💳 Reportar Pago</h3>
             <div class="info-box">
-                <strong>📝 Instrucciones:</strong> Complete todos los campos según su comprobante de pago. Seleccione los meses que está cancelando.
+                <strong>📝 Instrucciones:</strong> Puede seleccionar uno o varios meses y pagar el monto completo o un abono parcial. La administración lo verificará.
             </div>
             
             <form id="payment-form" onsubmit="enviarPago(event)">
@@ -342,11 +262,11 @@
                 <input type="hidden" id="input-nombre-rep">
                 <input type="hidden" id="input-cedula-rep">
                 
-                <label>Seleccione los meses que está pagando:</label>
+                <label>Seleccione los meses a pagar/abonar:</label>
                 <div id="meses-selector-container" class="meses-selector"></div>
                 <div id="meses-seleccionados-info" style="margin-top:10px; padding:10px; background:#f1f5f9; border-radius:8px; font-size:13px;">
                     <b>Meses seleccionados:</b> <span id="meses-count">0</span> | 
-                    <b>Total estimado:</b> <span id="total-estimado" style="color:#1e40af; font-weight:bold;">$0.00</span>
+                    <b>Total esperado:</b> <span id="total-estimado" style="color:#1e40af; font-weight:bold;">$0.00</span>
                 </div>
                 
                 <label>Método de Pago:</label>
@@ -411,6 +331,99 @@
             </form>
         </div>
     </div>
+
+    <!-- PASO 4.5: PAGO FAMILIAR -->
+    <div id="step-familiar" class="step">
+        <button class="btn-secondary" onclick="cerrarPagoFamiliar()">⬅ Volver a la lista</button>
+        
+        <div class="card" style="margin-top:15px;">
+            <h3 style="color:#7c3aed; margin-bottom:10px;">👨‍👩‍👧‍👦 Pago Familiar</h3>
+            <p style="font-size:13px; color:#64748b; margin-bottom:15px;">
+                Asigne el monto que va a pagar a cada hijo. Puede ser pago completo o abono parcial.
+            </p>
+            
+            <div id="familiar-hijos-container"></div>
+            
+            <div id="familiar-resumen" style="margin-top:15px; padding:15px; background:#ede9fe; border-radius:10px;">
+                <div class="resumen-item">
+                    <span class="label">Total a pagar:</span>
+                    <span class="value" id="familiar-total" style="color:#7c3aed; font-size:18px;">$0.00</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 style="color:var(--primary); margin-bottom:10px;">💳 Datos del Pago</h3>
+            
+            <form id="familiar-form" onsubmit="enviarPagoFamiliar(event)">
+                <label>Método de Pago:</label>
+                <select id="fam-metodo" required onchange="toggleMetodoPagoFamiliar()">
+                    <option value="">Seleccione...</option>
+                    <option value="Punto de Venta">Punto de Venta</option>
+                    <option value="Pago Móvil">Pago Móvil</option>
+                    <option value="Referencia Bancaria">Referencia Bancaria</option>
+                    <option value="Efectivo">Efectivo</option>
+                </select>
+                
+                <div id="fam-div-banco" style="display:none;">
+                    <label>Banco de Origen:</label>
+                    <select id="fam-banco">
+                        <option value="">Seleccione...</option>
+                        <option value="Banesco">Banesco</option>
+                        <option value="Mercantil">Mercantil</option>
+                        <option value="Provincial">Provincial</option>
+                        <option value="Banco de Venezuela">Banco de Venezuela</option>
+                        <option value="BNC">BNC</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                
+                <div id="fam-div-cuenta" style="display:none;">
+                    <label>Número de Cuenta/Cédula/RIF:</label>
+                    <input type="text" id="fam-cuenta">
+                </div>
+                
+                <div id="fam-div-referencia" style="display:none;">
+                    <label>Número de Referencia:</label>
+                    <input type="text" id="fam-ref">
+                </div>
+                
+                <label>Monto total en Bolívares (Bs.):</label>
+                <input type="number" id="fam-monto-bs" placeholder="0.00" step="0.01" min="0">
+                
+                <label>Fecha de la Transacción:</label>
+                <input type="date" id="fam-fecha" required>
+                
+                <label>Observaciones (Opcional):</label>
+                <textarea id="fam-observaciones" rows="2"></textarea>
+                
+                <div class="alert-box">
+                    <strong>✅ Confirmación:</strong> Se enviará un reporte familiar con los montos asignados.
+                </div>
+                
+                <button type="submit" class="btn-familiar" id="btn-familiar-submit">📤 ENVIAR PAGO FAMILIAR</button>
+                <div id="loading-familiar" class="loading" style="display:none;">
+                    <span class="spinner"></span>Enviando...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PASO 4.6: HISTORIAL DE PAGOS -->
+    <div id="step-historial" class="step">
+        <button class="btn-secondary" onclick="cerrarHistorial()">⬅ Volver a la lista</button>
+        
+        <div class="card" style="margin-top:15px;">
+            <h3 style="color:#0891b2; margin-bottom:10px;">📜 Mis Pagos</h3>
+            <p style="font-size:13px; color:#64748b; margin-bottom:15px;">
+                Historial completo de pagos y reportes pendientes de toda la familia.
+            </p>
+            
+            <div id="historial-container">
+                <div class="loading"><span class="spinner"></span>Cargando...</div>
+            </div>
+        </div>
+    </div>
     
     <!-- PASO 5: CONFIRMACIÓN -->
     <div id="step-4" class="step" style="text-align: center;">
@@ -435,13 +448,13 @@
 
 <script type="module">
     // ═══════════════════════════════════════════════════════
-    // PORTAL DE PADRES V21 - CONCORDANCIA CON ADMIN V19
+    // PORTAL V22 - Con regla día 10, abonos, pago familiar, antiduplicados
     // ═══════════════════════════════════════════════════════
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, query, where, getDocs,
-        updateDoc, doc, serverTimestamp, onSnapshot
+        updateDoc, doc, serverTimestamp, onSnapshot, getDoc
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -460,13 +473,15 @@
     const DB_PAGOS = "pagos_reportados";
     const DB_HISTORIAL = "historial_pagos";
     const DB_SOLICITUDES = "solicitudes_registro";
+    const DB_DUPLICADOS = "intentos_duplicados";
 
     const MESES_ORDEN = ["Inscripción", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"];
 
     // ═══════════════════════════════════════════════════════
-    // UTILIDADES
+    // REGLA V22: Cada mes se cobra a partir del día 10
     // ═══════════════════════════════════════════════════════
-    
+    const DIA_INICIO_COBRO = 10;
+
     function normalizarMes(m) {
         return (m || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
@@ -493,10 +508,6 @@
     }
     window.mostrarToast = mostrarToast;
     
-    // ═══════════════════════════════════════════════════════
-    // CÁLCULO DE MESES Y ESTADOS (igual que admin V19)
-    // ═══════════════════════════════════════════════════════
-    
     let mesActualIndex = 6;
     function calcularMesActual() {
         const fecha = new Date();
@@ -507,16 +518,25 @@
             const m = fecha.getMonth();
             mesActualIndex = m >= 8 ? (m - 7) : (m + 5);
         }
-        console.log(`[Portal V21] Mes actual: "${mesNombre}" → índice ${mesActualIndex} (${MESES_ORDEN[mesActualIndex]})`);
     }
     calcularMesActual();
     
+    // Regla día 10
     function calcularMesesReales(mesesRegistrados) {
         if (!mesesRegistrados || !Array.isArray(mesesRegistrados)) return [];
+        const diaActual = new Date().getDate();
         return mesesRegistrados.filter(mes => {
             const idx = indiceMes(mes);
-            return idx !== -1 && idx <= mesActualIndex;
+            if (idx === -1) return false;
+            if (idx < mesActualIndex) return true;
+            if (idx === mesActualIndex) return diaActual >= DIA_INICIO_COBRO;
+            return false;
         });
+    }
+    function estaEnGracia(mes) {
+        const idx = indiceMes(mes);
+        if (idx !== mesActualIndex) return false;
+        return new Date().getDate() < DIA_INICIO_COBRO;
     }
     function isSolvente(mesesRegistrados) {
         return calcularMesesReales(mesesRegistrados || []).length === 0;
@@ -525,7 +545,7 @@
         return (montoMensual || 0) * calcularMesesReales(mesesRegistrados || []).length;
     }
     
-    // Cache de evidencia de pago por nombre (igual que admin V19)
+    // Cache historial
     let cacheHistorialPorAlumno = {};
     let cacheHistorialCargado = false;
     
@@ -551,17 +571,13 @@
         return pagos.length > 0;
     }
     
-    // Devuelve 'DEUDOR', 'SOLVENTE' o 'SIN_MESES' (igual que admin V19)
     function getEstadoAlumno(alumno) {
         const mesesRegistrados = alumno.meses || [];
         const mesesReales = calcularMesesReales(mesesRegistrados);
-        
         if (mesesReales.length > 0) return 'DEUDOR';
-        if (mesesRegistrados.length > 0 && mesesReales.length === 0) return 'SOLVENTE';
-        if (tieneEvidenciaDePago(alumno.nombre)) return 'SOLVENTE';
-        return 'SIN_MESES';
+        return 'SOLVENTE';
     }
-
+    
     // ═══════════════════════════════════════════════════════
     // ESTADO
     // ═══════════════════════════════════════════════════════
@@ -576,9 +592,13 @@
     let historialPagosAlumno = [];
     let unsubscribePagosAlumno = null;
     let unsubscribeAlumno = null;
-    let montoMensualActual = 0; // para detectar cambios de monto mientras el padre está en pantalla
+    let montoMensualActual = 0;
+    
+    // Pago familiar
+    let asignacionesFamiliar = {}; // { hijoId: { monto, meses: [] } }
 
     document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fam-fecha').value = new Date().toISOString().split('T')[0];
 
     // ═══════════════════════════════════════════════════════
     // LOGIN
@@ -616,7 +636,6 @@
                 return;
             }
             
-            // Cargar cache de historial antes de mostrar la lista
             if (!cacheHistorialCargado) await cargarCacheHistorial();
             
             hijosActuales = [];
@@ -645,7 +664,7 @@
     };
 
     // ═══════════════════════════════════════════════════════
-    // LISTA DE HIJOS (V21: 3 estados)
+    // LISTA DE HIJOS
     // ═══════════════════════════════════════════════════════
     
     function mostrarListaHijos() {
@@ -662,18 +681,19 @@
             const mesesReales = calcularMesesReales(hijo.meses || []);
             const totalDeuda = montoMensual * mesesReales.length;
             const estado = getEstadoAlumno(hijo);
+            const abonos = hijo.abonos || {};
             
             let claseCard, estadoHTML;
             if (estado === 'DEUDOR') {
                 claseCard = 'deudor';
+                const tieneAbono = Object.values(abonos).some(v => v > 0);
+                const abonoTag = tieneAbono ? `<span class="abono-tag">🟡 Abonos registrados</span>` : '';
                 estadoHTML = `<span class="debt-tag">💰 $${totalDeuda.toFixed(2)}</span>
-                              <span class="debt-tag">📅 ${mesesReales.length} mes(es) pendiente(s)</span>`;
-            } else if (estado === 'SOLVENTE') {
+                              <span class="debt-tag">📅 ${mesesReales.length} mes(es)</span>
+                              ${abonoTag}`;
+            } else {
                 claseCard = 'solvente';
                 estadoHTML = `<span class="solvente-tag">✅ AL DÍA</span>`;
-            } else {
-                claseCard = 'sin-meses';
-                estadoHTML = `<span class="sin-meses-tag">⚠️ Pendiente de asignación</span>`;
             }
             
             const card = document.createElement('div');
@@ -729,48 +749,30 @@
         document.getElementById('input-nombre-rep').value = e.rep;
         document.getElementById('input-cedula-rep').value = e.cedula || '';
         
-        // Info de deuda / estado
         const deudaInfoDiv = document.getElementById('deuda-info');
-        const avisoSinMeses = document.getElementById('aviso-sin-meses');
         const cardPago = document.getElementById('card-reportar-pago');
         
-        if (estado === 'SIN_MESES') {
-            deudaInfoDiv.innerHTML = '';
-            avisoSinMeses.style.display = 'block';
-            cardPago.style.display = 'none';
-        } else if (estado === 'DEUDOR') {
+        if (estado === 'DEUDOR') {
             deudaInfoDiv.innerHTML = `
                 <div style="background:#fef3c7; padding:15px; border-radius:8px; margin:10px 0;">
                     <strong style="color:#92400e;">💰 Deuda actual: $${totalDeuda.toFixed(2)}</strong><br>
                     <span style="font-size:13px; color:#92400e;">📅 ${mesesReales.length} mes(es) vencido(s) por pagar</span>
                 </div>
             `;
-            avisoSinMeses.style.display = 'none';
             cardPago.style.display = 'block';
         } else {
             deudaInfoDiv.innerHTML = `
                 <div class="success-box">✅ Este estudiante está al día, no tiene meses vencidos.</div>
             `;
-            avisoSinMeses.style.display = 'none';
             cardPago.style.display = 'block';
         }
         
-        // Cargar historial y pendientes
         await cargarHistorialYPendientes(e.nombre);
-        
-        // Cuadrícula
         renderizarCuadricula(e, mesesPendientes, estado);
-        
-        // Selector de meses
         renderizarSelectorMeses(e, estado);
-        
-        // Pagos pendientes
         renderizarPagosPendientes();
-        
-        // Resetear formulario
         resetearFormularioPago();
         
-        // Listener en tiempo real
         if (unsubscribePagosAlumno) unsubscribePagosAlumno();
         unsubscribePagosAlumno = onSnapshot(
             query(collection(db, DB_PAGOS), where("nombreEst", "==", e.nombre)),
@@ -790,32 +792,26 @@
             }
         );
         
-        // Listener en tiempo real del alumno (para detectar cambios de monto/meses)
         if (unsubscribeAlumno) unsubscribeAlumno();
         unsubscribeAlumno = onSnapshot(doc(db, DB_MAIN, e.id), (docSnap) => {
             if (!docSnap.exists()) return;
             const nuevoAlumno = { id: docSnap.id, ...docSnap.data() };
             const nuevoMonto = parseFloat(nuevoAlumno.montoMensual) || 0;
             
-            // Detectar cambio de monto
             if (montoMensualActual > 0 && nuevoMonto !== montoMensualActual) {
                 mostrarToast(`⚠️ El monto mensual cambió: $${montoMensualActual.toFixed(2)} → $${nuevoMonto.toFixed(2)}`, 6000);
             }
             
-            // Actualizar referencia
             estudianteSeleccionado = nuevoAlumno;
             montoMensualActual = nuevoMonto;
             
-            // Actualizar en la lista local
             const idx = hijosActuales.findIndex(h => h.id === nuevoAlumno.id);
             if (idx !== -1) hijosActuales[idx] = nuevoAlumno;
             
-            // Re-renderizar cuadrícula y selector
             const estadoAct = getEstadoAlumno(nuevoAlumno);
             renderizarCuadricula(nuevoAlumno, nuevoAlumno.meses || [], estadoAct);
             renderizarSelectorMeses(nuevoAlumno, estadoAct);
             
-            // Actualizar info del estudiante (monto)
             const infoDiv = document.getElementById('estudiante-info');
             if (infoDiv) {
                 infoDiv.innerHTML = `
@@ -825,17 +821,6 @@
                     <strong>🪪 Cédula:</strong> ${esc(nuevoAlumno.cedula || 'No registrada')}<br>
                     <strong>💰 Monto Mensual:</strong> $${nuevoMonto.toFixed(2)}
                 `;
-            }
-            
-            // Actualizar visibilidad de aviso sin meses
-            const aviso = document.getElementById('aviso-sin-meses');
-            const cardPago = document.getElementById('card-reportar-pago');
-            if (estadoAct === 'SIN_MESES') {
-                if (aviso) aviso.style.display = 'block';
-                if (cardPago) cardPago.style.display = 'none';
-            } else {
-                if (aviso) aviso.style.display = 'none';
-                if (cardPago) cardPago.style.display = 'block';
             }
         });
     }
@@ -864,15 +849,8 @@
         const container = document.getElementById('cuadricula-meses');
         if (!container) return;
         
-        // Si está SIN_MESES, mostrar todos grises con etiqueta "sin asignar"
-        if (estado === 'SIN_MESES') {
-            let html = '';
-            MESES_ORDEN.forEach(mes => {
-                html += `<div class="mes-celda sin-asignar">⚠️ ${esc(mes)}</div>`;
-            });
-            container.innerHTML = html;
-            return;
-        }
+        const abonos = estudiante.abonos || {};
+        const montoMensual = parseFloat(estudiante.montoMensual) || 0;
         
         const mesesPagados = new Set();
         historialPagosAlumno.forEach(h => {
@@ -888,18 +866,25 @@
         MESES_ORDEN.forEach(mes => {
             const idx = indiceMes(mes);
             const esFuturo = idx > mesActualIndex;
+            const esGracia = estaEnGracia(mes);
             const estaPagado = mesesPagados.has(mes);
-            const estaPendiente = mesesPendientesVerif.has(mes);
-            const estaDebiendo = (mesesPendientes || []).includes(mes) && !estaPendiente;
+            const estaPendienteVerif = mesesPendientesVerif.has(mes);
+            const estaDebiendo = (mesesPendientes || []).includes(mes);
+            const abonoMes = abonos[mes] || 0;
             
-            let clase, icono;
+            let clase, icono, textoExtra = '';
             if (estaPagado) { clase = 'pagado'; icono = '✅'; }
-            else if (estaPendiente) { clase = 'pendiente-verif'; icono = '⏳'; }
-            else if (estaDebiendo) { clase = 'pendiente'; icono = '❌'; }
+            else if (estaPendienteVerif) { clase = 'pendiente-verif'; icono = '⏳'; }
+            else if (abonoMes > 0 && abonoMes < montoMensual) {
+                clase = 'abono'; icono = '🟡';
+                textoExtra = ` $${abonoMes.toFixed(0)}/$${montoMensual.toFixed(0)}`;
+            }
+            else if (estaDebiendo && !esFuturo) { clase = 'pendiente'; icono = '🔴'; }
+            else if (esGracia) { clase = 'gracia'; icono = '🕐'; }
             else if (esFuturo) { clase = 'futuro'; icono = '⏳'; }
             else { clase = 'futuro'; icono = '—'; }
             
-            html += `<div class="mes-celda ${clase}">${icono} ${esc(mes)}</div>`;
+            html += `<div class="mes-celda ${clase}">${icono} ${esc(mes)}${textoExtra}</div>`;
         });
         container.innerHTML = html;
     }
@@ -930,7 +915,7 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // SELECTOR DE MESES (V21: bloqueo si SIN_MESES)
+    // SELECTOR DE MESES - V22: TODOS desbloqueados
     // ═══════════════════════════════════════════════════════
     
     function renderizarSelectorMeses(estudiante, estado) {
@@ -940,41 +925,38 @@
         const btnSubmit = document.getElementById('btn-submit');
         const cardPago = document.getElementById('card-reportar-pago');
         
-        // Bloqueo si está SIN_MESES
-        if (estado === 'SIN_MESES') {
-            container.innerHTML = '<div class="sin-meses-box" style="grid-column:1/-1;">⚠️ Este estudiante aún no tiene meses asignados. No es posible reportar pagos.</div>';
-            if (btnSubmit) btnSubmit.disabled = true;
-            if (cardPago) cardPago.style.opacity = '0.5';
-            mesesSeleccionadosPago = [];
-            actualizarResumenMeses();
-            return;
-        }
-        
         if (cardPago) cardPago.style.opacity = '1';
         if (btnSubmit) btnSubmit.disabled = false;
         
         const meses = estudiante.meses || [];
-        const mesesReales = calcularMesesReales(meses);
+        
+        if (meses.length === 0) {
+            container.innerHTML = '<div class="success-box" style="grid-column:1/-1;">✅ No hay meses pendientes. Contacta a la administración si necesitas registrar un pago.</div>';
+            if (btnSubmit) btnSubmit.disabled = true;
+            return;
+        }
         
         const mesesEnVerif = new Set();
         pagosPendientesAlumno.forEach(p => {
             (p.mesesPagados || []).forEach(m => mesesEnVerif.add(m));
         });
         
-        if (mesesReales.length === 0) {
-            container.innerHTML = '<div class="success-box" style="grid-column:1/-1;">✅ No hay meses vencidos por pagar.</div>';
-            if (btnSubmit) btnSubmit.disabled = true;
-            return;
-        }
-        
-        container.innerHTML = mesesReales.map(m => {
+        // V22: Mostrar TODOS los meses (no solo vencidos) para permitir adelantos
+        container.innerHTML = meses.map(m => {
             const enVerif = mesesEnVerif.has(m);
+            const idx = indiceMes(m);
+            const esFuturo = idx > mesActualIndex;
+            const esGracia = estaEnGracia(m);
+            let etiqueta = '';
+            if (esFuturo) etiqueta = ' <small style="color:#64748b;">(futuro)</small>';
+            else if (esGracia) etiqueta = ' <small style="color:#4338ca;">(gracia)</small>';
+            
             return `
                 <label class="${enVerif ? 'disabled' : ''}" style="${enVerif ? 'opacity:0.5; cursor:not-allowed;' : ''}">
                     <input type="checkbox" value="${esc(m)}" class="mes-checkbox" 
                         ${enVerif ? 'disabled' : ''} 
                         onchange="toggleMesSeleccionado(this)">
-                    ${esc(m)} ${enVerif ? '<small style="color:#f59e0b;">(en revisión)</small>' : ''}
+                    ${esc(m)}${etiqueta} ${enVerif ? '<small style="color:#f59e0b;">(en revisión)</small>' : ''}
                 </label>
             `;
         }).join('');
@@ -1026,10 +1008,17 @@
         
         const diff = Math.abs(esperado - montoUsd);
         if (diff > 0.5) {
-            aviso.innerHTML = `⚠️ <strong>El monto no coincide con los meses seleccionados.</strong><br>
-                Esperado: <b>$${esperado.toFixed(2)}</b> (${mesesSeleccionadosPago.length} × $${montoMensual.toFixed(2)})<br>
-                Ingresado: <b>$${montoUsd.toFixed(2)}</b><br>
-                <small>Verifique antes de enviar. La administración validará el monto.</small>`;
+            if (montoUsd < esperado) {
+                aviso.innerHTML = `🟡 <strong>Estás haciendo un ABONO PARCIAL.</strong><br>
+                    Esperado completo: <b>$${esperado.toFixed(2)}</b> (${mesesSeleccionadosPago.length} × $${montoMensual.toFixed(2)})<br>
+                    Vas a abonar: <b>$${montoUsd.toFixed(2)}</b><br>
+                    <small>El mes quedará marcado como abono hasta cubrir el total.</small>`;
+            } else {
+                aviso.innerHTML = `⚠️ <strong>El monto excede lo esperado.</strong><br>
+                    Esperado: <b>$${esperado.toFixed(2)}</b><br>
+                    Ingresado: <b>$${montoUsd.toFixed(2)}</b><br>
+                    <small>Verifica antes de enviar.</small>`;
+            }
             aviso.style.display = 'block';
         } else {
             aviso.style.display = 'none';
@@ -1081,7 +1070,98 @@
     };
 
     // ═══════════════════════════════════════════════════════
-    // ENVIAR PAGO
+    // ANTIDUPLICADOS - Registra intento para admin
+    // ═══════════════════════════════════════════════════════
+    
+    async function registrarIntentoDuplicado(datos) {
+        try {
+            await addDoc(collection(db, DB_DUPLICADOS), {
+                ...datos,
+                fecha: serverTimestamp(),
+                revisado: false
+            });
+        } catch (e) {
+            console.error("Error guardando intento duplicado:", e);
+        }
+    }
+    
+    async function validarDuplicado(referencia, nombreEst, mesesPagados, monto) {
+        if (!referencia) return { duplicado: false };
+        
+        try {
+            // 1. Verificar en pagos_reportados (pendientes o cualquier estado)
+            const q1 = query(collection(db, DB_PAGOS), where("referencia", "==", referencia));
+            const snap1 = await getDocs(q1);
+            if (!snap1.empty) {
+                const existente = snap1.docs[0].data();
+                await registrarIntentoDuplicado({
+                    nombreEst,
+                    nombreRep: representanteActual,
+                    cedulaRep: cedulaActual,
+                    referencia,
+                    mesesPagados,
+                    monto,
+                    motivo: 'referencia_ya_en_pagos_pendientes',
+                    existenteEstado: existente.estado || 'desconocido'
+                });
+                return { duplicado: true, motivo: 'referencia_ya_en_pagos_pendientes' };
+            }
+            
+            // 2. Verificar en historial_pagos
+            const q2 = query(collection(db, DB_HISTORIAL), where("referencia", "==", referencia));
+            const snap2 = await getDocs(q2);
+            if (!snap2.empty) {
+                await registrarIntentoDuplicado({
+                    nombreEst,
+                    nombreRep: representanteActual,
+                    cedulaRep: cedulaActual,
+                    referencia,
+                    mesesPagados,
+                    monto,
+                    motivo: 'referencia_ya_verificada_en_historial'
+                });
+                return { duplicado: true, motivo: 'referencia_ya_verificada_en_historial' };
+            }
+            
+            // 3. Verificar mismo mes + mismo monto pendiente (posible reporte repetido)
+            const q3 = query(
+                collection(db, DB_PAGOS),
+                where("cedulaRep", "==", cedulaActual),
+                where("nombreEst", "==", nombreEst)
+            );
+            const snap3 = await getDocs(q3);
+            for (const docSnap of snap3.docs) {
+                const d = docSnap.data();
+                if ((d.estado || '').toLowerCase().includes('pendiente')) {
+                    const mOntEx = parseFloat(d.montoDivisas || 0);
+                    const mesesEx = (d.mesesPagados || []).slice().sort().join('|');
+                    const mesesNew = (mesesPagados || []).slice().sort().join('|');
+                    if (Math.abs(mOntEx - monto) < 0.5 && mesesEx === mesesNew) {
+                        await registrarIntentoDuplicado({
+                            nombreEst,
+                            nombreRep: representanteActual,
+                            cedulaRep: cedulaActual,
+                            referencia,
+                            mesesPagados,
+                            monto,
+                            motivo: 'mismo_mes_mismo_monto_pendiente',
+                            existenteMeses: d.mesesPagados,
+                            existenteMonto: mOntEx
+                        });
+                        return { duplicado: true, motivo: 'mismo_mes_mismo_monto_pendiente' };
+                    }
+                }
+            }
+            
+            return { duplicado: false };
+        } catch (e) {
+            console.error("Error validando duplicado:", e);
+            return { duplicado: false };
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ENVIAR PAGO INDIVIDUAL
     // ═══════════════════════════════════════════════════════
     
     window.enviarPago = async function(e) {
@@ -1090,12 +1170,7 @@
         const btn = document.getElementById('btn-submit');
         const loader = document.getElementById('loading-submit');
         
-        // Bloqueo de seguridad si SIN_MESES
         const estadoActual = getEstadoAlumno(estudianteSeleccionado);
-        if (estadoActual === 'SIN_MESES') {
-            alert("⚠️ Este estudiante aún no tiene meses asignados. No es posible reportar pagos.");
-            return;
-        }
         
         if (mesesSeleccionadosPago.length === 0) {
             alert("⚠️ Debe seleccionar al menos un mes para pagar");
@@ -1116,38 +1191,37 @@
         
         const referencia = document.getElementById('input-ref').value.trim();
         
-        if (referencia) {
-            try {
-                const qDup = query(collection(db, DB_PAGOS), where("referencia", "==", referencia));
-                const snapDup = await getDocs(qDup);
-                if (!snapDup.empty) {
-                    const continuar = confirm(`⚠️ Ya existe un reporte con la referencia ${referencia}.\n\n¿Está seguro de que es un pago diferente? Si es el mismo, cancele para evitar duplicados.`);
-                    if (!continuar) return;
-                }
-            } catch (err) {
-                console.warn("No se pudo validar duplicado:", err);
-            }
-        }
-        
-        const mesesEnVerif = new Set();
-        pagosPendientesAlumno.forEach(p => {
-            (p.mesesPagados || []).forEach(m => mesesEnVerif.add(m));
-        });
-        const conflictos = mesesSeleccionadosPago.filter(m => mesesEnVerif.has(m));
-        if (conflictos.length > 0) {
-            alert(`⚠️ Los siguientes meses ya están en revisión:\n${conflictos.join(', ')}\n\nEspere a que la administración los verifique.`);
-            return;
-        }
-        
         btn.disabled = true;
         loader.style.display = "block";
         
         try {
+            // ANTIDUPLICADOS
+            const check = await validarDuplicado(referencia, estudianteSeleccionado.nombre, mesesSeleccionadosPago, montoUSD);
+            if (check.duplicado) {
+                let msg = "⚠️ Reporte bloqueado por seguridad.\n\n";
+                if (check.motivo === 'referencia_ya_en_pagos_pendientes') {
+                    msg += `Ya existe un reporte pendiente con la referencia ${referencia}.`;
+                } else if (check.motivo === 'referencia_ya_verificada_en_historial') {
+                    msg += `La referencia ${referencia} ya fue verificada anteriormente.`;
+                } else if (check.motivo === 'mismo_mes_mismo_monto_pendiente') {
+                    msg += `Ya enviaste un reporte con los mismos meses y monto que está en revisión.`;
+                }
+                msg += "\n\nLa administración ha sido notificada de este intento.";
+                alert(msg);
+                btn.disabled = false;
+                loader.style.display = "none";
+                return;
+            }
+            
             const banco = document.getElementById('input-banco').value;
             const cuenta = document.getElementById('input-cuenta').value;
             const montoBs = parseFloat(document.getElementById('input-monto-bs').value) || 0;
             const fecha = document.getElementById('input-fecha').value;
             const observaciones = document.getElementById('input-observaciones').value;
+            
+            const montoMensual = parseFloat(estudianteSeleccionado.montoMensual) || 0;
+            const esperado = montoMensual * mesesSeleccionadosPago.length;
+            const esAbono = montoUSD < esperado - 0.5;
             
             const reporteData = {
                 nombreEst: document.getElementById('input-nombre-est').value,
@@ -1159,24 +1233,28 @@
                 cuenta: cuenta,
                 montoBs: montoBs,
                 montoDivisas: montoUSD,
+                montoEsperado: esperado,
+                esAbono: esAbono,
                 fechaPago: fecha,
                 fechaPagoTimestamp: new Date(fecha + 'T00:00:00'),
                 observaciones: observaciones,
                 mesesPagados: [...mesesSeleccionadosPago],
                 estado: "Pendiente de verificación",
                 timestamp: serverTimestamp(),
-                origen: "portal_padres_v21"
+                origen: "portal_padres_v22"
             };
             
             await addDoc(collection(db, DB_PAGOS), reporteData);
             
+            const tipoPago = esAbono ? '🟡 ABONO PARCIAL' : '✅ Pago completo';
             const resumen = `
                 <div class="resumen-item"><span class="label">👤 Estudiante:</span><span class="value">${esc(reporteData.nombreEst)}</span></div>
+                <div class="resumen-item"><span class="label">📌 Tipo:</span><span class="value">${tipoPago}</span></div>
                 <div class="resumen-item"><span class="label">💳 Método:</span><span class="value">${esc(reporteData.metodo)}</span></div>
                 ${reporteData.banco ? `<div class="resumen-item"><span class="label">🏦 Banco:</span><span class="value">${esc(reporteData.banco)}</span></div>` : ''}
                 ${reporteData.referencia ? `<div class="resumen-item"><span class="label">🔢 Referencia:</span><span class="value">${esc(reporteData.referencia)}</span></div>` : ''}
                 <div class="resumen-item"><span class="label">💰 Monto en $:</span><span class="value">$${reporteData.montoDivisas.toFixed(2)}</span></div>
-                ${reporteData.montoBs > 0 ? `<div class="resumen-item"><span class="label">💵 Monto en Bs:</span><span class="value">Bs. ${reporteData.montoBs.toFixed(2)}</span></div>` : ''}
+                <div class="resumen-item"><span class="label">🎯 Esperado:</span><span class="value">$${esperado.toFixed(2)}</span></div>
                 <div class="resumen-item"><span class="label">📅 Meses:</span><span class="value">${mesesSeleccionadosPago.map(m => esc(m)).join(', ')}</span></div>
                 <div class="resumen-item"><span class="label">📆 Fecha:</span><span class="value">${new Date(reporteData.fechaPago).toLocaleDateString('es-ES')}</span></div>
             `;
@@ -1214,6 +1292,387 @@
         document.querySelectorAll('.meses-selector label').forEach(l => l.classList.remove('selected'));
         actualizarResumenMeses();
     }
+
+    // ═══════════════════════════════════════════════════════
+    // PAGO FAMILIAR
+    // ═══════════════════════════════════════════════════════
+    
+    window.abrirPagoFamiliar = function() {
+        if (hijosActuales.length === 0) return;
+        
+        asignacionesFamiliar = {};
+        const container = document.getElementById('familiar-hijos-container');
+        
+        container.innerHTML = hijosActuales.map((hijo, i) => {
+            const montoMensual = parseFloat(hijo.montoMensual) || 0;
+            const mesesReales = calcularMesesReales(hijo.meses || []);
+            const totalDeuda = montoMensual * mesesReales.length;
+            const estado = getEstadoAlumno(hijo);
+            const abonos = hijo.abonos || {};
+            
+            if (estado === 'SOLVENTE' && mesesReales.length === 0) {
+                return `
+                    <div class="hijo-pago-familiar">
+                        <h4>${esc(hijo.nombre)}</h4>
+                        <div class="deuda-hijo solvente">✅ Al día — sin deuda vencida</div>
+                        <p style="font-size:12px; color:#64748b;">Este hijo no tiene meses pendientes.</p>
+                    </div>
+                `;
+            }
+            
+            const tieneAbonos = Object.keys(abonos).length > 0;
+            const abonosInfo = tieneAbonos ? `<div style="font-size:11px; color:#92400e; background:#fef3c7; padding:6px 10px; border-radius:5px; margin-bottom:8px;">🟡 Este hijo tiene abonos previos. El total mostrado ya los descuenta.</div>` : '';
+            
+            const mesesDisponibles = hijo.meses || [];
+            
+            return `
+                <div class="hijo-pago-familiar" data-hijo-id="${hijo.id}">
+                    <h4>${esc(hijo.nombre)} <small style="color:#64748b; font-weight:normal;">- ${esc(hijo.grado)} ${esc(hijo.seccion)}</small></h4>
+                    <div class="deuda-hijo">💰 Deuda actual: $${totalDeuda.toFixed(2)} (${mesesReales.length} mes/es)</div>
+                    ${abonosInfo}
+                    <label style="margin-top:0;">Meses a incluir:</label>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:5px;" class="fam-meses-${i}">
+                        ${mesesDisponibles.map(m => `
+                            <label style="background:#f8fafc; padding:5px 8px; border-radius:6px; border:2px solid #e2e8f0; font-size:12px; cursor:pointer; margin:0;">
+                                <input type="checkbox" class="fam-mes-check-${i}" value="${esc(m)}" 
+                                    style="width:auto; margin-right:4px;" onchange="actualizarHijoFamiliar(${i})">
+                                ${esc(m)}
+                            </label>
+                        `).join('')}
+                    </div>
+                    <label style="margin-top:10px;">Monto a pagar por este hijo ($):</label>
+                    <input type="number" id="fam-monto-hijo-${i}" placeholder="0.00" step="0.01" min="0" 
+                        oninput="actualizarHijoFamiliar(${i})" style="margin-top:5px;">
+                    <small style="color:#64748b; font-size:11px;">Puede poner menos para hacer un abono.</small>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('familiar-total').textContent = '$0.00';
+        
+        document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-familiar').classList.add('active');
+        window.scrollTo(0, 0);
+    };
+    
+    window.actualizarHijoFamiliar = function(i) {
+        const montoInput = document.getElementById(`fam-monto-hijo-${i}`);
+        const checkboxes = document.querySelectorAll(`.fam-mes-check-${i}:checked`);
+        const hijo = hijosActuales[i];
+        const montoMensual = parseFloat(hijo.montoMensual) || 0;
+        
+        // Auto-completar el monto si cambian los meses
+        if (checkboxes.length > 0 && (!montoInput.value || parseFloat(montoInput.value) === 0)) {
+            montoInput.value = (montoMensual * checkboxes.length).toFixed(2);
+        }
+        
+        recalcularTotalFamiliar();
+    };
+    
+    function recalcularTotalFamiliar() {
+        let total = 0;
+        hijosActuales.forEach((_, i) => {
+            const monto = parseFloat(document.getElementById(`fam-monto-hijo-${i}`)?.value) || 0;
+            if (monto > 0) total += monto;
+        });
+        document.getElementById('familiar-total').textContent = `$${total.toFixed(2)}`;
+    }
+    
+    window.toggleMetodoPagoFamiliar = function() {
+        const metodo = document.getElementById('fam-metodo').value;
+        const divBanco = document.getElementById('fam-div-banco');
+        const divCuenta = document.getElementById('fam-div-cuenta');
+        const divReferencia = document.getElementById('fam-div-referencia');
+        
+        switch(metodo) {
+            case 'Pago Móvil':
+                divBanco.style.display = 'block';
+                divCuenta.style.display = 'block';
+                divReferencia.style.display = 'block';
+                break;
+            case 'Referencia Bancaria':
+                divBanco.style.display = 'block';
+                divCuenta.style.display = 'none';
+                divReferencia.style.display = 'block';
+                break;
+            default:
+                divBanco.style.display = 'none';
+                divCuenta.style.display = 'none';
+                divReferencia.style.display = 'none';
+        }
+    };
+    
+    window.cerrarPagoFamiliar = function() {
+        document.getElementById('step-familiar').classList.remove('active');
+        document.getElementById('step-2').classList.add('active');
+        window.scrollTo(0, 0);
+    };
+    
+    window.enviarPagoFamiliar = async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('btn-familiar-submit');
+        const loader = document.getElementById('loading-familiar');
+        
+        // Recopilar asignaciones
+        const asignaciones = [];
+        for (let i = 0; i < hijosActuales.length; i++) {
+            const monto = parseFloat(document.getElementById(`fam-monto-hijo-${i}`)?.value) || 0;
+            const meses = Array.from(document.querySelectorAll(`.fam-mes-check-${i}:checked`)).map(c => c.value);
+            
+            if (monto > 0 || meses.length > 0) {
+                if (monto <= 0) {
+                    alert(`⚠️ El hijo ${hijosActuales[i].nombre} tiene meses seleccionados pero monto $0.`);
+                    return;
+                }
+                if (meses.length === 0) {
+                    alert(`⚠️ El hijo ${hijosActuales[i].nombre} tiene monto pero no tiene meses seleccionados.`);
+                    return;
+                }
+                asignaciones.push({
+                    hijoId: hijosActuales[i].id,
+                    nombre: hijosActuales[i].nombre,
+                    meses,
+                    monto,
+                    montoMensual: parseFloat(hijosActuales[i].montoMensual) || 0
+                });
+            }
+        }
+        
+        if (asignaciones.length === 0) {
+            alert("⚠️ Debes asignar monto a al menos un hijo.");
+            return;
+        }
+        
+        const metodo = document.getElementById('fam-metodo').value;
+        if (!metodo) {
+            alert("⚠️ Selecciona un método de pago.");
+            return;
+        }
+        
+        const referencia = document.getElementById('fam-ref')?.value.trim() || '';
+        const totalFamiliar = asignaciones.reduce((s, a) => s + a.monto, 0);
+        
+        btn.disabled = true;
+        loader.style.display = 'block';
+        
+        try {
+            // ANTIDUPLICADOS por referencia
+            if (referencia) {
+                const q1 = query(collection(db, DB_PAGOS), where("referencia", "==", referencia));
+                const snap1 = await getDocs(q1);
+                if (!snap1.empty) {
+                    await registrarIntentoDuplicado({
+                        nombreEst: asignaciones.map(a => a.nombre).join(', '),
+                        nombreRep: representanteActual,
+                        cedulaRep: cedulaActual,
+                        referencia,
+                        mesesPagados: asignaciones.flatMap(a => a.meses),
+                        monto: totalFamiliar,
+                        motivo: 'referencia_ya_en_pagos_pendientes_FAMILIAR',
+                        esFamiliar: true
+                    });
+                    alert(`⚠️ La referencia ${referencia} ya está registrada.`);
+                    btn.disabled = false;
+                    loader.style.display = 'none';
+                    return;
+                }
+                
+                const q2 = query(collection(db, DB_HISTORIAL), where("referencia", "==", referencia));
+                const snap2 = await getDocs(q2);
+                if (!snap2.empty) {
+                    await registrarIntentoDuplicado({
+                        nombreEst: asignaciones.map(a => a.nombre).join(', '),
+                        nombreRep: representanteActual,
+                        cedulaRep: cedulaActual,
+                        referencia,
+                        mesesPagados: asignaciones.flatMap(a => a.meses),
+                        monto: totalFamiliar,
+                        motivo: 'referencia_ya_verificada_FAMILIAR',
+                        esFamiliar: true
+                    });
+                    alert(`⚠️ La referencia ${referencia} ya fue verificada anteriormente.`);
+                    btn.disabled = false;
+                    loader.style.display = 'none';
+                    return;
+                }
+            }
+            
+            const banco = document.getElementById('fam-banco')?.value || '';
+            const cuenta = document.getElementById('fam-cuenta')?.value || '';
+            const montoBs = parseFloat(document.getElementById('fam-monto-bs').value) || 0;
+            const fecha = document.getElementById('fam-fecha').value;
+            const observaciones = document.getElementById('fam-observaciones').value;
+            
+            // Crear UN reporte por cada hijo, todos con mismo "grupoFamiliarId"
+            const grupoId = 'FAM-' + Date.now();
+            
+            for (const asig of asignaciones) {
+                const esperado = asig.montoMensual * asig.meses.length;
+                const esAbono = asig.monto < esperado - 0.5;
+                
+                await addDoc(collection(db, DB_PAGOS), {
+                    nombreEst: asig.nombre,
+                    nombreRep: representanteActual,
+                    cedulaRep: cedulaActual,
+                    metodo,
+                    banco,
+                    referencia,
+                    cuenta,
+                    montoBs: 0,
+                    montoDivisas: asig.monto,
+                    montoEsperado: esperado,
+                    esAbono,
+                    esFamiliar: true,
+                    grupoFamiliarId: grupoId,
+                    montoTotalFamiliar: totalFamiliar,
+                    montoBsFamiliar: montoBs,
+                    fechaPago: fecha,
+                    fechaPagoTimestamp: new Date(fecha + 'T00:00:00'),
+                    observaciones: observaciones + (asignaciones.length > 1 ? ` [Pago familiar, total $${totalFamiliar.toFixed(2)}]` : ''),
+                    mesesPagados: asig.meses,
+                    estado: "Pendiente de verificación",
+                    timestamp: serverTimestamp(),
+                    origen: "portal_padres_v22_familiar"
+                });
+            }
+            
+            const resumenHTML = `
+                <div class="resumen-item"><span class="label">👨‍👩‍👧‍👦 Tipo:</span><span class="value"><b>PAGO FAMILIAR</b></span></div>
+                <div class="resumen-item"><span class="label">👥 Hijos:</span><span class="value">${asignaciones.length}</span></div>
+                ${asignaciones.map(a => `
+                    <div class="resumen-item" style="background:#f8fafc; margin:2px 0; padding:6px 10px; border-radius:5px;">
+                        <span class="label" style="font-size:12px;">${esc(a.nombre)}</span>
+                        <span class="value" style="font-size:13px;">$${a.monto.toFixed(2)} <small style="color:#64748b;">(${a.meses.length}m)</small></span>
+                    </div>
+                `).join('')}
+                <div class="resumen-item" style="border-top:2px solid #7c3aed; padding-top:10px; margin-top:10px;">
+                    <span class="label" style="font-weight:bold; color:#7c3aed;">TOTAL:</span>
+                    <span class="value" style="color:#7c3aed; font-size:18px;">$${totalFamiliar.toFixed(2)}</span>
+                </div>
+                <div class="resumen-item"><span class="label">💳 Método:</span><span class="value">${esc(metodo)}</span></div>
+                ${referencia ? `<div class="resumen-item"><span class="label">🔢 Referencia:</span><span class="value">${esc(referencia)}</span></div>` : ''}
+                <div class="resumen-item"><span class="label">📆 Fecha:</span><span class="value">${new Date(fecha).toLocaleDateString('es-ES')}</span></div>
+            `;
+            
+            document.getElementById('resumen-reporte').innerHTML = resumenHTML;
+            
+            document.getElementById('step-familiar').classList.remove('active');
+            document.getElementById('step-4').classList.add('active');
+            window.scrollTo(0, 0);
+            
+        } catch (error) {
+            console.error("Error enviando pago familiar:", error);
+            alert("Error al enviar el reporte familiar.\n\nDetalle: " + error.message);
+        } finally {
+            btn.disabled = false;
+            loader.style.display = 'none';
+        }
+    };
+
+    // ═══════════════════════════════════════════════════════
+    // HISTORIAL DE PAGOS
+    // ═══════════════════════════════════════════════════════
+    
+    window.abrirHistorialPagos = async function() {
+        document.getElementById('step-2').classList.remove('active');
+        document.getElementById('step-historial').classList.add('active');
+        window.scrollTo(0, 0);
+        
+        const cont = document.getElementById('historial-container');
+        cont.innerHTML = '<div class="loading"><span class="spinner"></span>Cargando...</div>';
+        
+        try {
+            const todos = [];
+            
+            // Historial verificado
+            const qHist = query(collection(db, DB_HISTORIAL), where("cedulaRep", "==", cedulaActual));
+            const snapHist = await getDocs(qHist);
+            snapHist.forEach(d => {
+                todos.push({ tipo: 'verificado', ...d.data() });
+            });
+            
+            // Pendientes
+            const qPend = query(collection(db, DB_PAGOS), where("cedulaRep", "==", cedulaActual));
+            const snapPend = await getDocs(qPend);
+            snapPend.forEach(d => {
+                const data = d.data();
+                const estado = (data.estado || '').toLowerCase();
+                let tipo = 'pendiente';
+                if (estado.includes('rechazado')) tipo = 'rechazado';
+                todos.push({ tipo, ...data });
+            });
+            
+            // Ordenar por fecha
+            todos.sort((a, b) => {
+                const fa = a.fecha?.seconds || (a.timestamp?.seconds) || 0;
+                const fb = b.fecha?.seconds || (b.timestamp?.seconds) || 0;
+                return fb - fa;
+            });
+            
+            if (todos.length === 0) {
+                cont.innerHTML = '<div class="success-box">📭 No hay pagos registrados todavía.</div>';
+                return;
+            }
+            
+            const totalVerificado = todos.filter(t => t.tipo === 'verificado').reduce((s, t) => s + parseFloat(t.montoDivisas || 0), 0);
+            const totalPendiente = todos.filter(t => t.tipo === 'pendiente').reduce((s, t) => s + parseFloat(t.montoDivisas || 0), 0);
+            
+            let html = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <div style="background:#dcfce7; padding:12px; border-radius:8px; text-align:center;">
+                        <div style="font-size:11px; color:#166534; font-weight:bold;">✅ Verificado</div>
+                        <div style="font-size:20px; font-weight:bold; color:#166534;">$${totalVerificado.toFixed(2)}</div>
+                    </div>
+                    <div style="background:#fef3c7; padding:12px; border-radius:8px; text-align:center;">
+                        <div style="font-size:11px; color:#92400e; font-weight:bold;">⏳ Pendiente</div>
+                        <div style="font-size:20px; font-weight:bold; color:#92400e;">$${totalPendiente.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+            
+            todos.forEach(p => {
+                let claseItem = '', badgeClass = '', badgeText = '';
+                if (p.tipo === 'verificado') { claseItem = ''; badgeClass = 'badge-verificado'; badgeText = '✅ Verificado'; }
+                else if (p.tipo === 'pendiente') { claseItem = 'pendiente'; badgeClass = 'badge-pendiente'; badgeText = '⏳ En revisión'; }
+                else { claseItem = 'rechazado'; badgeClass = 'badge-rechazado'; badgeText = '❌ Rechazado'; }
+                
+                const esAbono = p.esAbono || false;
+                const fecha = p.fechaPago || (p.fecha?.seconds ? new Date(p.fecha.seconds * 1000).toISOString().slice(0,10) : 'N/A');
+                
+                html += `
+                    <div class="pago-historial-item ${claseItem}" ${esAbono ? 'style="border-left-color:#f59e0b;"' : ''}>
+                        <div style="display:flex; justify-content:space-between; align-items:start; gap:8px; flex-wrap:wrap;">
+                            <div style="flex:1;">
+                                <b>${esc(p.nombreEst || 'N/A')}</b>
+                                ${p.esFamiliar ? '<span style="background:#7c3aed; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">👨‍👩‍👧‍👦 FAMILIAR</span>' : ''}
+                                ${esAbono ? '<span style="background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">🟡 ABONO</span>' : ''}
+                                <br>
+                                <small>📅 ${(p.mesesPagados || []).map(m => esc(m)).join(', ') || 'N/A'}</small><br>
+                                ${p.referencia ? `<small>🔢 ${esc(p.referencia)}</small><br>` : ''}
+                                <small style="color:#94a3b8;">📆 ${fecha}</small>
+                            </div>
+                            <div style="text-align:right;">
+                                <b style="color:#0891b2; font-size:16px;">$${parseFloat(p.montoDivisas || 0).toFixed(2)}</b><br>
+                                <span class="badge-estado ${badgeClass}">${badgeText}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cont.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            cont.innerHTML = '<div class="error-message">Error al cargar historial.</div>';
+        }
+    };
+    
+    window.cerrarHistorial = function() {
+        document.getElementById('step-historial').classList.remove('active');
+        document.getElementById('step-2').classList.add('active');
+        window.scrollTo(0, 0);
+    };
 
     // ═══════════════════════════════════════════════════════
     // NAVEGACIÓN
@@ -1254,6 +1713,8 @@
         document.getElementById('step-2').classList.remove('active');
         document.getElementById('step-3').classList.remove('active');
         document.getElementById('step-4').classList.remove('active');
+        document.getElementById('step-familiar').classList.remove('active');
+        document.getElementById('step-historial').classList.remove('active');
         document.getElementById('step-1').classList.add('active');
         
         document.getElementById('input-cedula').value = "";
@@ -1302,24 +1763,12 @@
                 <button type="button" onclick="eliminarHijo(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-size:11px;">🗑 Quitar</button>
             </div>
             <div class="name-fields">
-                <div>
-                    <label>Primer Nombre *</label>
-                    <input type="text" class="hijo-pnombre" required>
-                </div>
-                <div>
-                    <label>Segundo Nombre <span class="optional-note">(opcional)</span></label>
-                    <input type="text" class="hijo-snombre">
-                </div>
+                <div><label>Primer Nombre *</label><input type="text" class="hijo-pnombre" required></div>
+                <div><label>Segundo Nombre <span class="optional-note">(opcional)</span></label><input type="text" class="hijo-snombre"></div>
             </div>
             <div class="name-fields">
-                <div>
-                    <label>Primer Apellido *</label>
-                    <input type="text" class="hijo-papellido" required>
-                </div>
-                <div>
-                    <label>Segundo Apellido <span class="optional-note">(opcional)</span></label>
-                    <input type="text" class="hijo-sapellido">
-                </div>
+                <div><label>Primer Apellido *</label><input type="text" class="hijo-papellido" required></div>
+                <div><label>Segundo Apellido <span class="optional-note">(opcional)</span></label><input type="text" class="hijo-sapellido"></div>
             </div>
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <div style="flex:2;">
@@ -1333,9 +1782,7 @@
                 </div>
                 <div style="flex:1;">
                     <label>Sección</label>
-                    <select class="hijo-seccion">
-                        <option>A</option><option>B</option>
-                    </select>
+                    <select class="hijo-seccion"><option>A</option><option>B</option></select>
                 </div>
             </div>
         `;
@@ -1379,18 +1826,18 @@
             const qCed = query(collection(db, DB_MAIN), where("cedula", "==", cedula));
             const snapCed = await getDocs(qCed);
             if (!snapCed.empty) {
-                alert(`⚠️ La cédula ${cedula} ya está registrada en el sistema.\n\nPuede ingresar directamente con esa cédula en la pantalla de acceso.`);
+                alert(`⚠️ La cédula ${cedula} ya está registrada. Puede ingresar directamente con esa cédula.`);
                 return;
             }
             
             const qSol = query(collection(db, DB_SOLICITUDES), where("cedula", "==", cedula), where("estado", "==", "pendiente"));
             const snapSol = await getDocs(qSol);
             if (!snapSol.empty) {
-                alert(`⚠️ Ya existe una solicitud pendiente con esta cédula.\n\nEspere a que la administración la revise.`);
+                alert(`⚠️ Ya existe una solicitud pendiente con esta cédula.`);
                 return;
             }
         } catch (err) {
-            console.warn("No se pudo validar duplicado de cédula:", err);
+            console.warn("No se pudo validar duplicado:", err);
         }
         
         const nombreRep = nombreCompleto(pnombreRep, snombreRep, papellidoRep, sapellidoRep);
@@ -1413,12 +1860,8 @@
             
             hijos.push({
                 nombre: nombreCompleto(pn, sn, pa, sa),
-                pnombre: pn,
-                snombre: sn,
-                papellido: pa,
-                sapellido: sa,
-                grado,
-                seccion
+                pnombre: pn, snombre: sn, papellido: pa, sapellido: sa,
+                grado, seccion
             });
         }
         
@@ -1439,7 +1882,7 @@
                 correo,
                 hijos,
                 estado: 'pendiente',
-                origen: 'portal_padres_v21',
+                origen: 'portal_padres_v22',
                 timestamp: serverTimestamp()
             });
             
@@ -1480,7 +1923,6 @@
         setTimeout(() => { document.getElementById('btn-submit').disabled = true; }, 50);
     });
     
-    // Pre-cargar cache de historial
     cargarCacheHistorial();
 </script>
 
