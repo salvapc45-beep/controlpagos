@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal de Pago - U.E.P Santiago De Jesus (V22)</title>
+    <title>Portal de Pago - U.E.P Santiago De Jesus (V23)</title>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -57,6 +57,7 @@
         .success-box { background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
         .error-message { background: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
         .warning-box { background: #fff7ed; border: 1px solid #fb923c; color: #9a3412; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; }
+        .blocked-box { background: #fee2e2; border: 2px solid #dc2626; color: #991b1b; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 14px; text-align: center; font-weight: bold; }
 
         .hijo-item { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
         .name-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -253,7 +254,7 @@
         <div class="card" id="card-reportar-pago">
             <h3 style="color:var(--primary); margin-bottom:10px;">💳 Reportar Pago</h3>
             <div class="info-box">
-                <strong>📝 Instrucciones:</strong> Puede seleccionar uno o varios meses y pagar el monto completo o un abono parcial. La administración lo verificará.
+                <strong>📝 Instrucciones:</strong> Puede seleccionar uno o varios meses y pagar el monto completo. Si va a abonar un monto menor al total, debe seleccionar <strong>UN SOLO MES</strong>.
             </div>
             
             <form id="payment-form" onsubmit="enviarPago(event)">
@@ -339,7 +340,7 @@
         <div class="card" style="margin-top:15px;">
             <h3 style="color:#7c3aed; margin-bottom:10px;">👨‍👩‍👧‍👦 Pago Familiar</h3>
             <p style="font-size:13px; color:#64748b; margin-bottom:15px;">
-                Asigne el monto que va a pagar a cada hijo. Puede ser pago completo o abono parcial.
+                Asigne el monto que va a pagar a cada hijo. Para abonos parciales, seleccione <strong>UN SOLO MES por hijo</strong>.
             </p>
             
             <div id="familiar-hijos-container"></div>
@@ -448,7 +449,7 @@
 
 <script type="module">
     // ═══════════════════════════════════════════════════════
-    // PORTAL V22 - Con regla día 10, abonos, pago familiar, antiduplicados
+    // PORTAL V23 - Fix fecha + Antiduplicado ref6 + Abono 1mes
     // ═══════════════════════════════════════════════════════
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -477,9 +478,6 @@
 
     const MESES_ORDEN = ["Inscripción", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"];
 
-    // ═══════════════════════════════════════════════════════
-    // REGLA V22: Cada mes se cobra a partir del día 10
-    // ═══════════════════════════════════════════════════════
     const DIA_INICIO_COBRO = 10;
 
     function normalizarMes(m) {
@@ -521,7 +519,6 @@
     }
     calcularMesActual();
     
-    // Regla día 10
     function calcularMesesReales(mesesRegistrados) {
         if (!mesesRegistrados || !Array.isArray(mesesRegistrados)) return [];
         const diaActual = new Date().getDate();
@@ -545,7 +542,6 @@
         return (montoMensual || 0) * calcularMesesReales(mesesRegistrados || []).length;
     }
     
-    // Cache historial
     let cacheHistorialPorAlumno = {};
     let cacheHistorialCargado = false;
     
@@ -578,10 +574,6 @@
         return 'SOLVENTE';
     }
     
-    // ═══════════════════════════════════════════════════════
-    // ESTADO
-    // ═══════════════════════════════════════════════════════
-    
     let cedulaActual = "";
     let representanteActual = "";
     let hijosActuales = [];
@@ -594,8 +586,7 @@
     let unsubscribeAlumno = null;
     let montoMensualActual = 0;
     
-    // Pago familiar
-    let asignacionesFamiliar = {}; // { hijoId: { monto, meses: [] } }
+    let asignacionesFamiliar = {};
 
     document.getElementById('input-fecha').value = new Date().toISOString().split('T')[0];
     document.getElementById('fam-fecha').value = new Date().toISOString().split('T')[0];
@@ -915,7 +906,7 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // SELECTOR DE MESES - V22: TODOS desbloqueados
+    // SELECTOR DE MESES
     // ═══════════════════════════════════════════════════════
     
     function renderizarSelectorMeses(estudiante, estado) {
@@ -941,7 +932,6 @@
             (p.mesesPagados || []).forEach(m => mesesEnVerif.add(m));
         });
         
-        // V22: Mostrar TODOS los meses (no solo vencidos) para permitir adelantos
         container.innerHTML = meses.map(m => {
             const enVerif = mesesEnVerif.has(m);
             const idx = indiceMes(m);
@@ -995,30 +985,49 @@
         validarMonto();
     }
     
+    // ═══════════════════════════════════════════════════════
+    // V23: Validación con regla de abono (1 mes obligatorio)
+    // ═══════════════════════════════════════════════════════
     function validarMonto() {
         const aviso = document.getElementById('aviso-monto');
+        const btnSubmit = document.getElementById('btn-submit');
         const montoUsd = parseFloat(document.getElementById('input-monto-usd').value) || 0;
         const montoMensual = parseFloat(estudianteSeleccionado?.montoMensual) || 0;
-        const esperado = montoMensual * mesesSeleccionadosPago.length;
+        const numMeses = mesesSeleccionadosPago.length;
+        const esperado = montoMensual * numMeses;
         
-        if (mesesSeleccionadosPago.length === 0 || montoUsd === 0) {
+        if (numMeses === 0 || montoUsd === 0) {
             aviso.style.display = 'none';
+            if (btnSubmit) btnSubmit.disabled = false;
             return;
         }
         
-        const diff = Math.abs(esperado - montoUsd);
-        if (diff > 0.5) {
-            if (montoUsd < esperado) {
-                aviso.innerHTML = `🟡 <strong>Estás haciendo un ABONO PARCIAL.</strong><br>
-                    Esperado completo: <b>$${esperado.toFixed(2)}</b> (${mesesSeleccionadosPago.length} × $${montoMensual.toFixed(2)})<br>
-                    Vas a abonar: <b>$${montoUsd.toFixed(2)}</b><br>
-                    <small>El mes quedará marcado como abono hasta cubrir el total.</small>`;
-            } else {
-                aviso.innerHTML = `⚠️ <strong>El monto excede lo esperado.</strong><br>
-                    Esperado: <b>$${esperado.toFixed(2)}</b><br>
-                    Ingresado: <b>$${montoUsd.toFixed(2)}</b><br>
-                    <small>Verifica antes de enviar.</small>`;
-            }
+        const esAbono = montoUsd < esperado - 0.5;
+        
+        // V23: Si es abono, solo 1 mes permitido
+        if (esAbono && numMeses > 1) {
+            aviso.innerHTML = `🚫 <strong>Debes seleccionar SOLO UN MES si vas a abonar.</strong><br>
+                Tienes ${numMeses} meses seleccionados pero estás pagando menos del total.<br>
+                <small>💡 Desmarca los meses adicionales, o paga el monto completo de $${esperado.toFixed(2)}.</small>`;
+            aviso.style.display = 'block';
+            if (btnSubmit) btnSubmit.disabled = true;
+            return;
+        }
+        
+        if (btnSubmit) btnSubmit.disabled = false;
+        
+        if (esAbono && numMeses === 1) {
+            aviso.innerHTML = `🟡 <strong>Estás haciendo un ABONO PARCIAL.</strong><br>
+                Mes: <b>${mesesSeleccionadosPago[0]}</b><br>
+                Monto completo: <b>$${montoMensual.toFixed(2)}</b><br>
+                Vas a abonar: <b>$${montoUsd.toFixed(2)}</b><br>
+                <small>El mes quedará en 🟡 hasta cubrir el total.</small>`;
+            aviso.style.display = 'block';
+        } else if (montoUsd > esperado + 0.5) {
+            aviso.innerHTML = `⚠️ <strong>El monto excede lo esperado.</strong><br>
+                Esperado: <b>$${esperado.toFixed(2)}</b><br>
+                Ingresado: <b>$${montoUsd.toFixed(2)}</b><br>
+                <small>Verifica antes de enviar.</small>`;
             aviso.style.display = 'block';
         } else {
             aviso.style.display = 'none';
@@ -1026,10 +1035,6 @@
     }
     document.getElementById('input-monto-usd')?.addEventListener('input', validarMonto);
 
-    // ═══════════════════════════════════════════════════════
-    // MÉTODOS DE PAGO
-    // ═══════════════════════════════════════════════════════
-    
     window.toggleMetodoPago = function() {
         const metodo = document.getElementById('input-metodo').value;
         const divBanco = document.getElementById('div-banco');
@@ -1070,7 +1075,7 @@
     };
 
     // ═══════════════════════════════════════════════════════
-    // ANTIDUPLICADOS - Registra intento para admin
+    // V23: ANTIDUPLICADO - últimos 6 dígitos + fecha
     // ═══════════════════════════════════════════════════════
     
     async function registrarIntentoDuplicado(datos) {
@@ -1085,71 +1090,52 @@
         }
     }
     
-    async function validarDuplicado(referencia, nombreEst, mesesPagados, monto) {
-        if (!referencia) return { duplicado: false };
+    async function validarDuplicado(referencia, nombreEst, mesesPagados, monto, fechaPago) {
+        if (!referencia || referencia.length < 6) return { duplicado: false };
+        const ultimos6 = referencia.slice(-6);
         
         try {
-            // 1. Verificar en pagos_reportados (pendientes o cualquier estado)
-            const q1 = query(collection(db, DB_PAGOS), where("referencia", "==", referencia));
-            const snap1 = await getDocs(q1);
-            if (!snap1.empty) {
-                const existente = snap1.docs[0].data();
-                await registrarIntentoDuplicado({
-                    nombreEst,
-                    nombreRep: representanteActual,
-                    cedulaRep: cedulaActual,
-                    referencia,
-                    mesesPagados,
-                    monto,
-                    motivo: 'referencia_ya_en_pagos_pendientes',
-                    existenteEstado: existente.estado || 'desconocido'
-                });
-                return { duplicado: true, motivo: 'referencia_ya_en_pagos_pendientes' };
+            // Buscar en pagos_reportados
+            const snap1 = await getDocs(collection(db, DB_PAGOS));
+            for (const docSnap of snap1.docs) {
+                const p = docSnap.data();
+                const refExist = (p.referencia || '').toString();
+                if (refExist.length >= 6 && refExist.slice(-6) === ultimos6 && p.fechaPago === fechaPago) {
+                    await registrarIntentoDuplicado({
+                        nombreEst,
+                        nombreRep: representanteActual,
+                        cedulaRep: cedulaActual,
+                        referencia,
+                        mesesPagados,
+                        monto,
+                        fechaPago,
+                        motivo: 'ultimos_6_digitos_y_fecha_coinciden_en_pagos',
+                        referenciaExistente: refExist,
+                        fechaExistente: p.fechaPago
+                    });
+                    return { duplicado: true, motivo: 'ultimos_6_digitos_y_fecha_coinciden_en_pagos' };
+                }
             }
             
-            // 2. Verificar en historial_pagos
-            const q2 = query(collection(db, DB_HISTORIAL), where("referencia", "==", referencia));
-            const snap2 = await getDocs(q2);
-            if (!snap2.empty) {
-                await registrarIntentoDuplicado({
-                    nombreEst,
-                    nombreRep: representanteActual,
-                    cedulaRep: cedulaActual,
-                    referencia,
-                    mesesPagados,
-                    monto,
-                    motivo: 'referencia_ya_verificada_en_historial'
-                });
-                return { duplicado: true, motivo: 'referencia_ya_verificada_en_historial' };
-            }
-            
-            // 3. Verificar mismo mes + mismo monto pendiente (posible reporte repetido)
-            const q3 = query(
-                collection(db, DB_PAGOS),
-                where("cedulaRep", "==", cedulaActual),
-                where("nombreEst", "==", nombreEst)
-            );
-            const snap3 = await getDocs(q3);
-            for (const docSnap of snap3.docs) {
-                const d = docSnap.data();
-                if ((d.estado || '').toLowerCase().includes('pendiente')) {
-                    const mOntEx = parseFloat(d.montoDivisas || 0);
-                    const mesesEx = (d.mesesPagados || []).slice().sort().join('|');
-                    const mesesNew = (mesesPagados || []).slice().sort().join('|');
-                    if (Math.abs(mOntEx - monto) < 0.5 && mesesEx === mesesNew) {
-                        await registrarIntentoDuplicado({
-                            nombreEst,
-                            nombreRep: representanteActual,
-                            cedulaRep: cedulaActual,
-                            referencia,
-                            mesesPagados,
-                            monto,
-                            motivo: 'mismo_mes_mismo_monto_pendiente',
-                            existenteMeses: d.mesesPagados,
-                            existenteMonto: mOntEx
-                        });
-                        return { duplicado: true, motivo: 'mismo_mes_mismo_monto_pendiente' };
-                    }
+            // Buscar en historial
+            const snap2 = await getDocs(collection(db, DB_HISTORIAL));
+            for (const docSnap of snap2.docs) {
+                const h = docSnap.data();
+                const refExist = (h.referencia || '').toString();
+                if (refExist.length >= 6 && refExist.slice(-6) === ultimos6 && h.fechaPago === fechaPago) {
+                    await registrarIntentoDuplicado({
+                        nombreEst,
+                        nombreRep: representanteActual,
+                        cedulaRep: cedulaActual,
+                        referencia,
+                        mesesPagados,
+                        monto,
+                        fechaPago,
+                        motivo: 'ultimos_6_digitos_y_fecha_coinciden_en_historial',
+                        referenciaExistente: refExist,
+                        fechaExistente: h.fechaPago
+                    });
+                    return { duplicado: true, motivo: 'ultimos_6_digitos_y_fecha_coinciden_en_historial' };
                 }
             }
             
@@ -1161,7 +1147,7 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // ENVIAR PAGO INDIVIDUAL
+    // V23: ENVIAR PAGO (sin timestamp, con regla abono)
     // ═══════════════════════════════════════════════════════
     
     window.enviarPago = async function(e) {
@@ -1169,8 +1155,6 @@
         
         const btn = document.getElementById('btn-submit');
         const loader = document.getElementById('loading-submit');
-        
-        const estadoActual = getEstadoAlumno(estudianteSeleccionado);
         
         if (mesesSeleccionadosPago.length === 0) {
             alert("⚠️ Debe seleccionar al menos un mes para pagar");
@@ -1189,39 +1173,43 @@
             return;
         }
         
+        const fecha = document.getElementById('input-fecha').value;
+        if (!fecha) {
+            alert("⚠️ Seleccione la fecha de la transacción");
+            return;
+        }
+        
+        const montoMensual = parseFloat(estudianteSeleccionado.montoMensual) || 0;
+        const esperado = montoMensual * mesesSeleccionadosPago.length;
+        const esAbono = montoUSD < esperado - 0.5;
+        
+        // V23: Validación crítica - abono solo 1 mes
+        if (esAbono && mesesSeleccionadosPago.length > 1) {
+            alert(`🚫 Debes seleccionar SOLO UN MES si vas a abonar.\n\nEstás pagando $${montoUSD.toFixed(2)} pero esperabas $${esperado.toFixed(2)}.\n\nDesmarca los meses adicionales o paga el monto completo.`);
+            return;
+        }
+        
         const referencia = document.getElementById('input-ref').value.trim();
         
         btn.disabled = true;
         loader.style.display = "block";
         
         try {
-            // ANTIDUPLICADOS
-            const check = await validarDuplicado(referencia, estudianteSeleccionado.nombre, mesesSeleccionadosPago, montoUSD);
-            if (check.duplicado) {
-                let msg = "⚠️ Reporte bloqueado por seguridad.\n\n";
-                if (check.motivo === 'referencia_ya_en_pagos_pendientes') {
-                    msg += `Ya existe un reporte pendiente con la referencia ${referencia}.`;
-                } else if (check.motivo === 'referencia_ya_verificada_en_historial') {
-                    msg += `La referencia ${referencia} ya fue verificada anteriormente.`;
-                } else if (check.motivo === 'mismo_mes_mismo_monto_pendiente') {
-                    msg += `Ya enviaste un reporte con los mismos meses y monto que está en revisión.`;
+            // V23: Antiduplicado ref-6 + fecha
+            if (referencia) {
+                const check = await validarDuplicado(referencia, estudianteSeleccionado.nombre, mesesSeleccionadosPago, montoUSD, fecha);
+                if (check.duplicado) {
+                    alert("Este pago ya fue registrado por favor verifique sus datos");
+                    btn.disabled = false;
+                    loader.style.display = "none";
+                    return;
                 }
-                msg += "\n\nLa administración ha sido notificada de este intento.";
-                alert(msg);
-                btn.disabled = false;
-                loader.style.display = "none";
-                return;
             }
             
             const banco = document.getElementById('input-banco').value;
             const cuenta = document.getElementById('input-cuenta').value;
             const montoBs = parseFloat(document.getElementById('input-monto-bs').value) || 0;
-            const fecha = document.getElementById('input-fecha').value;
             const observaciones = document.getElementById('input-observaciones').value;
-            
-            const montoMensual = parseFloat(estudianteSeleccionado.montoMensual) || 0;
-            const esperado = montoMensual * mesesSeleccionadosPago.length;
-            const esAbono = montoUSD < esperado - 0.5;
             
             const reporteData = {
                 nombreEst: document.getElementById('input-nombre-est').value,
@@ -1236,12 +1224,11 @@
                 montoEsperado: esperado,
                 esAbono: esAbono,
                 fechaPago: fecha,
-                fechaPagoTimestamp: new Date(fecha + 'T00:00:00'),
                 observaciones: observaciones,
                 mesesPagados: [...mesesSeleccionadosPago],
                 estado: "Pendiente de verificación",
                 timestamp: serverTimestamp(),
-                origen: "portal_padres_v22"
+                origen: "portal_padres_v23"
             };
             
             await addDoc(collection(db, DB_PAGOS), reporteData);
@@ -1254,9 +1241,10 @@
                 ${reporteData.banco ? `<div class="resumen-item"><span class="label">🏦 Banco:</span><span class="value">${esc(reporteData.banco)}</span></div>` : ''}
                 ${reporteData.referencia ? `<div class="resumen-item"><span class="label">🔢 Referencia:</span><span class="value">${esc(reporteData.referencia)}</span></div>` : ''}
                 <div class="resumen-item"><span class="label">💰 Monto en $:</span><span class="value">$${reporteData.montoDivisas.toFixed(2)}</span></div>
+                ${reporteData.montoBs > 0 ? `<div class="resumen-item"><span class="label">💵 Monto en Bs:</span><span class="value">Bs. ${reporteData.montoBs.toFixed(2)}</span></div>` : ''}
                 <div class="resumen-item"><span class="label">🎯 Esperado:</span><span class="value">$${esperado.toFixed(2)}</span></div>
                 <div class="resumen-item"><span class="label">📅 Meses:</span><span class="value">${mesesSeleccionadosPago.map(m => esc(m)).join(', ')}</span></div>
-                <div class="resumen-item"><span class="label">📆 Fecha:</span><span class="value">${new Date(reporteData.fechaPago).toLocaleDateString('es-ES')}</span></div>
+                <div class="resumen-item"><span class="label">📆 Fecha:</span><span class="value">${new Date(reporteData.fechaPago + 'T12:00:00').toLocaleDateString('es-ES')}</span></div>
             `;
             
             document.getElementById('resumen-reporte').innerHTML = resumen;
@@ -1294,7 +1282,7 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // PAGO FAMILIAR
+    // PAGO FAMILIAR (V23: sin timestamp, antiduplicado, regla abono)
     // ═══════════════════════════════════════════════════════
     
     window.abrirPagoFamiliar = function() {
@@ -1343,7 +1331,7 @@
                     <label style="margin-top:10px;">Monto a pagar por este hijo ($):</label>
                     <input type="number" id="fam-monto-hijo-${i}" placeholder="0.00" step="0.01" min="0" 
                         oninput="actualizarHijoFamiliar(${i})" style="margin-top:5px;">
-                    <small style="color:#64748b; font-size:11px;">Puede poner menos para hacer un abono.</small>
+                    <small style="color:#64748b; font-size:11px;">Para abono parcial, selecciona UN SOLO MES.</small>
                 </div>
             `;
         }).join('');
@@ -1361,7 +1349,6 @@
         const hijo = hijosActuales[i];
         const montoMensual = parseFloat(hijo.montoMensual) || 0;
         
-        // Auto-completar el monto si cambian los meses
         if (checkboxes.length > 0 && (!montoInput.value || parseFloat(montoInput.value) === 0)) {
             montoInput.value = (montoMensual * checkboxes.length).toFixed(2);
         }
@@ -1414,7 +1401,6 @@
         const btn = document.getElementById('btn-familiar-submit');
         const loader = document.getElementById('loading-familiar');
         
-        // Recopilar asignaciones
         const asignaciones = [];
         for (let i = 0; i < hijosActuales.length; i++) {
             const monto = parseFloat(document.getElementById(`fam-monto-hijo-${i}`)?.value) || 0;
@@ -1429,12 +1415,24 @@
                     alert(`⚠️ El hijo ${hijosActuales[i].nombre} tiene monto pero no tiene meses seleccionados.`);
                     return;
                 }
+                
+                const montoMensualHijo = parseFloat(hijosActuales[i].montoMensual) || 0;
+                const esperadoHijo = montoMensualHijo * meses.length;
+                const esAbonoHijo = monto < esperadoHijo - 0.5;
+                
+                // V23: regla abono 1 mes
+                if (esAbonoHijo && meses.length > 1) {
+                    alert(`🚫 Para el hijo ${hijosActuales[i].nombre}:\n\nEstás pagando menos del total, entonces debes seleccionar SOLO UN MES.`);
+                    return;
+                }
+                
                 asignaciones.push({
                     hijoId: hijosActuales[i].id,
                     nombre: hijosActuales[i].nombre,
                     meses,
                     monto,
-                    montoMensual: parseFloat(hijosActuales[i].montoMensual) || 0
+                    montoMensual: montoMensualHijo,
+                    esAbono: esAbonoHijo
                 });
             }
         }
@@ -1450,6 +1448,12 @@
             return;
         }
         
+        const fecha = document.getElementById('fam-fecha').value;
+        if (!fecha) {
+            alert("⚠️ Selecciona la fecha de la transacción.");
+            return;
+        }
+        
         const referencia = document.getElementById('fam-ref')?.value.trim() || '';
         const totalFamiliar = asignaciones.reduce((s, a) => s + a.monto, 0);
         
@@ -1457,30 +1461,35 @@
         loader.style.display = 'block';
         
         try {
-            // ANTIDUPLICADOS por referencia
+            // V23: Antiduplicado por ref-6 + fecha
             if (referencia) {
-                const q1 = query(collection(db, DB_PAGOS), where("referencia", "==", referencia));
-                const snap1 = await getDocs(q1);
-                if (!snap1.empty) {
-                    await registrarIntentoDuplicado({
-                        nombreEst: asignaciones.map(a => a.nombre).join(', '),
-                        nombreRep: representanteActual,
-                        cedulaRep: cedulaActual,
-                        referencia,
-                        mesesPagados: asignaciones.flatMap(a => a.meses),
-                        monto: totalFamiliar,
-                        motivo: 'referencia_ya_en_pagos_pendientes_FAMILIAR',
-                        esFamiliar: true
-                    });
-                    alert(`⚠️ La referencia ${referencia} ya está registrada.`);
-                    btn.disabled = false;
-                    loader.style.display = 'none';
-                    return;
+                const ultimos6 = referencia.slice(-6);
+                
+                // Buscar en pagos
+                const snapP = await getDocs(collection(db, DB_PAGOS));
+                let dup = false;
+                for (const dS of snapP.docs) {
+                    const p = dS.data();
+                    const refExist = (p.referencia || '').toString();
+                    if (refExist.length >= 6 && refExist.slice(-6) === ultimos6 && p.fechaPago === fecha) {
+                        dup = true;
+                        break;
+                    }
                 }
                 
-                const q2 = query(collection(db, DB_HISTORIAL), where("referencia", "==", referencia));
-                const snap2 = await getDocs(q2);
-                if (!snap2.empty) {
+                if (!dup) {
+                    const snapH = await getDocs(collection(db, DB_HISTORIAL));
+                    for (const dS of snapH.docs) {
+                        const h = dS.data();
+                        const refExist = (h.referencia || '').toString();
+                        if (refExist.length >= 6 && refExist.slice(-6) === ultimos6 && h.fechaPago === fecha) {
+                            dup = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (dup) {
                     await registrarIntentoDuplicado({
                         nombreEst: asignaciones.map(a => a.nombre).join(', '),
                         nombreRep: representanteActual,
@@ -1488,10 +1497,11 @@
                         referencia,
                         mesesPagados: asignaciones.flatMap(a => a.meses),
                         monto: totalFamiliar,
-                        motivo: 'referencia_ya_verificada_FAMILIAR',
+                        fechaPago: fecha,
+                        motivo: 'ref6_fecha_coinciden_FAMILIAR',
                         esFamiliar: true
                     });
-                    alert(`⚠️ La referencia ${referencia} ya fue verificada anteriormente.`);
+                    alert("Este pago ya fue registrado por favor verifique sus datos");
                     btn.disabled = false;
                     loader.style.display = 'none';
                     return;
@@ -1501,15 +1511,12 @@
             const banco = document.getElementById('fam-banco')?.value || '';
             const cuenta = document.getElementById('fam-cuenta')?.value || '';
             const montoBs = parseFloat(document.getElementById('fam-monto-bs').value) || 0;
-            const fecha = document.getElementById('fam-fecha').value;
             const observaciones = document.getElementById('fam-observaciones').value;
             
-            // Crear UN reporte por cada hijo, todos con mismo "grupoFamiliarId"
             const grupoId = 'FAM-' + Date.now();
             
             for (const asig of asignaciones) {
                 const esperado = asig.montoMensual * asig.meses.length;
-                const esAbono = asig.monto < esperado - 0.5;
                 
                 await addDoc(collection(db, DB_PAGOS), {
                     nombreEst: asig.nombre,
@@ -1522,18 +1529,17 @@
                     montoBs: 0,
                     montoDivisas: asig.monto,
                     montoEsperado: esperado,
-                    esAbono,
+                    esAbono: asig.esAbono,
                     esFamiliar: true,
                     grupoFamiliarId: grupoId,
                     montoTotalFamiliar: totalFamiliar,
                     montoBsFamiliar: montoBs,
                     fechaPago: fecha,
-                    fechaPagoTimestamp: new Date(fecha + 'T00:00:00'),
                     observaciones: observaciones + (asignaciones.length > 1 ? ` [Pago familiar, total $${totalFamiliar.toFixed(2)}]` : ''),
                     mesesPagados: asig.meses,
                     estado: "Pendiente de verificación",
                     timestamp: serverTimestamp(),
-                    origen: "portal_padres_v22_familiar"
+                    origen: "portal_padres_v23_familiar"
                 });
             }
             
@@ -1552,7 +1558,7 @@
                 </div>
                 <div class="resumen-item"><span class="label">💳 Método:</span><span class="value">${esc(metodo)}</span></div>
                 ${referencia ? `<div class="resumen-item"><span class="label">🔢 Referencia:</span><span class="value">${esc(referencia)}</span></div>` : ''}
-                <div class="resumen-item"><span class="label">📆 Fecha:</span><span class="value">${new Date(fecha).toLocaleDateString('es-ES')}</span></div>
+                <div class="resumen-item"><span class="label">📆 Fecha:</span><span class="value">${new Date(fecha + 'T12:00:00').toLocaleDateString('es-ES')}</span></div>
             `;
             
             document.getElementById('resumen-reporte').innerHTML = resumenHTML;
@@ -1585,14 +1591,12 @@
         try {
             const todos = [];
             
-            // Historial verificado
             const qHist = query(collection(db, DB_HISTORIAL), where("cedulaRep", "==", cedulaActual));
             const snapHist = await getDocs(qHist);
             snapHist.forEach(d => {
                 todos.push({ tipo: 'verificado', ...d.data() });
             });
             
-            // Pendientes
             const qPend = query(collection(db, DB_PAGOS), where("cedulaRep", "==", cedulaActual));
             const snapPend = await getDocs(qPend);
             snapPend.forEach(d => {
@@ -1603,7 +1607,6 @@
                 todos.push({ tipo, ...data });
             });
             
-            // Ordenar por fecha
             todos.sort((a, b) => {
                 const fa = a.fecha?.seconds || (a.timestamp?.seconds) || 0;
                 const fb = b.fecha?.seconds || (b.timestamp?.seconds) || 0;
@@ -1640,6 +1643,14 @@
                 const esAbono = p.esAbono || false;
                 const fecha = p.fechaPago || (p.fecha?.seconds ? new Date(p.fecha.seconds * 1000).toISOString().slice(0,10) : 'N/A');
                 
+                let fechaMostrar = 'N/A';
+                if (p.fechaPago && typeof p.fechaPago === 'string') {
+                    try {
+                        const [y, m, d] = p.fechaPago.split('-');
+                        if (y && m && d) fechaMostrar = `${d}/${m}/${y}`;
+                    } catch(e) {}
+                }
+                
                 html += `
                     <div class="pago-historial-item ${claseItem}" ${esAbono ? 'style="border-left-color:#f59e0b;"' : ''}>
                         <div style="display:flex; justify-content:space-between; align-items:start; gap:8px; flex-wrap:wrap;">
@@ -1650,7 +1661,7 @@
                                 <br>
                                 <small>📅 ${(p.mesesPagados || []).map(m => esc(m)).join(', ') || 'N/A'}</small><br>
                                 ${p.referencia ? `<small>🔢 ${esc(p.referencia)}</small><br>` : ''}
-                                <small style="color:#94a3b8;">📆 ${fecha}</small>
+                                <small style="color:#94a3b8;">📆 ${fechaMostrar}</small>
                             </div>
                             <div style="text-align:right;">
                                 <b style="color:#0891b2; font-size:16px;">$${parseFloat(p.montoDivisas || 0).toFixed(2)}</b><br>
@@ -1882,7 +1893,7 @@
                 correo,
                 hijos,
                 estado: 'pendiente',
-                origen: 'portal_padres_v22',
+                origen: 'portal_padres_v23',
                 timestamp: serverTimestamp()
             });
             
