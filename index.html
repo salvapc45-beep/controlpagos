@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V19.2</title>
+    <title>SISTEMA U.E.P SANTIAGO DE JESUS - CONTROL V19.3</title>
     <style>
         #securityOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -124,6 +124,7 @@
         .btn-check { background: var(--green); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; margin-right: 5px; font-weight: bold; }
         .btn-reject { background: var(--red); color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-edit-pago { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-del-pago { background: #991b1b; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-left: 3px; }
         
         .btn-ws { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--whatsapp); margin-right: 10px; }
         .btn-email { border:none; background:transparent; font-size:22px; cursor:pointer; color: var(--gmail); margin-right: 10px; }
@@ -235,6 +236,7 @@
         .mes-estado.abono { background: #fef3c7; color: #92400e; }
         .mes-estado.pendiente { background: #fee2e2; color: #991b1b; }
         .mes-estado.futuro { background: #f1f5f9; color: #94a3b8; }
+        .mes-estado.gracia { background: #e0e7ff; color: #4338ca; }
         
         .hist-item {
             background: white; border-left: 4px solid #0891b2;
@@ -255,7 +257,7 @@
 <body>
 
 <header>
-    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V19.2)
+    SISTEMA ADMINISTRATIVO - U.E.P SANTIAGO DE JESUS (V19.3)
     <button id="logoutBtn" class="logout-btn" style="display: none;">🚪 Cerrar Sesión</button>
 </header>
 
@@ -302,7 +304,7 @@
                 </select>
                 <select id="rSec" style="width:100px"><option>A</option><option>B</option></select>
             </div>
-            <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block">Meses Pendientes:</label>
+            <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block">Meses Pendientes: <small style="color:#64748b; font-weight:normal;">(13 meses marcados por defecto — desmarca los que no apliquen)</small></label>
             <select id="rMes" multiple style="height:150px">
                 <option value="Inscripción">Inscripción</option>
                 <option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option>
@@ -315,7 +317,7 @@
                 <small>Total calculado (solo meses vencidos): <span id="totalPreview" style="font-weight:bold; color:#1e40af">$0</span></small>
                 <small style="display:block; color:#64748b; margin-top:3px;">Meses seleccionados: <span id="mesesCount">0</span> | Monto mensual: $<span id="montoMensualPreview">0</span></small>
             </div>
-            <button class="btn-main" onclick="guardar(event)">GUARDAR REGISTRO V19.2</button>
+            <button class="btn-main" onclick="guardar(event)">GUARDAR REGISTRO V19.3</button>
         </div>
     </section>
 
@@ -350,7 +352,40 @@
             <h3 id="tit-list"></h3>
             <div class="card"><div style="text-align:right;"><span id="sec-total-label"></span></div><input type="text" id="search-filter" placeholder="🔍 Buscar por nombre, representante o cédula..." onkeyup="filterList()"></div>
             <div class="card"><div id="final-list"></div></div>
-            <div id="ficha-estudiante" class="ficha-container" style="display:none;"><div class="card"><h3>📋 Ficha del Estudiante</h3><div><div><label>Nombre:</label><input type="text" id="edit-nombre"></div><div><label>Representante:</label><input type="text" id="edit-representante"></div><div><label>Cédula:</label><input type="text" id="edit-cedula" readonly></div><div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div><div><label>Correo:</label><input type="email" id="edit-correo"></div><div><label>Grado:</label><input type="text" id="edit-grado" readonly></div><div><label>Monto Mensual:</label><input type="number" id="edit-monto-mensual" step="0.01" min="0"></div><div><label>Meses Pendientes:</label><div id="edit-meses"></div></div><div><label>Total Deuda:</label><h3 id="edit-total"></h3></div><div class="ficha-actions"><button class="btn-edit" onclick="guardarCambiosEstudiante(event)">💾 Guardar</button><button class="btn-edit-meses" onclick="abrirEditarMesesFicha()">📅 Editar meses</button><button class="btn-pay-manual" onclick="abrirModalPagoManual()">💰 Marcar pago / abono</button><button class="btn-historial" onclick="abrirHistorialRepresentante()">📜 Historial familiar</button><button class="btn-recibo" onclick="imprimirReciboFicha()">🧾 Recibo</button><button class="btn-edit" onclick="volverALista()">⬅ Volver</button><button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button></div></div></div></div>
+            <div id="ficha-estudiante" class="ficha-container" style="display:none;">
+                <div class="card">
+                    <h3>📋 Ficha del Estudiante</h3>
+                    <div>
+                        <div><label>Nombre:</label><input type="text" id="edit-nombre"></div>
+                        <div><label>Representante:</label><input type="text" id="edit-representante"></div>
+                        <div><label>Cédula:</label><input type="text" id="edit-cedula"></div>
+                        <div><label>Teléfono:</label><input type="tel" id="edit-telefono"></div>
+                        <div><label>Correo:</label><input type="email" id="edit-correo"></div>
+                        <div><label>Grado:</label>
+                            <select id="edit-grado">
+                                <option>5to Año</option><option>4to Año</option><option>3er Año</option><option>2do Año</option><option>1er Año</option>
+                                <option>6to Grado</option><option>5to Grado</option><option>4to Grado</option><option>3er Grado</option><option>2do Grado</option><option>1er Grado</option>
+                                <option>Preescolar 3</option><option>Preescolar 2</option><option>Preescolar 1</option><option>Maternal</option>
+                            </select>
+                        </div>
+                        <div><label>Sección:</label>
+                            <select id="edit-seccion"><option>A</option><option>B</option></select>
+                        </div>
+                        <div><label>Monto Mensual:</label><input type="number" id="edit-monto-mensual" step="0.01" min="0"></div>
+                        <div><label>Meses Pendientes:</label><div id="edit-meses"></div></div>
+                        <div><label>Total Deuda:</label><h3 id="edit-total"></h3></div>
+                        <div class="ficha-actions">
+                            <button class="btn-edit" onclick="guardarCambiosEstudiante(event)">💾 Guardar</button>
+                            <button class="btn-edit-meses" onclick="abrirEditarMesesFicha()">📅 Editar meses</button>
+                            <button class="btn-pay-manual" onclick="abrirModalPagoManual()">💰 Marcar pago / abono</button>
+                            <button class="btn-historial" onclick="abrirHistorialRepresentante()">📜 Historial familiar</button>
+                            <button class="btn-recibo" onclick="imprimirReciboFicha()">🧾 Recibo</button>
+                            <button class="btn-edit" onclick="volverALista()">⬅ Volver</button>
+                            <button class="btn-delete" onclick="eliminarEstudiante()">🗑 Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -379,9 +414,9 @@
 
     <section id="mod-rep" class="modulo">
         <div class="card">
-            <h3>📊 Pagos Reportados (V19.2)</h3>
+            <h3>📊 Pagos Reportados (V19.3)</h3>
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
-                <p style="font-size:12px; color:gray;">Haga clic en cualquier fila para ver detalles | <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">✏️ Editar solo admin</span></p>
+                <p style="font-size:12px; color:gray;">Haga clic en cualquier fila para ver detalles | <span style="background:#fef3c7; padding:2px 6px; border-radius:4px;">✏️ Editar / 🗑 Eliminar</span></p>
                 <div>
                     <button class="btn-csv" onclick="exportarPagosCSV()">📊 Exportar pagos (CSV)</button>
                     <button class="btn-export" onclick="exportarDatos()">📥 Backup (JSON)</button>
@@ -394,7 +429,7 @@
                             <th>Alumno / Representante</th>
                             <th>Método / Referencia</th>
                             <th>Fecha del pago</th>
-                            <th>Monto $</th>
+                            <th>Monto</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -531,7 +566,7 @@
 <div id="securityOverlay">
     <div class="login-box">
         <h2>🔒 ACCESO RESTRINGIDO</h2>
-        <p>Sistema Administrativo U.E.P Santiago De Jesus V19.2<br>Ingrese sus credenciales para continuar</p>
+        <p>Sistema Administrativo U.E.P Santiago De Jesus V19.3<br>Ingrese sus credenciales para continuar</p>
         <input type="password" id="cedulaInput" placeholder="Ingrese su credencial" autocomplete="off" autofocus>
         <button onclick="verificarCedula()">INGRESAR AL SISTEMA</button>
         <div class="error" id="loginError"></div>
@@ -608,7 +643,7 @@
             
             setTimeout(() => {
                 ocultarOverlaySeguridad();
-                document.title = `U.E.P Santiago De Jesus V19.2 | ${usuarioActivo}`;
+                document.title = `U.E.P Santiago De Jesus V19.3 | ${usuarioActivo}`;
                 document.getElementById('logoutBtn').style.display = 'block';
                 const ut = document.getElementById('userTagTop');
                 if (ut) ut.textContent = '👤 ' + usuarioActivo;
@@ -651,7 +686,7 @@
                     usuarioActivo = sesion.usuario;
                     ocultarOverlaySeguridad();
                     document.getElementById('logoutBtn').style.display = 'block';
-                    document.title = `U.E.P Santiago De Jesus V19.2 | ${usuarioActivo}`;
+                    document.title = `U.E.P Santiago De Jesus V19.3 | ${usuarioActivo}`;
                     const ut = document.getElementById('userTagTop');
                     if (ut) ut.textContent = '👤 ' + usuarioActivo;
                     iniciarInactividad();
@@ -788,6 +823,11 @@
     
     const MESES_ORDEN = ["Inscripción", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto"];
 
+    // ═══════════════════════════════════════════════════════
+    // V19.3: REGLA DEL DÍA 10
+    // ═══════════════════════════════════════════════════════
+    const DIA_INICIO_COBRO = 10;
+
     function normalizarMes(m) {
         return (m || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     }
@@ -801,29 +841,29 @@
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
     
+    // ═══════════════════════════════════════════════════════
+    // V19.3 FIX: FECHA SIN DESFASE (usa solo string)
+    // ═══════════════════════════════════════════════════════
     function formatearFechaPago(pago) {
-        if (pago.fechaPago) {
+        if (pago.fechaPago && typeof pago.fechaPago === 'string') {
             try {
-                const [y, m, d] = pago.fechaPago.split('-');
-                if (y && m && d) return `${d}/${m}/${y}`;
-            } catch(e) {}
-        }
-        if (pago.fechaPagoTimestamp) {
-            try {
-                const ts = pago.fechaPagoTimestamp;
-                const ms = ts.seconds ? ts.seconds * 1000 : (ts.toMillis ? ts.toMillis() : ts);
-                return new Date(ms).toLocaleDateString('es-ES');
-            } catch(e) {}
-        }
-        if (pago.fecha) {
-            try {
-                const ms = pago.fecha.seconds ? pago.fecha.seconds * 1000 : pago.fecha;
-                return new Date(ms).toLocaleDateString('es-ES') + ' <small style="color:#94a3b8;">(reporte)</small>';
+                const partes = pago.fechaPago.split('-');
+                if (partes.length === 3) {
+                    const [y, m, d] = partes;
+                    if (y && m && d) return `${d}/${m}/${y}`;
+                }
             } catch(e) {}
         }
         return '<span style="color:#94a3b8;">Sin fecha</span>';
     }
     window.formatearFechaPago = formatearFechaPago;
+    
+    // Formatear monto en Bs. con separador de miles
+    function formatearBs(valor) {
+        const n = parseFloat(valor) || 0;
+        return n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    window.formatearBs = formatearBs;
     
     function pedirTexto(titulo, placeholder = '') {
         return new Promise((resolve) => {
@@ -899,15 +939,9 @@
                 cacheHistorialPorAlumno[nombre].push(h);
             });
             cacheHistorialCargado = true;
-            console.log(`[V19.2] Historial cargado: ${Object.keys(cacheHistorialPorAlumno).length} alumnos`);
         } catch (e) {
             console.error("Error cargando cache historial:", e);
         }
-    }
-    
-    function tieneEvidenciaDePago(nombreEstudiante) {
-        const pagos = cacheHistorialPorAlumno[nombreEstudiante] || [];
-        return pagos.length > 0;
     }
     
     function getEstadoAlumno(alumno) {
@@ -930,19 +964,33 @@
             const m = fecha.getMonth();
             mesActualIndex = m >= 8 ? (m - 7) : (m + 5);
         }
-        console.log(`[V19.2] Mes detectado: "${mesNombre}" → índice ${mesActualIndex}`);
         const lbl = document.getElementById('currentYearLabel');
         if (lbl) lbl.textContent = currentYear;
         return mesActualIndex;
     }
     
+    // ═══════════════════════════════════════════════════════
+    // V19.3: Regla del día 10 aplicada
+    // ═══════════════════════════════════════════════════════
     function calcularMesesReales(mesesRegistrados) {
         if (!mesesRegistrados || !Array.isArray(mesesRegistrados)) return [];
+        const diaActual = new Date().getDate();
         return mesesRegistrados.filter(mes => {
             const idx = indiceMes(mes);
-            return idx !== -1 && idx <= mesActualIndex;
+            if (idx === -1) return false;
+            if (idx < mesActualIndex) return true;
+            if (idx === mesActualIndex) return diaActual >= DIA_INICIO_COBRO;
+            return false;
         });
     }
+    
+    function estaEnGracia(mes) {
+        const idx = indiceMes(mes);
+        if (idx !== mesActualIndex) return false;
+        return new Date().getDate() < DIA_INICIO_COBRO;
+    }
+    window.estaEnGracia = estaEnGracia;
+    
     function isSolvente(mesesRegistrados) {
         return calcularMesesReales(mesesRegistrados || []).length === 0;
     }
@@ -959,7 +1007,7 @@
     }
     function getNivelAlerta(meses) {
         const dia = new Date().getDate();
-        if (meses >= 3 || (meses >= 1 && dia > 10)) return { texto: "ALERTA URGENTE", clase: "urgente" };
+        if (meses >= 3 || (meses >= 1 && dia > DIA_INICIO_COBRO)) return { texto: "ALERTA URGENTE", clase: "urgente" };
         if (meses === 2) return { texto: "ALERTA NORMAL", clase: "normal" };
         return { texto: "ALERTA PREVIA", clase: "previa" };
     }
@@ -976,14 +1024,70 @@
     }
     
     // ═══════════════════════════════════════════════════════
-    // MIGRACIÓN AUTOMÁTICA V19.2
+    // V19.3: Verificar últimos 6 dígitos referencia + fecha
+    // ═══════════════════════════════════════════════════════
+    async function verificarDuplicadoRef6(referencia, fechaPago, idExcluir = null) {
+        if (!referencia || referencia.length < 6) return { duplicado: false };
+        const ultimos6 = referencia.slice(-6);
+        
+        // Buscar en pagos pendientes
+        const snapPagos = await getDocs(collection(db, DB_PAGOS));
+        for (const docSnap of snapPagos.docs) {
+            if (idExcluir && docSnap.id === idExcluir) continue;
+            const p = docSnap.data();
+            const refExistente = (p.referencia || '').toString();
+            if (refExistente.length >= 6 && refExistente.slice(-6) === ultimos6) {
+                if (p.fechaPago === fechaPago) {
+                    return { 
+                        duplicado: true, 
+                        tipo: 'pago_pendiente',
+                        detalle: `Ref ${refExistente} del ${p.fechaPago}`
+                    };
+                }
+            }
+        }
+        
+        // Buscar en historial
+        const snapHist = await getDocs(collection(db, DB_HISTORIAL));
+        for (const docSnap of snapHist.docs) {
+            const h = docSnap.data();
+            const refExistente = (h.referencia || '').toString();
+            if (refExistente.length >= 6 && refExistente.slice(-6) === ultimos6) {
+                if (h.fechaPago === fechaPago) {
+                    return { 
+                        duplicado: true, 
+                        tipo: 'historial',
+                        detalle: `Ref ${refExistente} del ${h.fechaPago}`
+                    };
+                }
+            }
+        }
+        
+        return { duplicado: false };
+    }
+    window.verificarDuplicadoRef6 = verificarDuplicadoRef6;
+    
+    async function registrarIntentoDuplicado(datos) {
+        try {
+            await addDoc(collection(db, DB_DUPLICADOS), {
+                ...datos,
+                fecha: serverTimestamp(),
+                revisado: false
+            });
+        } catch (e) {
+            console.error("Error guardando intento duplicado:", e);
+        }
+    }
+    window.registrarIntentoDuplicado = registrarIntentoDuplicado;
+    
+    // ═══════════════════════════════════════════════════════
+    // MIGRACIÓN AUTOMÁTICA V19.2 (mantenida)
     // ═══════════════════════════════════════════════════════
     window.ejecutarMigracionV19_2 = async function() {
         const bandera = localStorage.getItem('sdj_migracion_v19_2_ok');
         if (bandera === 'completada') return;
         if (!usuarioActivo) return;
         
-        console.log("[V19.2] Iniciando migración...");
         try {
             const snap = await getDocs(collection(db, DB_MAIN));
             let migrados = 0, sinCambios = 0, errores = 0;
@@ -993,14 +1097,10 @@
                 const a = d.data();
                 const mesesActuales = a.meses || [];
                 const abonosActuales = a.abonos || {};
-                
-                // Si ya tiene los 13 meses, no tocar
                 const mesesFaltantes = todosLosMeses.filter(m => !mesesActuales.includes(m));
-                // Si tiene historial, no rellenar esos meses
                 const historial = cacheHistorialPorAlumno[a.nombre] || [];
                 const mesesPagadosHist = new Set();
                 historial.forEach(h => (h.mesesPagados || []).forEach(m => mesesPagadosHist.add(m)));
-                
                 const mesesAAgregar = mesesFaltantes.filter(m => !mesesPagadosHist.has(m));
                 
                 if (mesesAAgregar.length === 0 && Object.keys(abonosActuales).length >= 0) {
@@ -1026,18 +1126,15 @@
             
             await addDoc(collection(db, DB_AUD_CORR), {
                 tipo: 'migracion_v19_2',
-                migrados,
-                sinCambios,
-                errores,
+                migrados, sinCambios, errores,
                 ejecutadoPor: usuarioActivo,
                 fecha: serverTimestamp()
             });
             
             localStorage.setItem('sdj_migracion_v19_2_ok', 'completada');
-            console.log(`[V19.2] Migración completa: ${migrados} migrados, ${sinCambios} sin cambios, ${errores} errores`);
             
             if (migrados > 0) {
-                showModal(`✅ Migración V19.2 completada\n\n• Migrados: ${migrados}\n• Sin cambios: ${sinCambios}\n• Errores: ${errores}\n\nTodos los alumnos ahora tienen el año escolar completo.`);
+                showModal(`✅ Migración V19.2 completada\n\n• Migrados: ${migrados}\n• Sin cambios: ${sinCambios}\n• Errores: ${errores}`);
             }
         } catch (e) {
             console.error("Error en migración:", e);
@@ -1059,6 +1156,7 @@
             MESES_ORDEN.forEach(mes => {
                 const idx = indiceMes(mes);
                 const esFuturo = idx > mesActualIndex;
+                const esGracia = estaEnGracia(mes);
                 const pagadoHist = mesesPagados.has(mes);
                 const abonoMes = (abonos && abonos[mes]) ? abonos[mes] : 0;
                 const monto = montoMensual || 0;
@@ -1068,6 +1166,8 @@
                     clase = 'pagado'; icono = '✅'; texto = 'Pagado';
                 } else if (abonoMes > 0) {
                     clase = 'abono'; icono = '🟡'; texto = `$${abonoMes.toFixed(0)}/$${monto.toFixed(0)}`;
+                } else if (esGracia) {
+                    clase = 'gracia'; icono = '🕐'; texto = `Gracia`;
                 } else if (esFuturo) {
                     clase = 'futuro'; icono = '⏳'; texto = 'Futuro';
                 } else {
@@ -1146,6 +1246,16 @@
     });
     document.getElementById('rMes')?.addEventListener('change', () => { window.hayTrabajoSinGuardar = true; });
     
+    // V19.3: Marcar los 13 meses por defecto al cargar
+    document.addEventListener('DOMContentLoaded', () => {
+        const selMes = document.getElementById('rMes');
+        if (selMes) {
+            Array.from(selMes.options).forEach(opt => { opt.selected = true; });
+        }
+        // Recalcular al cargar
+        setTimeout(() => actualizarTotalPreview(), 100);
+    });
+    
     window.guardar = async (evt) => {
         if (!usuarioActivo) { showModal("⚠️ Sistema bloqueado"); mostrarOverlaySeguridad(); return; }
         const cedula = document.getElementById('rCedula').value;
@@ -1183,7 +1293,8 @@
             document.getElementById('rMail').value = '';
             document.getElementById('rTel').value = '';
             document.getElementById('rMon').value = '';
-            document.getElementById('rMes').selectedIndex = -1;
+            // V19.3: Re-marcar los 13 meses después de guardar
+            Array.from(document.getElementById('rMes').options).forEach(opt => { opt.selected = true; });
             actualizarTotalPreview();
             window.hayTrabajoSinGuardar = false;
         } catch (error) {
@@ -1293,7 +1404,8 @@
             document.getElementById('edit-cedula').value = estudianteActual.cedula || '';
             document.getElementById('edit-telefono').value = estudianteActual.tel || '';
             document.getElementById('edit-correo').value = estudianteActual.mail || '';
-            document.getElementById('edit-grado').value = `${estudianteActual.grado} - ${estudianteActual.seccion}`;
+            document.getElementById('edit-grado').value = estudianteActual.grado;
+            document.getElementById('edit-seccion').value = estudianteActual.seccion;
             document.getElementById('edit-monto-mensual').value = estudianteActual.montoMensual || 0;
             
             let mesesHTML = '';
@@ -1338,31 +1450,64 @@
             const nuevoMonto = parseFloat(document.getElementById('edit-monto-mensual').value) || 0;
             const montoAnterior = estudianteActual.montoMensual || 0;
             const montoCambio = Math.abs(nuevoMonto - montoAnterior) > 0.01;
+            
+            const nuevoNombre = document.getElementById('edit-nombre').value.trim();
+            const nuevaCedula = document.getElementById('edit-cedula').value.trim();
+            const nuevoGrado = document.getElementById('edit-grado').value;
+            const nuevaSeccion = document.getElementById('edit-seccion').value;
+            
+            if (!nuevoNombre) { showModal("El nombre es obligatorio"); return; }
+            if (!nuevaCedula) { showModal("La cédula es obligatoria"); return; }
+            
+            const cedulaCambio = estudianteActual.cedula !== nuevaCedula;
+            if (cedulaCambio) {
+                const ok = await showModal(`⚠️ Cambiarás la CÉDULA del representante:\n\n${estudianteActual.cedula} → ${nuevaCedula}\n\nEl representante tendrá que usar la nueva cédula para entrar al portal.\n\n¿Continuar?`, true);
+                if (!ok) return;
+            }
+            
             if (montoCambio) {
                 const confirmar = await showModal(`⚠️ El monto mensual cambió:\n\n$${montoAnterior} → $${nuevoMonto}\n\nLa deuda se recalculará.\n¿Continuar?`, true);
                 if (!confirmar) return;
             }
+            
             await updateDoc(doc(db, DB_MAIN, estudianteActual.id), {
+                nombre: nuevoNombre,
                 rep: document.getElementById('edit-representante').value,
+                cedula: nuevaCedula,
                 tel: document.getElementById('edit-telefono').value,
                 mail: document.getElementById('edit-correo').value,
+                grado: nuevoGrado,
+                seccion: nuevaSeccion,
                 montoMensual: nuevoMonto,
                 total: calcularTotalReal(nuevoMonto, estudianteActual.meses, estudianteActual.abonos || {}),
                 modificadoPor: usuarioActivo,
                 fechaModificacion: serverTimestamp()
             });
-            if (montoCambio) {
-                await addDoc(collection(db, DB_AUD_CORR), {
-                    alumnoId: estudianteActual.id,
-                    nombreEst: estudianteActual.nombre,
-                    tipo: 'cambio_monto',
-                    montoAnterior,
-                    montoNuevo: nuevoMonto,
-                    corregidoPor: usuarioActivo,
-                    fecha: serverTimestamp()
-                });
-            }
+            
+            await addDoc(collection(db, DB_AUD_CORR), {
+                alumnoId: estudianteActual.id,
+                nombreEst: nuevoNombre,
+                tipo: 'edicion_ficha_completa',
+                anteriores: {
+                    nombre: estudianteActual.nombre,
+                    cedula: estudianteActual.cedula,
+                    grado: estudianteActual.grado,
+                    seccion: estudianteActual.seccion,
+                    montoMensual: montoAnterior
+                },
+                nuevos: {
+                    nombre: nuevoNombre,
+                    cedula: nuevaCedula,
+                    grado: nuevoGrado,
+                    seccion: nuevaSeccion,
+                    montoMensual: nuevoMonto
+                },
+                corregidoPor: usuarioActivo,
+                fecha: serverTimestamp()
+            });
+            
             showModal("✅ Cambios guardados");
+            await window.mostrarFichaEstudiante(estudianteActual.id);
             window.loadFinal(curSec);
         };
         if (btn) await window.conBotonBloqueado(btn, ejecutar);
@@ -1607,19 +1752,26 @@
         showModal(`✅ Enviando ${conCorreo.length} correos.`);
     };
     
+    // ═══════════════════════════════════════════════════════
+    // V19.3: DETALLES DEL PAGO con BANCO y MONTO Bs
+    // ═══════════════════════════════════════════════════════
     window.mostrarDetallesPago = async (id) => {
         if (!usuarioActivo) return;
         const docSnap = await getDoc(doc(db, DB_PAGOS, id));
         if(docSnap.exists()) {
             pagoSeleccionado = { id, ...docSnap.data() };
             const fechaFormateada = formatearFechaPago(pagoSeleccionado);
+            const montoBs = parseFloat(pagoSeleccionado.montoBs || 0);
+            const montoUsd = parseFloat(pagoSeleccionado.montoDivisas || pagoSeleccionado.monto || 0);
             document.getElementById('detalles-pago-content').innerHTML = `
                 <div class="detail-row"><span class="detail-label">Estudiante:</span><span class="detail-value">${esc(pagoSeleccionado.nombreEst)}</span></div>
                 <div class="detail-row"><span class="detail-label">Representante:</span><span class="detail-value">${esc(pagoSeleccionado.nombreRep)}</span></div>
                 <div class="detail-row" style="background:#fef3c7;"><span class="detail-label">📅 Fecha del pago:</span><span class="detail-value"><b>${fechaFormateada}</b></span></div>
                 <div class="detail-row"><span class="detail-label">Método:</span><span class="detail-value">${esc(pagoSeleccionado.metodo)}</span></div>
+                ${pagoSeleccionado.banco ? `<div class="detail-row"><span class="detail-label">🏦 Banco:</span><span class="detail-value">${esc(pagoSeleccionado.banco)}</span></div>` : ''}
                 <div class="detail-row"><span class="detail-label">Referencia:</span><span class="detail-value">${esc(pagoSeleccionado.referencia)}</span></div>
-                <div class="detail-row"><span class="detail-label">Monto USD:</span><span class="detail-value">$${pagoSeleccionado.montoDivisas || pagoSeleccionado.monto}</span></div>
+                <div class="detail-row" style="background:#dcfce7;"><span class="detail-label">💰 Monto USD:</span><span class="detail-value"><b>$${montoUsd.toFixed(2)}</b></span></div>
+                <div class="detail-row" style="background:#dbeafe;"><span class="detail-label">💵 Monto Bs.:</span><span class="detail-value"><b>Bs. ${formatearBs(montoBs)}</b></span></div>
                 <div class="detail-row"><span class="detail-label">Meses pagados:</span><span class="detail-value">${(pagoSeleccionado.mesesPagados||[]).map(m=>esc(m)).join(', ')}</span></div>
                 ${pagoSeleccionado.esAbono ? '<div class="detail-row" style="background:#fef3c7;"><span class="detail-label">Tipo:</span><span class="detail-value"><b>ABONO PARCIAL</b></span></div>' : ''}
                 ${pagoSeleccionado.editadoPor ? `<div class="detail-row" style="background:#fef3c7;"><span class="detail-label">Editado por:</span><span class="detail-value">${esc(pagoSeleccionado.editadoPor)}</span></div>` : ''}
@@ -1691,8 +1843,10 @@
                 pagoId: pagoEditando.id, 
                 anteriores: {
                     metodo: pagoEditando.metodo,
+                    banco: pagoEditando.banco,
                     referencia: pagoEditando.referencia,
                     fechaPago: pagoEditando.fechaPago,
+                    montoBs: pagoEditando.montoBs,
                     montoDivisas: pagoEditando.montoDivisas,
                     mesesPagados: pagoEditando.mesesPagados
                 }, 
@@ -1709,7 +1863,7 @@
     };
     
     // ═══════════════════════════════════════════════════════
-    // VALIDAR PAGO (con soporte de abonos)
+    // V19.3: VALIDAR PAGO con verificación de ref (últimos 6)
     // ═══════════════════════════════════════════════════════
     window.validarPago = async (id) => {
         if (!usuarioActivo) { showModal("Acceso restringido"); return; }
@@ -1717,6 +1871,27 @@
         const docSnap = await getDoc(docRef);
         if(!docSnap.exists()) return;
         const pago = docSnap.data();
+        
+        // V19.3: Verificar duplicado por últimos 6 dígitos + fecha
+        const dupCheck = await verificarDuplicadoRef6(pago.referencia, pago.fechaPago, id);
+        if (dupCheck.duplicado) {
+            await registrarIntentoDuplicado({
+                nombreEst: pago.nombreEst,
+                nombreRep: pago.nombreRep,
+                cedulaRep: pago.cedulaRep,
+                referencia: pago.referencia,
+                fechaPago: pago.fechaPago,
+                monto: pago.montoDivisas,
+                mesesPagados: pago.mesesPagados,
+                motivo: 'ultimos_6_digitos_coinciden_en_verificacion',
+                detalle: dupCheck.detalle
+            });
+            const continuar = await showModal(
+                `⚠️ Este pago ya fue registrado, por favor verifique sus datos.\n\n${dupCheck.detalle}\n\n¿Deseas verificarlo de todas formas?`,
+                true
+            );
+            if (!continuar) return;
+        }
         
         // Buscar estudiante
         let estudianteId = null;
@@ -1733,29 +1908,26 @@
             if (!snapNom.empty) { estudianteId = snapNom.docs[0].id; estudianteData = snapNom.docs[0].data(); }
         }
         
-        // Determinar si es abono parcial
         const montoPagado = parseFloat(pago.montoDivisas || pago.monto || 0);
         const mesesPagados = pago.mesesPagados || [];
         const montoMensual = estudianteData?.montoMensual || 0;
-        const esAbono = mesesPagados.length === 1 && montoMensual > 0 && montoPagado < montoMensual - 0.5;
+        const esAbono = pago.esAbono === true || (mesesPagados.length === 1 && montoMensual > 0 && montoPagado < montoMensual - 0.5);
         
         const fechaPagoStr = formatearFechaPago(pago).replace(/<[^>]*>/g, '');
         let msgConfirm = `¿Verificar pago de ${pago.nombreEst}?\n\nFecha: ${fechaPagoStr}\nMeses: ${mesesPagados.join(', ')}\nMonto: $${montoPagado}`;
         if (esAbono) {
-            msgConfirm += `\n\n🟡 TIPO: ABONO PARCIAL (esperado $${montoMensual} por mes)`;
+            msgConfirm += `\n\n🟡 TIPO: ABONO PARCIAL`;
         }
         msgConfirm += '\n\n¿Continuar?';
         if (!await showModal(msgConfirm, true)) return;
         
         try {
-            // Actualizar estado del pago
             await updateDoc(docRef, {
                 procesadoPor: usuarioActivo,
                 estado: `Verificado por ${usuarioActivo}`,
                 fechaProcesamiento: serverTimestamp()
             });
             
-            // Guardar en historial
             await addDoc(collection(db, DB_HISTORIAL), {
                 nombreEst: pago.nombreEst,
                 nombreRep: pago.nombreRep,
@@ -1764,6 +1936,7 @@
                 montoDivisas: montoPagado,
                 montoBs: pago.montoBs || 0,
                 metodo: pago.metodo || '',
+                banco: pago.banco || '',
                 referencia: pago.referencia || '',
                 fechaPago: pago.fechaPago || '',
                 esAbono: esAbono,
@@ -1773,26 +1946,31 @@
                 fecha: serverTimestamp()
             });
             
-            // Actualizar alumno (con abonos)
             if (estudianteId && estudianteData) {
                 const mesesActuales = estudianteData.meses || [];
                 const abonosActuales = estudianteData.abonos || {};
                 const nuevosAbonos = { ...abonosActuales };
                 let nuevosMeses = [...mesesActuales];
                 
-                if (esAbono && mesesPagados.length === 1) {
-                    // Abono parcial a un solo mes
-                    const mes = mesesPagados[0];
-                    nuevosAbonos[mes] = (nuevosAbonos[mes] || 0) + montoPagado;
-                    // Si el abono completa el mes, quitar de pendientes
-                    if (nuevosAbonos[mes] >= montoMensual - 0.5) {
-                        nuevosMeses = nuevosMeses.filter(m => m !== mes);
+                if (esAbono && mesesPagados.length >= 1) {
+                    // Distribuir monto entre los meses seleccionados (en orden cronológico)
+                    let restante = montoPagado;
+                    const mesesOrdenados = mesesPagados.slice().sort((a, b) => indiceMes(a) - indiceMes(b));
+                    for (const mes of mesesOrdenados) {
+                        if (restante <= 0) break;
+                        const yaAbonado = nuevosAbonos[mes] || 0;
+                        const falta = Math.max(0, montoMensual - yaAbonado);
+                        const aplicar = Math.min(restante, falta);
+                        nuevosAbonos[mes] = yaAbonado + aplicar;
+                        restante -= aplicar;
+                        if (nuevosAbonos[mes] >= montoMensual - 0.5) {
+                            nuevosMeses = nuevosMeses.filter(m => m !== mes);
+                        }
                     }
                 } else {
-                    // Pago completo de uno o varios meses
                     mesesPagados.forEach(mes => {
                         nuevosMeses = nuevosMeses.filter(m => m !== mes);
-                        nuevosAbonos[mes] = montoMensual; // marcar completo
+                        nuevosAbonos[mes] = montoMensual;
                     });
                 }
                 
@@ -1853,6 +2031,44 @@
         }
     };
     
+    // ═══════════════════════════════════════════════════════
+    // V19.3: ELIMINAR REPORTE (nuevo)
+    // ═══════════════════════════════════════════════════════
+    window.eliminarReporte = async (id) => {
+        if (!usuarioActivo) { showModal("Acceso restringido"); return; }
+        const docRef = doc(db, DB_PAGOS, id);
+        const docSnap = await getDoc(docRef);
+        if (!docSnap.exists()) { showModal("El reporte no existe"); return; }
+        const pago = docSnap.data();
+        
+        const confirmar = await showModal(
+            `🗑 ¿Eliminar definitivamente este reporte?\n\nEstudiante: ${pago.nombreEst}\nRef: ${pago.referencia || 'N/A'}\nMonto: $${pago.montoDivisas || 0}\n\nEsta acción no se puede deshacer.`,
+            true
+        );
+        if (!confirmar) return;
+        
+        try {
+            await addDoc(collection(db, DB_AUD_DEL), {
+                tipo: 'eliminacion_reporte',
+                reporteId: id,
+                nombreEst: pago.nombreEst,
+                nombreRep: pago.nombreRep,
+                cedulaRep: pago.cedulaRep,
+                referencia: pago.referencia,
+                monto: pago.montoDivisas,
+                mesesPagados: pago.mesesPagados,
+                datosCompletos: pago,
+                eliminadoPor: usuarioActivo,
+                fecha: serverTimestamp()
+            });
+            await deleteDoc(docRef);
+            showModal("✅ Reporte eliminado. Registrado en auditoría.");
+        } catch (error) {
+            console.error("Error:", error);
+            showModal("❌ Error al eliminar: " + error.message);
+        }
+    };
+    
     window.del = async (id) => {
         if (!usuarioActivo || !await showModal("¿Eliminar alumno?", true)) return;
         const docRef = doc(db, DB_MAIN, id);
@@ -1861,10 +2077,6 @@
         await deleteDoc(docRef);
         showModal("✅ Alumno eliminado");
     };
-    
-    // ═══════════════════════════════════════════════════════
-    // PAGO MANUAL con soporte de abonos
-    // ═══════════════════════════════════════════════════════
     
     window.abrirModalPagoManual = () => {
         if (!usuarioActivo || !estudianteActual) return;
@@ -1917,14 +2129,15 @@
             const obs = document.getElementById('pago-manual-obs').value.trim();
             const montoMensual = estudianteActual.montoMensual || 0;
             
-            // Registrar en historial
             await addDoc(collection(db, DB_HISTORIAL), {
                 nombreEst: estudianteActual.nombre,
                 nombreRep: estudianteActual.rep,
                 cedulaRep: estudianteActual.cedula || '',
                 mesesPagados: checks,
                 montoDivisas: monto,
+                montoBs: 0,
                 metodo: 'Manual',
+                banco: '',
                 referencia: ref,
                 fechaPago: fechaPago,
                 observaciones: obs,
@@ -1933,7 +2146,6 @@
                 fecha: serverTimestamp()
             });
             
-            // Distribuir monto entre los meses (en orden cronológico)
             const mesesActuales = estudianteActual.meses || [];
             const abonosActuales = estudianteActual.abonos || {};
             const nuevosAbonos = { ...abonosActuales };
@@ -1971,10 +2183,6 @@
         else await ejecutar();
     };
     
-    // ═══════════════════════════════════════════════════════
-    // HISTORIAL DEL REPRESENTANTE (nueva función)
-    // ═══════════════════════════════════════════════════════
-    
     window.abrirHistorialRepresentante = async () => {
         if (!estudianteActual || !usuarioActivo) return;
         const cedula = estudianteActual.cedula;
@@ -1988,18 +2196,15 @@
         document.getElementById('modal-historial-rep').style.display = 'flex';
         
         try {
-            // Buscar todos los hijos del rep
             const hijosSnap = await getDocs(query(collection(db, DB_MAIN), where("cedula", "==", cedula)));
             const hijos = hijosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
             
-            // Buscar todo el historial de esos hijos
             const historial = [];
             for (const hijo of hijos) {
                 const hSnap = await getDocs(query(collection(db, DB_HISTORIAL), where("nombreEst", "==", hijo.nombre)));
                 hSnap.forEach(d => historial.push({ _hijoNombre: hijo.nombre, id: d.id, ...d.data() }));
             }
             
-            // Ordenar por fecha descendente
             historial.sort((a, b) => {
                 const fa = a.fecha?.seconds || 0;
                 const fb = b.fecha?.seconds || 0;
@@ -2020,7 +2225,7 @@
             } else {
                 html += `<h4 style="margin-bottom:10px;">📜 Historial de pagos (${historial.length})</h4>`;
                 historial.slice(0, 50).forEach(h => {
-                    const fechaStr = h.fecha?.seconds ? new Date(h.fecha.seconds * 1000).toLocaleDateString('es-ES') : 'N/A';
+                    const fechaStr = formatearFechaPago(h).replace(/<[^>]*>/g, '');
                     const clase = h.esAbono ? 'pendiente' : 'verificado';
                     html += `<div class="hist-item ${clase}">
                         <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:5px;">
@@ -2052,10 +2257,6 @@
             document.getElementById('modal-historial-rep').style.display = 'none';
         }
     };
-    
-    // ═══════════════════════════════════════════════════════
-    // RECIBO
-    // ═══════════════════════════════════════════════════════
     
     window.imprimirReciboFicha = () => {
         if (!estudianteActual) return;
@@ -2099,10 +2300,6 @@
         win.document.close();
         setTimeout(() => win.print(), 500);
     };
-    
-    // ═══════════════════════════════════════════════════════
-    // EXPORTACIONES CSV
-    // ═══════════════════════════════════════════════════════
     
     window.exportarTodosCSV = () => {
         if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
@@ -2162,10 +2359,6 @@
         descargarCSV(`uep_pagos_${new Date().toISOString().slice(0,10)}.csv`, filas);
     };
     
-    // ═══════════════════════════════════════════════════════
-    // MÓDULO DE SOLICITUDES (con monto por hijo)
-    // ═══════════════════════════════════════════════════════
-    
     async function cargarSolicitudes() {
         const div = document.getElementById('lista-solicitudes');
         if (!div) return;
@@ -2195,6 +2388,7 @@
                         <button class="btn-edit" onclick="abrirEditarSolicitud('${docSnap.id}')" style="font-size:11px;">✏️ Editar</button>
                         <button class="btn-check" onclick="aprobarSolicitudDirecta('${docSnap.id}')" style="font-size:11px;">✅ Aprobar</button>
                         <button class="btn-reject" onclick="rechazarSolicitud('${docSnap.id}')" style="font-size:11px;">✖ Rechazar</button>
+                        <button class="btn-del-pago" onclick="eliminarSolicitud('${docSnap.id}')" style="font-size:11px;">🗑 Eliminar</button>
                     </div>
                 `;
                 div.appendChild(cardDiv);
@@ -2204,6 +2398,43 @@
             div.innerHTML = '<p style="color:red; text-align:center;">❌ Error al cargar</p>';
         }
     }
+    
+    // ═══════════════════════════════════════════════════════
+    // V19.3: ELIMINAR SOLICITUD (nuevo)
+    // ═══════════════════════════════════════════════════════
+    window.eliminarSolicitud = async (id) => {
+        if (!usuarioActivo) { showModal("Acceso restringido"); return; }
+        const docSnap = await getDoc(doc(db, DB_SOLICITUDES, id));
+        if (!docSnap.exists()) { showModal("La solicitud no existe"); return; }
+        const sol = docSnap.data();
+        
+        const confirmar = await showModal(
+            `🗑 ¿Eliminar definitivamente esta solicitud?\n\nRepresentante: ${sol.nombreRep}\nCédula: ${sol.cedula}\nHijos: ${(sol.hijos || []).length}\n\nEsta acción no se puede deshacer.`,
+            true
+        );
+        if (!confirmar) return;
+        
+        try {
+            await addDoc(collection(db, DB_AUD_DEL), {
+                tipo: 'eliminacion_solicitud',
+                solicitudId: id,
+                nombreRep: sol.nombreRep,
+                cedula: sol.cedula,
+                telefono: sol.telefono || sol.tel,
+                correo: sol.correo || sol.mail,
+                hijos: sol.hijos,
+                datosCompletos: sol,
+                eliminadoPor: usuarioActivo,
+                fecha: serverTimestamp()
+            });
+            await deleteDoc(doc(db, DB_SOLICITUDES, id));
+            showModal("✅ Solicitud eliminada. Registrada en auditoría.");
+            cargarSolicitudes();
+        } catch (error) {
+            console.error("Error:", error);
+            showModal("❌ Error al eliminar: " + error.message);
+        }
+    };
     
     window.abrirEditarSolicitud = async function(id) {
         if (!usuarioActivo) { showModal("⚠️ Acceso restringido"); return; }
@@ -2316,7 +2547,6 @@
         
         const nombreRep = construirNombreCompleto(pnombreRep, snombreRep, papellidoRep, sapellidoRep);
         
-        // Recopilar hijos con monto individual
         const hijos = [];
         const pnombres = document.querySelectorAll('.edit-hijo-pnombre');
         const snombres = document.querySelectorAll('.edit-hijo-snombre');
@@ -2462,10 +2692,6 @@
         }
     };
     
-    // ═══════════════════════════════════════════════════════
-    // ESTADÍSTICAS
-    // ═══════════════════════════════════════════════════════
-    
     window.cargarEstadisticas = async () => {
         const cont = document.getElementById('stats-container');
         if (!cont) return;
@@ -2538,10 +2764,6 @@
         }
     };
     
-    // ═══════════════════════════════════════════════════════
-    // AUDITORÍA
-    // ═══════════════════════════════════════════════════════
-    
     let cacheAuditoria = { ediciones: [], eliminaciones: [], correos: [], correcciones: [], logins: [], duplicados: [] };
     let filtroAuditoriaActual = 'todas';
     
@@ -2612,7 +2834,8 @@
             if (item._tipo === 'edicion') {
                 html += `<div class="audit-item tipo-edicion"><b>✏️ Edición de pago</b> — ${esc(fechaStr)}<br><small><b>Por:</b> ${esc(item.editadoPor || 'N/A')}</small></div>`;
             } else if (item._tipo === 'eliminacion') {
-                html += `<div class="audit-item tipo-eliminacion"><b>🗑 Eliminación</b> — ${esc(fechaStr)}<br><small><b>Alumno:</b> ${esc(item.nombre || 'N/A')} | <b>Por:</b> ${esc(item.eliminadoPor || 'N/A')}</small></div>`;
+                const tipoTxt = item.tipo === 'eliminacion_reporte' ? 'reporte' : (item.tipo === 'eliminacion_solicitud' ? 'solicitud' : 'alumno');
+                html += `<div class="audit-item tipo-eliminacion"><b>🗑 Eliminación de ${tipoTxt}</b> — ${esc(fechaStr)}<br><small><b>Alumno/Rep:</b> ${esc(item.nombre || item.nombreRep || 'N/A')} | <b>Por:</b> ${esc(item.eliminadoPor || 'N/A')}</small></div>`;
             } else if (item._tipo === 'correo') {
                 html += `<div class="audit-item tipo-correo"><b>✉️ Correo (${esc(item.tipo || '')})</b> — ${esc(fechaStr)}<br><small><b>Est:</b> ${esc(item.estudiante || '')} | <b>Por:</b> ${esc(item.enviadoPor || '')}</small></div>`;
             } else if (item._tipo === 'login') {
@@ -2628,10 +2851,6 @@
         html += '</div>';
         cont.innerHTML = html;
     }
-    
-    // ═══════════════════════════════════════════════════════
-    // DUPLICADOS - LISTA Y GESTIÓN
-    // ═══════════════════════════════════════════════════════
     
     function renderDuplicados() {
         const cont = document.getElementById('lista-duplicados');
@@ -2692,10 +2911,6 @@
         }
     }
     
-    // ═══════════════════════════════════════════════════════
-    // FILTRO DE AÑO
-    // ═══════════════════════════════════════════════════════
-    
     window.aplicarFiltroAnio = () => {
         const sel = document.getElementById('filtroAnioGlobal');
         filtroAnioActual = sel.value;
@@ -2717,10 +2932,6 @@
         const aniosOrd = Array.from(anios).sort((a, b) => b - a);
         sel.innerHTML = '<option value="todos">Todos</option>' + aniosOrd.map(a => `<option value="${a}">${a}</option>`).join('');
     }
-    
-    // ═══════════════════════════════════════════════════════
-    // INICIALIZACIÓN
-    // ═══════════════════════════════════════════════════════
     
     (async () => {
         await actualizarMesDesdeServidor();
@@ -2802,13 +3013,19 @@
                 if(estadoTexto.includes('Verificado')) estadoColor = '#22c55e';
                 if(estadoTexto.includes('Rechazado')) estadoColor = '#ef4444';
                 const fechaFormateada = formatearFechaPago(p);
+                const montoUsd = parseFloat(p.montoDivisas || p.monto || 0);
+                const montoBs = parseFloat(p.montoBs || 0);
+                
                 tb.innerHTML += `<tr class="clickable-row" onclick="mostrarDetallesPago('${d.id}')">
                     <td><strong>${esc(p.nombreEst || 'N/A')}</strong><br><small>${esc(p.nombreRep || '')}</small></td>
                     <td>${esc(p.metodo || '')}<br><small>${esc(p.referencia || '')}</small></td>
                     <td><strong>${fechaFormateada}</strong></td>
-                    <td><strong>$${p.montoDivisas || p.monto || 0}</strong></td>
+                    <td><strong>$${montoUsd.toFixed(2)}</strong><br><small style="color:#64748b;">Bs. ${formatearBs(montoBs)}</small></td>
                     <td><span style="background:${estadoColor}; color:white; padding:4px 8px; border-radius:12px; font-size:11px;">${esc(estadoTexto)}</span></td>
-                    <td><button class="btn-edit-pago" onclick="event.stopPropagation(); abrirModalEditar('${d.id}')">✏️ Editar</button></td>
+                    <td>
+                        <button class="btn-edit-pago" onclick="event.stopPropagation(); abrirModalEditar('${d.id}')">✏️ Editar</button>
+                        <button class="btn-del-pago" onclick="event.stopPropagation(); eliminarReporte('${d.id}')">🗑</button>
+                    </td>
                 </tr>`;
             });
         });
